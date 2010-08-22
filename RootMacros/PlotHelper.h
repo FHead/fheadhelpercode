@@ -39,15 +39,15 @@ public:
    void SetOption(string option);
    string GetOption();
    template <class PlotType> void AddPlot(PlotType *Histogram, string PlotOption = "",
-      bool LogY = false, bool LogZ = false, bool Grid = false);
+      bool LogY = false, bool LogZ = false, bool Grid = false, bool LogX = false);
    template <class PlotType> void Add4PanelPlot(PlotType *Histogram1, PlotType *Histogram2,
       PlotType *Histogram3, PlotType *Histogram4, string PlotOption = "",
-      bool LogY = false, bool LogZ = false, bool Grid = false);
+      bool LogY = false, bool LogZ = false, bool Grid = false, bool LogX = false);
    template <class PlotType> void AddPlot(PlotType &Histogram, string PlotOption = "",
-      bool LogY = false, bool LogZ = false, bool Grid = false);
+      bool LogY = false, bool LogZ = false, bool Grid = false, bool LogX = false);
    template <class PlotType> void Add4PanelPlot(PlotType &Histogram1, PlotType &Histogram2,
       PlotType &Histogram3, PlotType &Histogram4, string PlotOption = "",
-      bool LogY = false, bool LogZ = false, bool Grid = false);
+      bool LogY = false, bool LogZ = false, bool Grid = false, bool LogX = false);
    template <class PlotType> void AddNormalizedPlot(PlotType *Histogram, string PlotOption = "",
       bool LogY = false, bool LogZ = false, bool Grid = false);
    template <class PlotType> void AddNormalizedPlot(PlotType &Histogram, string PlotOption = "",
@@ -136,7 +136,7 @@ string PsFileHelper::GetOption()
    return Option;
 }
 
-template <class PlotType> void PsFileHelper::AddPlot(PlotType *Histogram, string PlotOption, bool LogY, bool LogZ, bool Grid)
+template <class PlotType> void PsFileHelper::AddPlot(PlotType *Histogram, string PlotOption, bool LogY, bool LogZ, bool Grid, bool LogX)
 {
    if(Histogram == NULL)
       return;
@@ -145,6 +145,8 @@ template <class PlotType> void PsFileHelper::AddPlot(PlotType *Histogram, string
 
    Histogram->Draw(PlotOption.c_str());
 
+   if(LogX == true)
+      canvas.SetLogx();
    if(LogY == true)
       canvas.SetLogy();
    if(LogZ == true)
@@ -160,7 +162,7 @@ template <class PlotType> void PsFileHelper::AddPlot(PlotType *Histogram, string
 }
 
 template <class PlotType> void PsFileHelper::Add4PanelPlot(PlotType *Histogram1, PlotType *Histogram2,
-   PlotType *Histogram3, PlotType *Histogram4, string PlotOption, bool LogY, bool LogZ, bool Grid)
+   PlotType *Histogram3, PlotType *Histogram4, string PlotOption, bool LogY, bool LogZ, bool Grid, bool LogX)
 {
    TCanvas canvas;
 
@@ -177,6 +179,8 @@ template <class PlotType> void PsFileHelper::Add4PanelPlot(PlotType *Histogram1,
 
       Histograms[i]->Draw(PlotOption.c_str());
 
+      if(LogX == true)
+         Pad->SetLogx();
       if(LogY == true)
          Pad->SetLogy();
       if(LogZ == true)
@@ -192,15 +196,15 @@ template <class PlotType> void PsFileHelper::Add4PanelPlot(PlotType *Histogram1,
    AddCanvas(canvas);
 }
 
-template <class PlotType> void PsFileHelper::AddPlot(PlotType &Histogram, string PlotOption, bool LogY, bool LogZ, bool Grid)
+template <class PlotType> void PsFileHelper::AddPlot(PlotType &Histogram, string PlotOption, bool LogY, bool LogZ, bool Grid, bool LogX)
 {
-   AddPlot(&Histogram, PlotOption, LogY, LogZ, Grid);
+   AddPlot(&Histogram, PlotOption, LogY, LogZ, Grid, LogX);
 }
 
 template <class PlotType> void Add4PanelPlot(PlotType &Histogram1, PlotType &Histogram2,
-   PlotType &Histogram3, PlotType &Histogram4, string PlotOption, bool LogY, bool LogZ, bool Grid)
+   PlotType &Histogram3, PlotType &Histogram4, string PlotOption, bool LogY, bool LogZ, bool Grid, bool LogX)
 {
-   Add4PanelPlot(&Histogram1, &Histogram2, &Histogram3, &Histogram4, PlotOption, LogY, LogZ, Grid);
+   Add4PanelPlot(&Histogram1, &Histogram2, &Histogram3, &Histogram4, PlotOption, LogY, LogZ, Grid, LogX);
 }
 
 template <class PlotType> void PsFileHelper::AddNormalizedPlot(PlotType *Histogram, string PlotOption,
