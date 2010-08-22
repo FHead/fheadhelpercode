@@ -1,0 +1,101 @@
+<html>
+<body>
+
+<script type="text/javascript">
+
+function convert(form)
+{
+   d = new Date(form.year.value, form.month.value - 1, form.day.value);
+   // d = new Date();
+   d.setHours(15);
+   d.setMinutes(0);
+   d.setSeconds(0);
+   d.setMilliseconds(0);
+
+   // document.write('Query date: ' + d + '<br />');
+
+
+   reference = new Date(2005, 9, 24);
+   reference.setHours(12);
+   reference.setMinutes(0);
+   reference.setSeconds(0);
+   reference.setMilliseconds(0);
+
+   // document.write("Reference date: " + reference + '<br />');
+
+
+   daydifference = d - reference;
+   daydifference = daydifference / 1000 / 60 / 60 / 24;
+   daydifference = Math.round(daydifference);
+
+   // document.write('Difference: ' + (d - reference) + '<br />');
+   // document.write('Difference in days: ' + daysdifference + '<br />');
+
+   primary = daydifference;
+   period = 0;
+
+   daysinperiod = 7 * 7 * 7 * 7;
+
+   if(daydifference < 0)
+   {
+      period = -(Math.floor(-daydifference / daysinperiod) + 1);
+      primary = daydifference - period * daysinperiod;
+   }
+   else if(daydifference > daysinperiod)
+   {
+      period = Math.floor(daydifference / daysinperiod);
+      primary = daydifference - period * daysinperiod;
+   }
+
+   // document.write('<br />');
+   // document.write('Primary day number: ' + primary + '<br />');
+   // document.write('Period number: ' + period + '<br />');
+
+   day = primary % 7 + 1;
+   week = Math.floor(primary / 7) % 7 + 1;
+   chapter = Math.floor(primary / 49) % 7 + 1;
+   book = Math.floor(primary / 343) % 7 + 1;
+
+   finalstring = '';
+   parts = d.toUTCString().split(' ');
+   finalstring = finalstring + parts[1] + ' ' + parts[2] + ' ' + parts[3] + ' = ';
+
+   if(period != 0)
+   {
+      finalstring = finalstring + '(' + period + ') ' + book + chapter + week + day + '<br />';
+   }
+   else
+   {
+      finalstring = finalstring + book + chapter + week + day + '<br />';
+   }
+
+   container = document.getElementById('result');
+   container.innerHTML = container.innerHTML + finalstring;
+}
+
+function clearresults()
+{
+   container = document.getElementById('result');
+   container.innerHTML = '';
+}
+
+</script>
+
+<h3>Date conversion (Version 0)</h3>
+
+<form name="inputfields" action="">
+   <table>
+      <tr><td>Year</td><td><input type="text" name="year" id="year"></td></tr>
+      <tr><td>Month (1-12)</td><td><input type="text" name="month"></td></tr>
+      <tr><td>Day (1-31)</td><td><input type="text" name="day"></td></tr>
+   </table>
+   <input type="button" value="convert" onclick="convert(this.form)">
+   <input type="button" value="clear" onclick="clearresults()">
+</form>
+
+<div id="result" name="result">
+</div>
+
+</body>
+</html>
+
