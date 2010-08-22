@@ -1,0 +1,72 @@
+<html>
+<body>
+
+<script type="text/javascript">
+
+function convert(form)
+{
+   reference2 = new Date(1970, 0, 1);
+   
+   reference = new Date(2005, 9, 24);
+   reference.setHours(12);
+   reference.setMinutes(0);
+   reference.setSeconds(0);
+   reference.setMilliseconds(0);
+
+   period = form.period.value;
+   date = form.date.value;
+
+   book = Math.floor(date / 1000) % 10;
+   chapter = Math.floor(date / 100) % 10;
+   week = Math.floor(date / 10) % 10;
+   day = date % 10;
+
+   millisecondperday = 1000 * 24 * 60 * 60;
+   daydifference = period * 7 * 7 * 7 * 7 + (book - 1) * 7 * 7 * 7 + (chapter - 1) * 7 * 7 + (week - 1) * 7 + (day - 1);
+
+   x = Math.floor((reference - reference2) + daydifference * millisecondperday);
+   d = new Date(x);
+
+   finalstring = '';
+
+   if(period != 0)
+   {
+      finalstring = finalstring + '(' + period + ') ' + book + chapter + week + day;
+   }
+   else
+   {
+      finalstring = finalstring + book + chapter + week + day;
+   }
+
+   parts = d.toUTCString().split(' ');
+   finalstring = finalstring + ' = ' + parts[1] + ' ' + parts[2] + ' ' + parts[3] + '<br />';
+
+   container = document.getElementById('result');
+   container.innerHTML = container.innerHTML + finalstring;
+}
+
+function clearresults()
+{
+   container = document.getElementById('result');
+   container.innerHTML = '';
+}
+
+</script>
+
+<h3>Date conversion (Version 0)</h3>
+
+<form name="inputfields" action="">
+   <table>
+      <tr><td>Period</td><td><input type="text" name="period" id="period"></td></tr>
+      <tr><td>Date (1111-7777)</td><td><input type="text" name="date" id="date"></td></tr>
+   </table>
+   <input type="button" value="convert" onclick="convert(this.form)">
+   <input type="button" value="clear" onclick="clearresults()">
+</form>
+
+<div id="result" name="result">
+</div>
+
+</body>
+</html>
+
