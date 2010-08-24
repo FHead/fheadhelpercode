@@ -1,0 +1,97 @@
+=== What is this ===
+
+- This is a set a scripts aiming at a semi-automatic way to check if
+there are any duplicate events in a given set of root files, and the
+root files are in format of usual vecbos lists
+
+- The script launches one job per run (which might be a lot of files),
+and count the number of times an event is appearing; then fill the
+result in a histogram.
+
+- For example if there is a file with 5 events (Run, Event)
+
+124020 13523853
+124020 13523854
+124020 13523855
+124020 13523855
+124020 13523856
+
+then the 1-count bin will be 3, and the 2-count bin will be 1.
+
+- The output is a pdf file for easy viewing
+
+
+
+
+=== Do only once to setup ===
+
+1. To checkout this code, on lxplus, do
+
+svn checkout http://fheadhelpercode.googlecode.com/svn/trunk/Vecbos/CheckDuplicates VecbosCheckDuplicates
+
+which will give you a skeleton structure with minimal script
+
+
+2. After checking out, you should modify MakeSingleRunList.py and set the
+CMSSW area to the right one
+
+
+3. Compile CheckDuplicates.C by going into a root session and do
+
+[0] .L CheckDuplicates.C+
+[1] .q
+
+Note: try to use the same CMSSW version as you will submit the jobs for
+smoother experience
+
+
+
+
+=== Do every time new data comes ===
+
+4. Now, every time there is a new set of data coming and you would like
+to check for duplicates, first prepare the list in usual vecbos list
+format (ie., like one of those in the cmst3_35X/... folders)
+
+
+5. Run the script to prepare scripts for submitting
+
+sh PrepareToRun.sh (ListLocation) (TagName)
+
+where the first argument is the list file, and the second one is some
+tag in order not to overwrite previous result
+
+
+6. Now the scripts should be in SingleRunScripts and the single-run lists
+should be in SingleRunLists.  Go to SingleRunScripts folder and submit
+the ones you want, or submit all by doing
+
+sh SubmitAll.sh
+
+which will submit all single-run scripts to queue <8nh> on lxplus.
+
+
+7. Wait until they all finish, and then go to Processing folder.
+
+
+8. Run the script that adds and exports stuff (for everything)
+
+sh AddAll.sh
+
+
+9. There should be a pdf file containing all the histograms for different
+runs.  Check if there is everything is in bin with 1.  If not, there
+are duplicates in the run.
+
+
+=== Note ===
+
+- I might include an update on SubmitAll.sh to be tag-specific....if I
+got time to do it.
+
+- Author (in case of problems): Yi Chen, Caltech CMS group
+
+- Email: yi.chen@cern.ch, chen.yi.first@gmail.com
+
+
+
