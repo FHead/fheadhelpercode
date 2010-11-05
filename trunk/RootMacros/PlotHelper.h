@@ -57,12 +57,12 @@ public:
    template <class PlotType> void AddPlotWithText(PlotType &Histogram, string Text,
       string PlotOption = "", double X = 0.1, double Y = 0.9, double TextSize = 0.03);
    void AddHistogramFromFile(TFile &File, string HistogramName,
-      string PlotOption = "", bool LogY = false, bool LogZ = false, bool Grid = false);
+      string PlotOption = "", bool LogY = false, bool LogZ = false, bool Grid = false, bool LogX = false);
    void Add4PanelHistogramFromFile(TFile &File, string HistogramName1, string HistogramName2,
       string HistogramName3, string HistogramName4,
-      string PlotOption = "", bool LogY = false, bool LogZ = false, bool Grid = false);
+      string PlotOption = "", bool LogY = false, bool LogZ = false, bool Grid = false, bool LogX = false);
    void AddGraphFromFile(TFile &File, string GraphName,
-      string PlotOption = "", bool LogY = false, bool LogZ = false, bool Grid = false);
+      string PlotOption = "", bool LogY = false, bool LogZ = false, bool Grid = false, bool LogX = false);
    void AddCanvas(TCanvas *Canvas);
    void AddCanvas(TCanvas &Canvas);
    void AddCanvasWithText(TCanvas *Canvas, string Text, double X = 0.1, double Y = 0.9, double TextSize = 0.03);
@@ -255,17 +255,18 @@ template <class PlotType> void PsFileHelper::AddPlotWithText(PlotType &Histogram
    AddPlotWithText(&Histogram, Text, PlotOption, X, Y, TextSize);
 }
 
-void PsFileHelper::AddHistogramFromFile(TFile &File, string HistogramName, string PlotOption, bool LogY, bool LogZ, bool Grid)
+void PsFileHelper::AddHistogramFromFile(TFile &File, string HistogramName, string PlotOption, bool LogY,
+   bool LogZ, bool Grid, bool LogX)
 {
    TH1 *Histogram = (TH1 *)File.Get(HistogramName.c_str());
    if(Histogram == NULL)
       return;
 
-   AddPlot(Histogram, PlotOption, LogY, LogZ, Grid);
+   AddPlot(Histogram, PlotOption, LogY, LogZ, Grid, LogX);
 }
 
 void PsFileHelper::Add4PanelHistogramFromFile(TFile &File, string HistogramName1, string HistogramName2,
-   string HistogramName3, string HistogramName4, string PlotOption, bool LogY, bool LogZ, bool Grid)
+   string HistogramName3, string HistogramName4, string PlotOption, bool LogY, bool LogZ, bool Grid, bool LogX)
 {
    TH1 *Histograms[4];
 
@@ -274,16 +275,17 @@ void PsFileHelper::Add4PanelHistogramFromFile(TFile &File, string HistogramName1
    Histograms[2] = (TH1 *)File.Get(HistogramName3.c_str());
    Histograms[3] = (TH1 *)File.Get(HistogramName4.c_str());
 
-   Add4PanelPlot(Histograms[0], Histograms[1], Histograms[2], Histograms[3], PlotOption, LogY, LogZ, Grid);
+   Add4PanelPlot(Histograms[0], Histograms[1], Histograms[2], Histograms[3], PlotOption, LogY, LogZ, Grid, LogX);
 }
 
-void PsFileHelper::AddGraphFromFile(TFile &File, string GraphName, string PlotOption, bool LogY, bool LogZ, bool Grid)
+void PsFileHelper::AddGraphFromFile(TFile &File, string GraphName, string PlotOption, bool LogY, bool LogZ,
+   bool Grid, bool LogX)
 {
    TGraph *Graph = (TGraph *)File.Get(GraphName.c_str());
    if(Graph == NULL)
       return;
 
-   AddPlot(Graph, PlotOption, LogY, LogZ, Grid);
+   AddPlot(Graph, PlotOption, LogY, LogZ, Grid, LogX);
 }
 
 void PsFileHelper::AddCanvas(TCanvas *Canvas)

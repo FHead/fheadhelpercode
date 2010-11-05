@@ -4,6 +4,7 @@
    cout << endl;
 
    gROOT->SetStyle("Plain");
+   gROOT->ProcessLine(".include /home/yichen/RootMacros");
 
    // nice palette!
    // courtesy of Segev, http://ultrahigh.org/2007/08/20/making-pretty-root-color-palettes/
