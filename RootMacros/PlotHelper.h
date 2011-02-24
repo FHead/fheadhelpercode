@@ -332,19 +332,23 @@ void PsFileHelper::AddTextPage(vector<string> Text, double X, double Y, double T
 {
    TCanvas canvas;
 
-   vector<TLatex> texts;
+   vector<TLatex *> texts;
 
    for(unsigned int i = 0; i < Text.size(); i++)
    {
-      texts.push_back(TLatex(X, Y - i * 0.07, Text[i].c_str()));
-      texts[i].SetName(Form("TextLine%d", i));
-      texts[i].SetTextSize(TextSize);
+      texts.push_back(new TLatex(X, Y - i * 0.07, Text[i].c_str()));
+      texts[i]->SetName(Form("TextLine%d", i));
+      texts[i]->SetTextSize(TextSize);
    }
 
    for(unsigned int i = 0; i < Text.size(); i++)
-      texts[i].Draw();
+      texts[i]->Draw();
 
    canvas.Print(FileName.c_str(), Option.c_str());
+
+   for(unsigned int i = 0; i < Text.size(); i++)
+      delete texts[i];
+   texts.clear();
 }
 
 void PsFileHelper::AddTimeStampPage()
