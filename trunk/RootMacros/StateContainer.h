@@ -29,6 +29,7 @@ public:
    vector<string> GetListOfKeys();
    DataContainer &operator [](string Key);   // get single object
    void Insert(string Key, DataContainer NewData);
+   bool Exist(string Key);
    void Touch(string Key);
    void Delete(string Key);
    string GetRepresentation(string Key);   // get representation of single value
@@ -74,6 +75,13 @@ void StateContainer::Insert(string Key, DataContainer NewData)
 {
    Touch(Key);
    Data[Key] = NewData;
+}
+//---------------------------------------------------------------------------
+bool StateContainer::Exist(string Key)
+{
+   if(Data.find(Key) == Data.end())
+      return false;
+   return true;
 }
 //---------------------------------------------------------------------------
 void StateContainer::Touch(string Key)

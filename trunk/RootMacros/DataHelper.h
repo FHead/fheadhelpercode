@@ -5,6 +5,7 @@
 #include <string>
 #include <istream>
 #include <ostream>
+#include <fstream>
 #include <map>
 using namespace std;
 //---------------------------------------------------------------------------
@@ -30,6 +31,7 @@ private:
 public:
    StateContainer &operator [](string Key);
    vector<string> GetListOfKeys();
+   bool Exist(string Key);
    void Touch(string Key);
    void Insert(string Key, StateContainer NewState);
    void Erase(string Key);
@@ -84,6 +86,13 @@ vector<string> DataHelper::GetListOfKeys()
       Keys.push_back(iter->first);
       
    return Keys;
+}
+//---------------------------------------------------------------------------
+bool DataHelper::Exist(string Key)
+{
+   if(States.find(Key) == States.end())
+      return false;
+   return true;
 }
 //---------------------------------------------------------------------------
 void DataHelper::Touch(string Key)

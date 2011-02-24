@@ -6,12 +6,13 @@
 #include <istream>
 #include <ostream>
 #include <sstream>
+#include <algorithm>
 using namespace std;
 //---------------------------------------------------------------------------
 class DataContainer;
 union DataMessenger;
 //---------------------------------------------------------------------------
-ostream &operator <<(ostream &out, DataContainer &data);
+ostream &operator <<(ostream &out, DataContainer data);
 istream &operator >>(istream &in, DataContainer &data);
 //---------------------------------------------------------------------------
 void IntegerToChar4(int Number, char ChNumber[4]);
@@ -72,7 +73,7 @@ public:
    DataContainer operator -(const DataContainer &other);   // none: nothing, string: nothing, numbers: subtraction
    DataContainer operator *(const DataContainer &other);   // none: nothing, string * string: concatenation, string * number: repetition, numbers: multiplication
    DataContainer operator /(const DataContainer &other);   // none: nothing, string: nothing, numbers: division
-   DataContainer operator -();   // none: nothing, string: nothing, numbers: negation
+   DataContainer operator -();   // none: nothing, string: reverse, numbers: negation
    void SaveToStream(ostream &out);
    void LoadFromStream(istream &in);
 };
@@ -342,8 +343,202 @@ DataContainer DataContainer::operator +(const DataContainer &other)
       return result;
    }
    
-   DataContainter Empty;
-   Empty.Type == DataTypeNone;
+   DataContainer Empty;
+   Empty.Type = DataTypeNone;
+   return Empty;
+}
+//---------------------------------------------------------------------------
+DataContainer DataContainer::operator -(const DataContainer &other)
+{
+   if(Type == DataTypeNone || Type == DataTypeString)
+      return *this;
+
+   if((Type == DataTypeDouble || Type == DataTypeInteger)
+      && other.Type != DataTypeDouble && other.Type != DataTypeInteger)
+      return *this;
+
+   if(Type == DataTypeDouble && other.Type == DataTypeDouble)
+   {
+      DataContainer result = *this;
+      result.DoubleValue = DoubleValue - other.DoubleValue;
+      return result;
+   }
+   if(Type == DataTypeDouble && other.Type == DataTypeInteger)
+   {
+      DataContainer result = *this;
+      result.DoubleValue = DoubleValue - other.IntegerValue;
+      return result;
+   }
+   if(Type == DataTypeInteger && other.Type == DataTypeDouble)
+   {
+      DataContainer result = other;
+      result.DoubleValue = IntegerValue - other.DoubleValue;
+      return result;
+   }
+   if(Type == DataTypeInteger && other.Type == DataTypeInteger)
+   {
+      DataContainer result = *this;
+      result.IntegerValue = IntegerValue - other.IntegerValue;
+      return result;
+   }
+   
+   DataContainer Empty;
+   Empty.Type = DataTypeNone;
+   return Empty;
+}
+//---------------------------------------------------------------------------
+DataContainer DataContainer::operator *(const DataContainer &other)
+{
+   // get done with "None" category
+   if(Type == DataTypeNone || other.Type == DataTypeNone)
+      return *this;
+
+   // string * string = concatenation, string * integer = repetition, string * double = repetition (round down)
+   if(Type == DataTypeString)
+   {
+      if(other.Type == DataTypeString)
+      {
+         DataContainer result = *this;
+         result.StringValue = StringValue + other.StringValue;
+         return result;
+      }
+      if(other.Type == DataTypeInteger || other.Type == DataTypeDouble)
+      {
+         long long Repetition = 1;
+         if(other.Type == DataTypeInteger)
+            Repetition = other.IntegerValue;
+         if(other.Type == DataTypeDouble)
+            Repetition = (int)other.DoubleValue;
+
+         if(Repetition == 0)
+         {
+            DataContainer result;
+            result = "";
+            return result;
+         }
+
+         DataContainer result = StringValue;
+
+         if(Repetition < 0)
+         {
+            reverse(result.StringValue.begin(), result.StringValue.end());
+            Repetition = -Repetition;
+         }
+
+         string Temp = result.StringValue;
+         for(int i = 1; i < Repetition; i++)
+            result.StringValue = result.StringValue + Temp;
+
+         return result;
+      }
+   }
+
+   // numbers....usual stuff
+   if(Type == DataTypeDouble && other.Type == DataTypeDouble)
+   {
+      DataContainer result = *this;
+      result.DoubleValue = DoubleValue * other.DoubleValue;
+      return result;
+   }
+   if(Type == DataTypeDouble && other.Type == DataTypeInteger)
+   {
+      DataContainer result = *this;
+      result.DoubleValue = DoubleValue * other.IntegerValue;
+      return result;
+   }
+   if(Type == DataTypeInteger && other.Type == DataTypeDouble)
+   {
+      DataContainer result = other;
+      result.DoubleValue = IntegerValue * other.DoubleValue;
+      return result;
+   }
+   if(Type == DataTypeInteger && other.Type == DataTypeInteger)
+   {
+      DataContainer result = *this;
+      result.DoubleValue = IntegerValue * other.IntegerValue;
+      return result;
+   }
+
+   DataContainer Empty;
+   Empty.Type = DataTypeNone;
+   return Empty;
+}
+//---------------------------------------------------------------------------
+DataContainer DataContainer::operator /(const DataContainer &other)
+{
+   if(Type == DataTypeNone || Type == DataTypeString)
+      return *this;
+
+   if((Type == DataTypeDouble || Type == DataTypeInteger)
+      && other.Type != DataTypeDouble && other.Type != DataTypeInteger)
+      return *this;
+
+   if(Type == DataTypeDouble && other.Type == DataTypeDouble)
+   {
+      DataContainer result = *this;
+      result.DoubleValue = DoubleValue / other.DoubleValue;
+      return result;
+   }
+   if(Type == DataTypeDouble && other.Type == DataTypeInteger)
+   {
+      DataContainer result = *this;
+      result.DoubleValue = DoubleValue / other.IntegerValue;
+      return result;
+   }
+   if(Type == DataTypeInteger && other.Type == DataTypeDouble)
+   {
+      DataContainer result = other;
+      result.DoubleValue = IntegerValue / other.DoubleValue;
+      return result;
+   }
+   if(Type == DataTypeInteger && other.Type == DataTypeInteger)
+   {
+      if(IntegerValue % other.IntegerValue == 0)
+      {
+         DataContainer result = *this;
+         result.IntegerValue = IntegerValue / other.IntegerValue;
+         return result;
+      }
+      else
+      {
+         DataContainer result;
+         result.Type = DataTypeDouble;
+         result.DoubleValue = (double)IntegerValue / other.IntegerValue;
+         return result;
+      }
+   }
+   
+   DataContainer Empty;
+   Empty.Type = DataTypeNone;
+   return Empty;
+}
+//---------------------------------------------------------------------------
+DataContainer DataContainer::operator -()
+{
+   if(Type == DataTypeNone)
+      return *this;
+
+   if(Type == DataTypeString)
+   {
+      DataContainer result = *this;
+      reverse(result.StringValue.begin(), result.StringValue.end());
+      return result;
+   }
+   if(Type == DataTypeDouble)
+   {
+      DataContainer result = *this;
+      result.DoubleValue = -DoubleValue;
+      return result;
+   }
+   if(Type == DataTypeInteger)
+   {
+      DataContainer result = *this;
+      result.IntegerValue = -IntegerValue;
+      return result;
+   }
+   
+   DataContainer Empty;
+   Empty.Type = DataTypeNone;
    return Empty;
 }
 //---------------------------------------------------------------------------
@@ -421,7 +616,7 @@ void DataContainer::LoadFromStream(istream &in)
    }
 }
 //---------------------------------------------------------------------------
-ostream &operator <<(ostream &out, DataContainer &data)
+ostream &operator <<(ostream &out, DataContainer data)
 {
    out << data.GetRepresentation();
    return out;
@@ -437,8 +632,8 @@ void IntegerToChar4(int Number, char ChNumber[4])
 {
    for(int i = 3; i >= 0; i--)
    {
-      ChNumber[i] = (char)(Number % 256);
-      Number = (Number - Number % 256) / 256;
+      ChNumber[i] = (char)(Number % 128);
+      Number = (Number - Number % 128) / 128;
    }
 }
 //---------------------------------------------------------------------------
@@ -447,7 +642,7 @@ long long Char4ToInteger(char ChNumber[4])
    long long Answer = 0;
    
    for(int i = 0; i < 4; i++)
-      Answer = Answer * 256 + ChNumber[i];
+      Answer = Answer * 128 + ChNumber[i];
       
    return Answer;
 }
