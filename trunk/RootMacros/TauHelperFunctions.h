@@ -1,3 +1,9 @@
+#ifndef TauHelperFunctions_6564_AJSDKGIRIKANSVCGKISNCGIKNHKZSG
+#define TauHelperFunctions_6564_AJSDKGIRIKANSVCGKISNCGIKNHKZSG
+
+#include <vector>
+#include <cmath>
+using namespace std;
 
 #include "GenparticleTree.h"
 
@@ -14,29 +20,26 @@
 
 #define PI 3.14159265358979323846264338327950288479716939937510
 
-bool HasTau(GenParticleTree &Tree);
 int FindCategory(GenParticleTree &Tree, int index);
-double GetMass(double P[4]);
-double GetMass2(double P[4]);
-double GetP(double P[4]);
-double GetPT(double P[4]);
-double GetEta(double P[4]);
-double GetPhi(double P[4]);
-double GetAngle(double P1[4], double P2[4]);
-double GetDR(double P1[4], double P2[4]);
-double GetDPhi(double P1[4], double P2[4]);
-double GetMT(double P1[4], double P2[4]);
-double GetMinRadius(double P1[4], double P2[4], double P3[4]);   // in eta-phi space
-double GetMinRadius(double X1, double Y1, double X2, double Y2, double X3, double Y3);
-
-bool HasTau(GenParticleTree &Tree)
-{
-   for(int i = 0; i < Tree.ParticleCount(); i++)
-      if(Tree[i].PDGID == 15 || Tree[i].PDGID == -15)
-         return true;
-
-   return false;
-}
+double GetMass(const double P[4]);
+double GetMass2(const double P[4]);
+double GetP(const double P[4]);
+double GetPT(const double P[4]);
+double GetEta(const double P[4]);
+double GetRapidity(const double P[4]);
+double GetY(const double P[4]);
+double GetPhi(const double P[4]);
+double GetAngle(const double P1[4], const double P2[4]);
+double GetDR(const double P1[4], const double P2[4]);
+double GetDPhi(const double P1[4], const double P2[4]);
+double GetMT(const double P1[4], const double P2[4]);
+double GetMinRadius(const double P1[4], const double P2[4], const double P3[4]);   // in eta-phi space
+double GetMinRadius(const double X1, const double Y1, const double X2, const double Y2, const double X3, const double Y3);
+double GetMR(const double P1[4], const double P2[4]);
+double GetMRT(const double P1[4], const double P2[4]);
+double GetR(const double P1[4], const double P2[4]);
+double GetBeta(const double P[4]);
+double GetGamma(const double P[4]);
 
 int FindCategory(GenParticleTree &Tree, int index)
 {
@@ -105,34 +108,44 @@ int FindCategory(GenParticleTree &Tree, int index)
    return 8;
 }
 
-double GetMass(double P[4])
+double GetMass(const double P[4])
 {
    return sqrt(P[0] * P[0] - P[1] * P[1] - P[2] * P[2] - P[3] * P[3]);
 }
 
-double GetMass2(double P[4])
+double GetMass2(const double P[4])
 {
    return (P[0] * P[0] - P[1] * P[1] - P[2] * P[2] - P[3] * P[3]);
 }
 
-double GetP(double P[4])
+double GetP(const double P[4])
 {
    return sqrt(P[1] * P[1] + P[2] * P[2] + P[3] * P[3]);
 }
 
-double GetPT(double P[4])
+double GetPT(const double P[4])
 {
    return sqrt(P[1] * P[1] + P[2] * P[2]);
 }
 
-double GetEta(double P[4])
+double GetEta(const double P[4])
 {
    double Momentum = GetP(P);
 
    return 0.5 * log((Momentum - P[3]) / (Momentum + P[3]));
 }
 
-double GetPhi(double P[4])
+double GetRapidity(const double P[4])
+{
+   return 0.5 * log((P[0] - P[3]) / (P[0] + P[3]));
+}
+
+double GetY(const double P[4])
+{
+   return GetRapidity(P);
+}
+
+double GetPhi(const double P[4])
 {
    double PT = GetPT(P);
 
@@ -143,12 +156,12 @@ double GetPhi(double P[4])
    return Angle;
 }
 
-double GetAngle(double P1[4], double P2[4])
+double GetAngle(const double P1[4], const double P2[4])
 {
    return acos((P1[1] * P2[1] + P1[2] * P2[2] + P1[3] * P2[3]) / GetP(P1) / GetP(P2));
 }
 
-double GetDR(double P1[4], double P2[4])
+double GetDR(const double P1[4], const double P2[4])
 {
    double DEta = GetEta(P1) - GetEta(P2);
    double DPhi = GetDPhi(P1, P2);
@@ -156,7 +169,7 @@ double GetDR(double P1[4], double P2[4])
    return sqrt(DPhi * DPhi + DEta * DEta);
 }
 
-double GetDPhi(double P1[4], double P2[4])
+double GetDPhi(const double P1[4], const double P2[4])
 {
    double DPhi = GetPhi(P1) - GetPhi(P2);
 
@@ -168,7 +181,7 @@ double GetDPhi(double P1[4], double P2[4])
    return DPhi;
 }
 
-double GetMT(double P1[4], double P2[4])
+double GetMT(const double P1[4], const double P2[4])
 {
    double PT1 = GetPT(P1);
    double PT2 = GetPT(P2);
@@ -180,7 +193,7 @@ double GetMT(double P1[4], double P2[4])
    return sqrt(2 * (PT1 * PT2 - P1[1] * P2[1] - P1[2] * P2[2]));
 }
 
-double GetMinRadius(double P1[4], double P2[4], double P3[4])   // in eta-phi space
+double GetMinRadius(const double P1[4], const double P2[4], const double P3[4])   // in eta-phi space
 {
    double Eta1 = GetEta(P1);
    double Phi1 = GetPhi(P1);
@@ -220,7 +233,7 @@ double GetMinRadius(double P1[4], double P2[4], double P3[4])   // in eta-phi sp
    return GetMinRadius(Eta1, Phi1 + Best1 * 2 * PI, Eta2, Phi2 + Best2 * 2 * PI, Eta3, Phi3 + Best3 * 2 * PI);
 }
 
-double GetMinRadius(double X1, double Y1, double X2, double Y2, double X3, double Y3)
+double GetMinRadius(const double X1, const double Y1, const double X2, const double Y2, const double X3, const double Y3)
 {
    // compare two radii:
    //    - common circle radius
@@ -264,7 +277,38 @@ double GetMinRadius(double X1, double Y1, double X2, double Y2, double X3, doubl
    return sqrt(min(MaxEdge2, Distance2));
 }
 
+double GetMR(const double P1[4], const double P2[4])
+{
+   double Temp1 = P1[0] * P2[3] - P1[3] * P2[0];
+   double Temp2 = P1[3] - P2[3];
+   double Temp3 = P1[0] - P2[0];
+   return 2 * sqrt(Temp1 * Temp1 / (Temp2 * Temp2 - Temp3 * Temp3));
+}
 
+double GetMRT(const double P1[4], const double P2[4], const double ME[4])
+{
+   double Temp1 = GetPT(ME) * (GetPT(P1) + GetPT(P2));
+   double Temp2 = ME[1] * (P1[1] + P2[1]) + ME[2] * (P1[2] + P2[2]);
+   return sqrt((Temp1 - Temp2) / 2);
+}
+
+double GetR(const double P1[4], const double P2[4], const double ME[4])
+{
+   return GetMRT(P1, P2, ME) / GetMR(P1, P2);
+}
+
+double GetBeta(const double P[4])
+{
+   double Gamma = GetGamma(P);
+   return sqrt(1 - 1 / (Gamma * Gamma));
+}
+
+double GetGamma(const double P[4])
+{
+   return P[0] / GetMass(P);
+}
+
+#endif
 
 
 
