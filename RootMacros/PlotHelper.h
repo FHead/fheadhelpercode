@@ -34,7 +34,7 @@ public:
    PsFileHelper(string filename, string option);
    ~PsFileHelper();
    void Open(string filename);
-   void Close();
+   void Close(bool Convert = true);
    string GetFileName();
    void SetOption(string option);
    string GetOption();
@@ -96,7 +96,7 @@ PsFileHelper::PsFileHelper(string filename, string option)
 PsFileHelper::~PsFileHelper()
 {
    if(Status == true)
-      Close();
+      Close(true);
 }
 
 void PsFileHelper::Open(string filename)
@@ -109,13 +109,16 @@ void PsFileHelper::Open(string filename)
    canvas.Print((FileName + "[").c_str(), Option.c_str());
 }
 
-void PsFileHelper::Close()
+void PsFileHelper::Close(bool Convert)
 {
    TCanvas canvas;
    canvas.Print((FileName + "]").c_str(), Option.c_str());
 
-   gROOT->ProcessLine((".! ps2pdf " + FileName).c_str());
-   gROOT->ProcessLine((".! rm " + FileName).c_str());
+   if(Convert == true)
+   {
+      gROOT->ProcessLine((".! ps2pdf " + FileName).c_str());
+      gROOT->ProcessLine((".! rm " + FileName).c_str());
+   }
 
    Status = false;
    FileName = "";

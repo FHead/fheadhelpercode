@@ -1,3 +1,6 @@
+#ifndef DrawRandom_H_AJGRKJVCGTZRHISCGGARHWGCA
+#define DrawRandom_H_AJGRKJVCGTZRHISCGGARHWGCA
+
 #include <cmath>
 #include <cstdlib>
 using namespace std;
@@ -201,4 +204,5 @@ double DrawPoisson(double mean)
    return value;
 }
 
+#endif
 

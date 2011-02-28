@@ -2,6 +2,7 @@
 #define GenparticleTree_6563_ASNDVRHISGHFHSF
 
 #include <vector>
+#include <cmath>
 #include <deque>
 #include <algorithm>
 #include <ostream>
@@ -9,10 +10,16 @@
 using namespace std;
 
 #define DEFAULT_VALUE -999999
+#define PI 3.14159265358979323846264338327950288479716939937510
 
 union SaveHelper;
 class GenParticle;
 class GenParticleTree;
+
+bool HasTau(GenParticleTree &Tree);
+vector<int> FindAllIndices(GenParticleTree &Tree, int PDGID, int StatusCode = 0);
+vector<int> TraceChildren(GenParticleTree &Tree, int SourceIndex);
+vector<int> KeepStableParticle(GenParticleTree &Tree, vector<int> &Indices);
 
 union SaveHelper
 {
@@ -39,6 +46,71 @@ public:
    
    void SaveToStream(ostream &out, bool ASCII = false);
    void LoadFromStream(istream &in, bool ASCII = false);
+
+public:
+   struct SortByPhi : public binary_function<GenParticle, GenParticle, bool>
+   {
+      bool operator()(const GenParticle &First, const GenParticle &Second) const
+      {
+         double Phi1 = acos(First.P[1] / sqrt(First.P[1] * First.P[1] + First.P[2] * First.P[2]));
+         if(First.P[2] < 0)
+            Phi1 = -Phi1;
+
+         double Phi2 = acos(Second.P[1] / sqrt(Second.P[1] * Second.P[1] + Second.P[2] * Second.P[2]));
+         if(Second.P[2] < 0)
+            Phi2 = -Phi2;
+
+         if(Phi1 < Phi2)   return true;
+         if(Phi1 > Phi2)   return false;
+
+         return false;
+      }
+   };
+   struct SortByDR : public binary_function<GenParticle, GenParticle, bool>
+   {
+      double ReferenceEta;
+      double ReferencePhi;
+      SortByDR(double Eta, double Phi)
+      {
+         ReferenceEta = Eta;
+         ReferencePhi = Phi;
+      }
+      bool operator()(const GenParticle &First, const GenParticle &Second) const
+      {
+         double Phi1 = acos(First.P[1] / sqrt(First.P[1] * First.P[1] + First.P[2] * First.P[2]));
+         if(First.P[2] < 0)
+            Phi1 = -Phi1;
+         double P1 = sqrt(First.P[1] * First.P[1] + First.P[2] * First.P[2] + First.P[3] * First.P[3]);
+         double Eta1 = 0.5 * log((P1 - First.P[3]) / (P1 + First.P[3]));
+
+         double DPhi1 = Phi1 - ReferencePhi;
+         if(DPhi1 > PI)
+            DPhi1 = 2 * PI - DPhi1;
+         if(DPhi1 < -PI)
+            DPhi1 = DPhi1 + 2 * PI;
+         double DEta1 = Eta1 - ReferenceEta;
+         
+         double Phi2 = acos(Second.P[1] / sqrt(Second.P[1] * Second.P[1] + Second.P[2] * Second.P[2]));
+         if(Second.P[2] < 0)
+            Phi2 = -Phi2;
+         double P2 = sqrt(Second.P[1] * Second.P[1] + Second.P[2] * Second.P[2] + Second.P[3] * Second.P[3]);
+         double Eta2 = 0.5 * log((P2 - Second.P[3]) / (P2 + Second.P[3]));
+
+         double DPhi2 = Phi2 - ReferencePhi;
+         if(DPhi2 > PI)
+            DPhi2 = 2 * PI - DPhi2;
+         if(DPhi2 < -PI)
+            DPhi2 = DPhi2 + 2 * PI;
+         double DEta2 = Eta2 - ReferenceEta;
+
+         if(DPhi1 * DPhi1 + DEta1 * DEta1 < DPhi2 * DPhi2 + DEta2 * DEta2)
+            return true;
+         if(DPhi1 * DPhi1 + DEta1 * DEta1 > DPhi2 * DPhi2 + DEta2 * DEta2)
+            return false;
+
+         return false;
+      }
+   };
 };
 
 GenParticle::GenParticle()
@@ -602,6 +674,79 @@ void GenParticleTree::RebuildRank()
    }
 }
 
+bool HasTau(GenParticleTree &Tree)
+{
+   for(int i = 0; i < Tree.ParticleCount(); i++)
+      if(Tree[i].PDGID == 15 || Tree[i].PDGID == -15)
+         return true;
+
+   return false;
+}
+
+vector<int> FindAllIndices(GenParticleTree &Tree, int PDGID, int StatusCode)
+{
+   vector<int> Result;
+
+   for(int i = 0; i < (int)Tree.ParticleCount(); i++)
+   {
+      if(StatusCode > 0 && Tree[i].StatusCode != StatusCode)
+         continue;
+      if(Tree[i].PDGID != PDGID)
+         continue;
+
+      Result.push_back(i);
+   }
+
+   return Result;
+}
+
+vector<int> TraceChildren(GenParticleTree &Tree, int SourceIndex)
+{
+   vector<int> AllChildren;
+
+   deque<int> ToBeProcessed;
+   ToBeProcessed.push_back(SourceIndex);
+
+   while(ToBeProcessed.size() > 0)
+   {
+      int Current = ToBeProcessed[0];
+      ToBeProcessed.pop_front();
+
+      for(int i = 0; i < (int)Tree[Current].Daughters.size(); i++)
+      {
+         if(find(AllChildren.begin(), AllChildren.end(), Tree[Current].Daughters[i]) == AllChildren.end())
+         {
+            ToBeProcessed.push_back(Tree[Current].Daughters[i]);
+            AllChildren.push_back(Tree[Current].Daughters[i]);
+         }
+      }
+   }
+
+   return AllChildren;
+}
+
+vector<int> KeepStableParticle(GenParticleTree &Tree, vector<int> &Indices)
+{
+   vector<int> StableIndices;
+
+   for(int i = 0; i < (int)Indices.size(); i++)
+   {
+      if(Indices[i] < 0 || Indices[i] >= Tree.ParticleCount())
+         continue;
+      if(Tree[Indices[i]].StatusCode != 1)
+         continue;
+
+      StableIndices.push_back(Indices[i]);
+   }
+
+   return StableIndices;
+}
+
+
 #endif
+
+
+
+
 
 
