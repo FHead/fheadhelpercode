@@ -36,8 +36,8 @@ double GetMT(const double P1[4], const double P2[4]);
 double GetMinRadius(const double P1[4], const double P2[4], const double P3[4]);   // in eta-phi space
 double GetMinRadius(const double X1, const double Y1, const double X2, const double Y2, const double X3, const double Y3);
 double GetMR(const double P1[4], const double P2[4]);
-double GetMRT(const double P1[4], const double P2[4]);
-double GetR(const double P1[4], const double P2[4]);
+double GetMRT(const double P1[4], const double P2[4], const double ME[4]);
+double GetR(const double P1[4], const double P2[4], const double ME[4]);
 double GetBeta(const double P[4]);
 double GetGamma(const double P[4]);
 

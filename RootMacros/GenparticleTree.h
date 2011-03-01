@@ -20,6 +20,7 @@ bool HasTau(GenParticleTree &Tree);
 vector<int> FindAllIndices(GenParticleTree &Tree, int PDGID, int StatusCode = 0);
 vector<int> TraceChildren(GenParticleTree &Tree, int SourceIndex);
 vector<int> KeepStableParticle(GenParticleTree &Tree, vector<int> &Indices);
+vector<int> ListStableParticle(GenParticleTree &Tree);
 
 union SaveHelper
 {
@@ -265,9 +266,10 @@ private:
    int EventNumber;
 public:
    GenParticleTree();
-   GenParticleTree(vector<GenParticle> &particles, int run, int event);
+   GenParticleTree(vector<GenParticle> &particles, int run, int event, bool IgnoreInfrastructure = false);
    ~GenParticleTree();
-   void Initialize(vector<GenParticle> &particles);
+   void Initialize(vector<GenParticle> &particles, bool IgnoreInfrastructure = false);
+   void Initialize();
    GenParticle &operator [](int index);
    int GetRank(int index);
    int GetTreeIndex(int index);
@@ -278,6 +280,7 @@ public:
    int GetRunNumber() { return RunNumber; }
    int GetEventNumber() { return EventNumber; }
    int RecommendTree();
+   GenParticleTree operator +(const GenParticleTree &other) const;
 public:
    void SaveToStream(ostream &out, bool ASCII = false);
    void LoadFromStream(istream &in, bool ASCII = false);
@@ -294,9 +297,9 @@ GenParticleTree::GenParticleTree()
    TreeIndex.clear();
 }
 
-GenParticleTree::GenParticleTree(vector<GenParticle> &particles, int run, int event)
+GenParticleTree::GenParticleTree(vector<GenParticle> &particles, int run, int event, bool IgnoreInfrastructure)
 {
-   Initialize(particles);
+   Initialize(particles, IgnoreInfrastructure);
    
    RunNumber = run;
    EventNumber = event;
@@ -306,10 +309,16 @@ GenParticleTree::~GenParticleTree()
 {
 }
 
-void GenParticleTree::Initialize(vector<GenParticle> &particles)
+void GenParticleTree::Initialize(vector<GenParticle> &particles, bool IgnoreInfrastructure)
 {
    Particles = particles;
 
+   if(IgnoreInfrastructure == false)
+      Initialize();
+}
+   
+void GenParticleTree::Initialize()
+{
    // RepairReciprocalLinking();
    RebuildTreeIndex();
    RebuildRank();
@@ -401,6 +410,22 @@ int GenParticleTree::RecommendTree()
          MostPopulatedTree = i;
    
    return MostPopulatedTree;
+}
+
+GenParticleTree GenParticleTree::operator +(const GenParticleTree &other) const
+{
+   vector<GenParticle> NewParticles = Particles;
+   NewParticles.insert(NewParticles.end(), other.Particles.begin(), other.Particles.end());
+
+   for(int i = (int)Particles.size(); i < (int)NewParticles.size(); i++)
+   {
+      for(int j = 0; j < (int)NewParticles[i].Mothers.size(); j++)
+         NewParticles[i].Mothers[j] += Particles.size();
+      for(int j = 0; j < (int)NewParticles[i].Daughters.size(); j++)
+         NewParticles[i].Daughters[j] += Particles.size();
+   }
+
+   return GenParticleTree(NewParticles, RunNumber, EventNumber, true);
 }
 
 void GenParticleTree::SaveToStream(ostream &out, bool ASCII)
@@ -737,6 +762,21 @@ vector<int> KeepStableParticle(GenParticleTree &Tree, vector<int> &Indices)
          continue;
 
       StableIndices.push_back(Indices[i]);
+   }
+
+   return StableIndices;
+}
+
+vector<int> ListStableParticle(GenParticleTree &Tree)
+{
+   vector<int> StableIndices;
+
+   for(int i = 0; i < Tree.ParticleCount(); i++)
+   {
+      if(Tree[i].StatusCode != 1)
+         continue;
+
+      StableIndices.push_back(i);
    }
 
    return StableIndices;
