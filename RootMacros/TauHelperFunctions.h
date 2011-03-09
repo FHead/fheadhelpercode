@@ -132,12 +132,12 @@ double GetEta(const double P[4])
 {
    double Momentum = GetP(P);
 
-   return 0.5 * log((Momentum - P[3]) / (Momentum + P[3]));
+   return 0.5 * log((Momentum + P[3]) / (Momentum - P[3]));
 }
 
 double GetRapidity(const double P[4])
 {
-   return 0.5 * log((P[0] - P[3]) / (P[0] + P[3]));
+   return 0.5 * log((P[0] + P[3]) / (P[0] - P[3]));
 }
 
 double GetY(const double P[4])
