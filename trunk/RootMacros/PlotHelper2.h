@@ -7,6 +7,7 @@
 //    so that we can check quickly using pdf and come back to TFile later if needed
 //    the helper functions here will be mostly on *.ps files
 // Added feature compared to 6152: being able to insert a table of contents (and it's clickable!)
+//    automatic home button
 // Developer: Yi Chen, 6612
 
 #include <iostream>
@@ -32,6 +33,12 @@ private:
    string FileName;
    string Option;
    bool Status;   // false - file not opened; true - file good and ongoing
+private:
+   bool AutomaticHomeButton;
+   double HomeButtonX;
+   double HomeButtonY;
+   double HomeButtonSize;
+   string HomeButtonDestination;
 public:
    PsFileHelper();
    PsFileHelper(string filename);
@@ -81,6 +88,9 @@ public:
    void PrintLineToPSFile(string Line);
    void InsertNamedDestination(string Name);
    void InsertBallLinkAbsolute(int X, int Y, int Radius, string Destination);
+   void InsertHomeButtonAbsolute(double X, double Y, double Size, string Destination);
+   void SetAutomaticHomeButton(bool newvalue = true, string Destination = "HomePage",
+      double X = 50, double Y = 50, double Size = 75);
 };
 
 PsFileHelper::PsFileHelper()
@@ -88,18 +98,36 @@ PsFileHelper::PsFileHelper()
    Status = false;
    FileName = "";
    Option = "Landscape";
+
+   AutomaticHomeButton = false;
+   HomeButtonX = 50;
+   HomeButtonY = 50;
+   HomeButtonSize = 75;
+   HomeButtonDestination = "";
 }
 
 PsFileHelper::PsFileHelper(string filename)
 {
    Option = "Landscape";
 
+   AutomaticHomeButton = false;
+   HomeButtonX = 50;
+   HomeButtonY = 50;
+   HomeButtonSize = 75;
+   HomeButtonDestination = "";
+   
    Open(filename);
 }
 
 PsFileHelper::PsFileHelper(string filename, string option)
 {
    Option = option;
+   
+   AutomaticHomeButton = false;
+   HomeButtonX = 50;
+   HomeButtonY = 50;
+   HomeButtonSize = 75;
+   HomeButtonDestination = "";
 
    Open(filename);
 }
@@ -317,6 +345,9 @@ void PsFileHelper::AddCanvas(TCanvas *Canvas)
       return;
 
    Canvas->Print(FileName.c_str(), Option.c_str());
+
+   if(AutomaticHomeButton == true)
+      InsertHomeButtonAbsolute(HomeButtonX, HomeButtonY, HomeButtonSize, HomeButtonDestination);
 }
 
 void PsFileHelper::AddCanvas(TCanvas &Canvas)
@@ -333,6 +364,9 @@ void PsFileHelper::AddCanvasWithText(TCanvas *Canvas, string Text, double X, dou
    text.Draw();
 
    Canvas->Print(FileName.c_str(), Option.c_str());
+
+   if(AutomaticHomeButton == true)
+      InsertHomeButtonAbsolute(HomeButtonX, HomeButtonY, HomeButtonSize, HomeButtonDestination);
 }
 
 void PsFileHelper::AddCanvasWithText(TCanvas &Canvas, string Text, double X, double Y, double TextSize)
@@ -349,6 +383,9 @@ void PsFileHelper::AddTextPage(string Text, double X, double Y, double TextSize)
    text.Draw();
 
    canvas.Print(FileName.c_str(), Option.c_str());
+
+   if(AutomaticHomeButton == true)
+      InsertHomeButtonAbsolute(HomeButtonX, HomeButtonY, HomeButtonSize, HomeButtonDestination);
 }
 
 void PsFileHelper::AddTextPage(vector<string> Text, double X, double Y, double TextSize)
@@ -368,6 +405,9 @@ void PsFileHelper::AddTextPage(vector<string> Text, double X, double Y, double T
       texts[i]->Draw();
 
    canvas.Print(FileName.c_str(), Option.c_str());
+
+   if(AutomaticHomeButton == true)
+      InsertHomeButtonAbsolute(HomeButtonX, HomeButtonY, HomeButtonSize, HomeButtonDestination);
 
    for(int i = 0; i < (int)Text.size(); i++)
       delete texts[i];
@@ -406,6 +446,9 @@ void PsFileHelper::AddTableOfContentPage(vector<string> Items, vector<string> De
       texts[i]->Draw();
 
    canvas.Print(FileName.c_str(), Option.c_str());
+
+   if(AutomaticHomeButton == true)
+      InsertHomeButtonAbsolute(HomeButtonX, HomeButtonY, HomeButtonSize, HomeButtonDestination);
 
    for(int i = 0; i < (int)Items.size() && i < (int)Destinations.size(); i++)
    {
@@ -454,7 +497,7 @@ void PsFileHelper::PrintLineToPSFile(string Line)
 void PsFileHelper::InsertNamedDestination(string Name)
 {
    PrintLineToPSFile("");
-   PrintLineToPSFile("%% Defining named destination: " + Name);
+   // PrintLineToPSFile("%% Defining named destination: " + Name);
    PrintLineToPSFile("[ /Dest /" + Name);
    PrintLineToPSFile("   /DEST pdfmark");
    PrintLineToPSFile("");
@@ -478,6 +521,72 @@ void PsFileHelper::InsertBallLinkAbsolute(int X, int Y, int Radius, string Desti
    PrintLineToPSFile("/Subtype /Link");
    PrintLineToPSFile("/ANN pdfmark");
    PrintLineToPSFile("");
+}
+
+void PsFileHelper::InsertHomeButtonAbsolute(double X, double Y, double Size, string Destination)
+{
+   double H = 0.4;   // height and width of the small box in the bottom, in units of "Size"
+   double W = 0.75;
+
+   double X2 = 0.7;   // chimney left side x (lower side y is always 0.5), and width/height in units of "Size"
+   double W2 = 0.125;
+   double H2 = 0.4;
+
+   double LowerLeftX = X - Size / 2;
+   double LowerLeftY = Y - Size / 2;
+
+   double PointsX[11] = {0};
+   double PointsY[11] = {0};
+
+   PointsX[0] = 0;              PointsY[0] = H;
+   PointsX[1] = 0.5;            PointsY[1] = 1;
+
+   PointsX[2] = X2;             PointsY[2] = (1 - X2) / (1 - 0.5) * (1 - H) + H;
+   PointsX[3] = X2;             PointsY[3] = H2 + H;
+   PointsX[4] = X2 + W2;        PointsY[4] = H2 + H;
+   PointsX[5] = X2 + W2;        PointsY[5] = (1 - X2 - W2) / (1 - 0.5) * (1 - H) + H;
+
+   PointsX[6] = 1;              PointsY[6] = H;
+   PointsX[7] = 0.5 + W / 2;    PointsY[7] = H;
+   PointsX[8] = 0.5 + W / 2;    PointsY[8] = 0;
+   PointsX[9] = 0.5 - W / 2;    PointsY[9] = 0;
+   PointsX[10] = 0.5 - W / 2;   PointsY[10] = H;
+
+   PrintLineToPSFile("");
+   PrintLineToPSFile("newpath");
+   for(int i = 0; i < 11; i++)
+   {
+      char TempString[1000];
+      sprintf(TempString, "%.1f %.1f ", LowerLeftX + PointsX[i] * Size, LowerLeftY + PointsY[i] * Size);
+      
+      if(i == 0)
+         PrintLineToPSFile(string(TempString) + " moveto");
+      else
+         PrintLineToPSFile(string(TempString) + " lineto");
+      
+   }
+   PrintLineToPSFile("closepath fill");
+
+   stringstream box;
+   box << "[ /Rect [" << LowerLeftX << " " << LowerLeftY << " "
+      << LowerLeftX + Size << " " << LowerLeftY + Size << "]";
+
+   PrintLineToPSFile("");
+   PrintLineToPSFile(box.str());
+   PrintLineToPSFile("/Color [0 0 1]");
+   PrintLineToPSFile("/Dest /" + Destination);
+   PrintLineToPSFile("/Subtype /Link");
+   PrintLineToPSFile("/ANN pdfmark");
+   PrintLineToPSFile("");
+}
+
+void PsFileHelper::SetAutomaticHomeButton(bool newvalue, string Destination, double X, double Y, double Size)
+{
+   AutomaticHomeButton = newvalue;
+   HomeButtonDestination = Destination;
+   HomeButtonX = X;
+   HomeButtonY = Y;
+   HomeButtonSize = Size;
 }
 
 #endif
