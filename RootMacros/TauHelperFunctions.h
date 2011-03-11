@@ -5,6 +5,7 @@
 #include <cmath>
 using namespace std;
 
+#include "DrawRandom.h"
 #include "GenparticleTree.h"
 
 // Categories:
@@ -40,6 +41,19 @@ double GetMRT(const double P1[4], const double P2[4], const double ME[4]);
 double GetR(const double P1[4], const double P2[4], const double ME[4]);
 double GetBeta(const double P[4]);
 double GetGamma(const double P[4]);
+void RotateX(double InP[4], double OutP[4], double Angle);
+void RotateY(double InP[4], double OutP[4], double Angle);
+void RotateZ(double InP[4], double OutP[4], double Angle);
+void Rotate(double InP[4], double OutP[4], double Axis[4], double Angle);
+void BoostX(double InP[4], double OutP[4], double Beta);
+void BoostY(double InP[4], double OutP[4], double Beta);
+void BoostZ(double InP[4], double OutP[4], double Beta);
+void Boost(double InP[4], double OutP[4], double Axis[4], double Beta);
+double BetaToGamma(double Beta);
+double GammaToBeta(double Gamma);
+void SmearAngle(double InP[4], double OutP[4], double Angle);
+void SmearMomentum(double InP[4], double OutP[4], double Scale);
+void SpatialCrossProduct(double InP1[4], double InP2[4], double OutP[4]);
 
 int FindCategory(GenParticleTree &Tree, int index)
 {
@@ -233,7 +247,8 @@ double GetMinRadius(const double P1[4], const double P2[4], const double P3[4]) 
    return GetMinRadius(Eta1, Phi1 + Best1 * 2 * PI, Eta2, Phi2 + Best2 * 2 * PI, Eta3, Phi3 + Best3 * 2 * PI);
 }
 
-double GetMinRadius(const double X1, const double Y1, const double X2, const double Y2, const double X3, const double Y3)
+double GetMinRadius(const double X1, const double Y1, const double X2, const double Y2,
+   const double X3, const double Y3)
 {
    // compare two radii:
    //    - common circle radius
@@ -306,6 +321,145 @@ double GetBeta(const double P[4])
 double GetGamma(const double P[4])
 {
    return P[0] / GetMass(P);
+}
+
+void RotateX(double InP[4], double OutP[4], double Angle)
+{
+   OutP[0] = InP[0];
+   OutP[1] = InP[1];
+   OutP[2] = cos(Angle) * InP[2] - sin(Angle) * InP[3];
+   OutP[3] = sin(Angle) * InP[2] + cos(Angle) * InP[3];
+}
+
+void RotateY(double InP[4], double OutP[4], double Angle)
+{
+   OutP[0] = InP[0];
+   OutP[1] = sin(Angle) * InP[3] + cos(Angle) * InP[1];
+   OutP[2] = InP[2];
+   OutP[3] = cos(Angle) * InP[3] - sin(Angle) * InP[1];
+}
+
+void RotateZ(double InP[4], double OutP[4], double Angle)
+{
+   OutP[0] = InP[0];
+   OutP[1] = cos(Angle) * InP[1] - sin(Angle) * InP[2];
+   OutP[2] = sin(Angle) * InP[1] + cos(Angle) * InP[2];
+   OutP[3] = InP[3];
+}
+
+void Rotate(double InP[4], double OutP[4], double Axis[4], double Angle)
+{
+   // rotate "axis" and input to y-z plane, then rotate "axis" to z axis,
+   //    rotate input with respect to z axis
+   //    and then rotate back
+
+   double Psi = PI / 2 - GetPhi(Axis);
+   double Theta = acos(Axis[3] / GetP(Axis));
+
+   double TempP1[4], TempP2[4], TempP3[4], TempP4[4];
+
+   RotateZ(InP, TempP1, Psi);
+   RotateX(TempP1, TempP2, Theta);
+   RotateZ(TempP2, TempP3, Angle);
+   RotateX(TempP3, TempP4, -Theta);
+   RotateZ(TempP4, OutP, -Psi);
+}
+
+void BoostX(double InP[4], double OutP[4], double Beta)
+{
+   double Gamma = BetaToGamma(Beta);
+
+   OutP[0] = Gamma * InP[0] - Beta * Gamma * InP[1];
+   OutP[1] = -Beta * Gamma * InP[0] + Gamma * InP[1];
+   OutP[2] = InP[2];
+   OutP[3] = InP[3];
+}
+
+void BoostY(double InP[4], double OutP[4], double Beta)
+{
+   double Gamma = BetaToGamma(Beta);
+
+   OutP[0] = Gamma * InP[0] - Beta * Gamma * InP[2];
+   OutP[1] = InP[1];
+   OutP[2] = -Beta * Gamma * InP[0] + Gamma * InP[2];
+   OutP[3] = InP[3];
+}
+
+void BoostZ(double InP[4], double OutP[4], double Beta)
+{
+   double Gamma = BetaToGamma(Beta);
+
+   OutP[0] = Gamma * InP[0] - Beta * Gamma * InP[3];
+   OutP[1] = InP[1];
+   OutP[2] = InP[2];
+   OutP[3] = -Beta * Gamma * InP[0] + Gamma * InP[3];
+}
+
+void Boost(double InP[4], double OutP[4], double Axis[4], double Beta)
+{
+   if(GetPT(Axis) < 1e-8)   // axis along z direction
+   {
+      if(Axis[3] > 0)
+         BoostZ(InP, OutP, Beta);
+      else
+         BoostZ(InP, OutP, -Beta);
+      return;
+   }
+
+   double Psi = PI / 2 - GetPhi(Axis);
+   double Theta = acos(Axis[3] / GetP(Axis));
+
+   double TempP1[4], TempP2[4], TempP3[4], TempP4[4];
+
+   RotateZ(InP, TempP1, Psi);
+   RotateX(TempP1, TempP2, Theta);
+   BoostZ(TempP2, TempP3, Beta);
+   RotateX(TempP3, TempP4, -Theta);
+   RotateZ(TempP4, OutP, -Psi);
+}
+
+double BetaToGamma(double Beta)
+{
+   return 1 / sqrt(1 - Beta * Beta);
+}
+
+double GammaToBeta(double Gamma)
+{
+   return sqrt(1 - 1 / (Gamma * Gamma));
+}
+
+void SmearAngle(double InP[4], double OutP[4], double Angle)
+{
+   double Reference[4] = {0, 1, 0, 0};
+   if(fabs(InP[2]) < 1e-6 && fabs(InP[3]) < 1e-6)
+      Reference[2] = 1;
+
+   double Axis[4] = {1, 0, 0, 0};
+   SpatialCrossProduct(InP, Reference, Axis);   // so that axis is perpendicular to input momentum
+
+   double RealAxis[4] = {1, 0, 0, 0};   // pick a random rotation axis perpendicular to input momentum
+   double AxisRotation = DrawRandom(0, 2 * PI);
+   Rotate(Axis, RealAxis, InP, AxisRotation);
+
+   double SmearAngle = DrawGaussian(Angle);
+   Rotate(InP, OutP, RealAxis, SmearAngle);
+}
+
+void SmearMomentum(double InP[4], double OutP[4], double Scale)
+{
+   double Factor = 1 + DrawGaussian(Scale);
+
+   OutP[0] = InP[0] * Factor;
+   OutP[1] = InP[1] * Factor;
+   OutP[2] = InP[2] * Factor;
+   OutP[3] = InP[3] * Factor;
+}
+
+void SpatialCrossProduct(double InP1[4], double InP2[4], double OutP[4])
+{
+   OutP[1] = InP1[2] * InP2[3] - InP1[3] * InP2[2];
+   OutP[2] = InP1[3] * InP2[1] - InP1[1] * InP2[3];
+   OutP[3] = InP1[1] * InP2[2] - InP1[2] * InP2[1];
 }
 
 #endif
