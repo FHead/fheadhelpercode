@@ -14,11 +14,14 @@ double DrawGaussian(double center, double sigma);
 double DrawGaussian(double sigma);
 double DrawCruijff(double center, double sigmal, double sigmar, double alphal, double alphar);
 double DrawExponential(double exponent, double left, double right);
+double DrawExponential(double exponent, double side);
 double DrawPoisson(double mean);
 
 double DrawRandom()
 {
-   return double(rand() % 100000) / 100000;
+   double Value1 = double(rand() % 100000) / 100000;
+   double Value2 = double(rand() % 100000) / 100000;
+   return Value1 + Value2 / 100000;
 }
 
 double DrawRandom(double max)
@@ -90,7 +93,7 @@ double DrawGaussian(double sigma)
    // form: exp(-x^2/(2 sigma^2))
    while(OK == false)
    {
-      value = DrawRandom(-sigma * 5, sigma * 5);
+      value = DrawRandom(-sigma * 15, sigma * 15);
       double check = DrawRandom();
 
       if(check < exp(-value * value / 2 / sigma / sigma))
@@ -172,11 +175,50 @@ double DrawExponential(double exponent, double left, double right)
       value = DrawRandom(right - left);
       double check = DrawRandom();
 
-      if(check < exp(-value * exponent))
+      if(check < exp(value * exponent))
          OK = true;
    }
 
    return value + left;
+}
+
+double DrawExponential(double exponent, double side)
+{
+   if(exponent == 0)
+      return side;
+
+   if(exponent > 0)
+   {
+      double Distance = DrawExponential(-exponent, 0);
+      return side - Distance;
+   }
+
+   double Distance = 0;
+
+   bool OK = false;
+   while(OK == false)
+   {
+      double value = DrawRandom(0, 1);
+      if(value < exp(-1))   // not within this decay length
+         Distance = Distance + 1 / fabs(exponent);
+      else   // within this decay length
+         OK = true;
+   }
+
+   OK = false;
+   while(OK == false)
+   {
+      double value = DrawRandom(0, 1);   // determine exactly where in this range
+      double check = DrawRandom(0, 1);
+
+      if(check < exp(-value))
+      {
+         Distance = Distance + value / fabs(exponent);
+         OK = true;
+      }
+   }
+
+   return Distance + side;
 }
 
 double DrawPoisson(double mean)
