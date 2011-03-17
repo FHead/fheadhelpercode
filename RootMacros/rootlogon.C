@@ -4,7 +4,7 @@
    cout << endl;
 
    gROOT->SetStyle("Plain");
-   gROOT->ProcessLine(".include /home/fhead/RootMacros");
+   gROOT->ProcessLine(".include /home/yichen/RootMacros");
 
    // nice palette!
    // courtesy of Segev, http://ultrahigh.org/2007/08/20/making-pretty-root-color-palettes/
@@ -20,11 +20,11 @@
    gStyle->SetNumberContours(NCont);
 
    // pythia 8 environmental variables
-   gSystem->ExpandPathName("$PYTHIA8DATA");
-   gSystem->Load("$PYTHIA8/lib/libpythia8");
-   gSystem->Load("libEG");
-   gSystem->Load("libEGPythia8");
+   // gSystem->ExpandPathName("$PYTHIA8DATA");
+   // gSystem->Load("$PYTHIA8/lib/libpythia8");
+   // gSystem->Load("libEG");
+   // gSystem->Load("libEGPythia8");
 
    gStyle->SetOptFit(111);
-   gStyle->SetPaperSize(24, 16);
+   // gStyle->SetPaperSize(24, 16);
 }

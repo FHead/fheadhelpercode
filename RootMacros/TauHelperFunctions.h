@@ -54,6 +54,7 @@ double GammaToBeta(double Gamma);
 void SmearAngle(double InP[4], double OutP[4], double Angle);
 void SmearMomentum(double InP[4], double OutP[4], double Scale);
 void SpatialCrossProduct(double InP1[4], double InP2[4], double OutP[4]);
+void CopyFourVector(double From[4], double To[4]);
 
 int FindCategory(GenParticleTree &Tree, int index)
 {
@@ -460,6 +461,14 @@ void SpatialCrossProduct(double InP1[4], double InP2[4], double OutP[4])
    OutP[1] = InP1[2] * InP2[3] - InP1[3] * InP2[2];
    OutP[2] = InP1[3] * InP2[1] - InP1[1] * InP2[3];
    OutP[3] = InP1[1] * InP2[2] - InP1[2] * InP2[1];
+}
+
+void CopyFourVector(double From[4], double To[4])
+{
+   To[0] = From[0];
+   To[1] = From[1];
+   To[2] = From[2];
+   To[3] = From[3];
 }
 
 #endif
