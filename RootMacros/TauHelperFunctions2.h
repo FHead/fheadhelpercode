@@ -47,6 +47,8 @@ public:
    ~FourVector();
    void SetPtEtaPhi(double pt, double eta, double phi);   // massless
    void SetPtEtaPhiMass(double pt, double eta, double phi, double mass = 0);
+   void SetSizeThetaPhi(double size, double theta, double phi);
+   void SetSizeThetaPhiMass(double size, double theta, double phi, double mass = 0);
    double &operator [](int index);
    double operator [](int index) const;
    FourVector &operator =(const FourVector &Other);
@@ -63,6 +65,7 @@ public:
    double GetRapidity() const;
    double GetY() const;
    double GetPhi() const;
+   double GetTheta() const;
    double GetGamma() const;
    double GetBeta() const;
    FourVector RotateX(double Angle) const;
@@ -120,6 +123,19 @@ void FourVector::SetPtEtaPhiMass(double pt, double eta, double phi, double mass)
    P[3] = pt * sinh(eta);
 
    P[0] = sqrt(mass * mass + SpatialDot(*this));
+}
+
+void FourVector::SetSizeThetaPhi(double size, double theta, double phi)
+{
+   SetSizeThetaPhiMass(size, theta, phi, 0);
+}
+
+void FourVector::SetSizeThetaPhiMass(double size, double theta, double phi, double mass)
+{
+   P[0] = sqrt(size * size + mass * mass);
+   P[1] = size * sin(theta) * cos(phi);
+   P[2] = size * sin(theta) * sin(phi);
+   P[3] = size * cos(theta);
 }
 
 double &FourVector::operator [](int index)
@@ -236,6 +252,11 @@ double FourVector::GetPhi() const
       Angle = -Angle;
 
    return Angle;
+}
+
+double FourVector::GetTheta() const
+{
+   return acos(P[3] / GetP());
 }
 
 double FourVector::GetBeta() const
