@@ -21,20 +21,38 @@
 #include "TH2D.h"
 #include "TH1.h"
 //-------------------------------------------------------------------------
-#define BranchType_Double 0
-#define BranchType_Integer 1
-#define BranchType_Boolean 2
+#define BranchType_Double 1
+#define BranchType_Float 2
+#define BranchType_Integer 3
+#define BranchType_Boolean 4
+#define BranchType_Expression 5
 //-------------------------------------------------------------------------
-struct HistogramRecord;
+#define VerbosityLevel_Quiet 0
+#define VerbosityLevel_Information 1
+#define VerbosityLevel_Noisy 2
+//-------------------------------------------------------------------------
+class HistogramRecord;
+class ExpressionNode;
 class QuickViewHelper;
 //-------------------------------------------------------------------------
-struct HistogramRecord
+class HistogramRecord
 {
+public:
    std::string Name;
    bool Is1D;
    std::string Variable1;
    std::string Variable2;
    std::string Selection;
+public:
+   HistogramRecord() {}
+};
+//-------------------------------------------------------------------------
+class ExpressionNode
+{
+   std::string Name;
+   ExpressionNode *ChildNode1;
+   ExpressionNode *ChildNode2;
+   bool IsLeaf;
 };
 //-------------------------------------------------------------------------
 class QuickViewHelper
@@ -42,14 +60,19 @@ class QuickViewHelper
 private:
    TTree *Tree;
    std::map<std::string, double *> DoubleBranches;
+   std::map<std::string, float *> FloatBranches;
    std::map<std::string, int *> IntegerBranches;
    std::map<std::string, bool *> BooleanBranches;
+   std::map<std::string, std::vector<double> > ExpressionBranches;
+   std::vector<ExpressionNode> ExpressionCommands;
    std::map<std::string, int> BranchType;
    std::map<std::string, int> BranchSize;
 private:
    std::map<std::string, TH1D *> Histogram1D;
    std::map<std::string, TH2D *> Histogram2D;
    std::map<std::string, HistogramRecord> HistogramRecords;
+private:
+   int VerbosityLevel;
 public:
    QuickViewHelper();
    ~QuickViewHelper();
@@ -57,6 +80,7 @@ public:
    bool LoadTree(TTree *tree);
    void PrintBranches();
    void Execute();
+   void SetVerbosityLevel(int NewLevel);
 public:
    void RegisterHistogram1DSimple(std::string HistogramName, std::string Variable,
       int NumberOfBins, double Minimum, double Maximum, std::string Title = "",
@@ -69,11 +93,17 @@ public:
    std::map<std::string, TH2D *> GetHistogram2D();
    TH1 *GetHistogram(std::string HistogramName);
    TH1 *operator [](std::string HistogramName);
+public:
+   bool BuildExpression(std::string ExpressionName, std::string ExpressionFormula);
+private:
+   double GetValue(const std::string Name, int Instance = 0);
 };
 //-------------------------------------------------------------------------
 QuickViewHelper::QuickViewHelper()
 {
    Clear();
+
+   VerbosityLevel = VerbosityLevel_Information;
 }
 //-------------------------------------------------------------------------
 QuickViewHelper::~QuickViewHelper()
@@ -87,6 +117,16 @@ void QuickViewHelper::Clear()
 
    for(std::map<std::string, double *>::iterator iter = DoubleBranches.begin();
       iter != DoubleBranches.end(); iter++)
+   {
+      if(iter->second != NULL)
+      {
+         delete[] iter->second;
+         iter->second = NULL;
+      }
+   }
+   
+   for(std::map<std::string, float *>::iterator iter = FloatBranches.begin();
+      iter != FloatBranches.end(); iter++)
    {
       if(iter->second != NULL)
       {
@@ -116,6 +156,7 @@ void QuickViewHelper::Clear()
    }
    
    DoubleBranches.clear();
+   FloatBranches.clear();
    IntegerBranches.clear();
    BooleanBranches.clear();
 
@@ -152,6 +193,7 @@ bool QuickViewHelper::LoadTree(TTree *tree)
    // Loop over branches and leaves and allocate variables for getting stuff out of the tree
    TObjArray *BranchList = Tree->GetListOfBranches();
    int NumberOfBranches = BranchList->GetEntries();
+   
    for(int i = 0; i < NumberOfBranches; i++)
    {
       if(BranchList->At(i)->IsA()->GetName() != TString("TBranch"))
@@ -170,25 +212,31 @@ bool QuickViewHelper::LoadTree(TTree *tree)
             if(CurrentLeaf->GetTypeName() == TString("Double_t"))
             {
                DoubleBranches.insert(std::pair<std::string, double *>(CurrentLeaf->GetName(),
-                  new double[CurrentLeaf->GetLenStatic()]));
+                  new double[CurrentLeaf->GetNdata()]));
                BranchType.insert(std::pair<std::string, int>(CurrentLeaf->GetName(), BranchType_Double));
-               BranchSize.insert(std::pair<std::string, int>(CurrentLeaf->GetName(), CurrentLeaf->GetLenStatic()));
+               BranchSize.insert(std::pair<std::string, int>(CurrentLeaf->GetName(), CurrentLeaf->GetNdata()));
+            }
+            if(CurrentLeaf->GetTypeName() == TString("Float_t"))
+            {
+               FloatBranches.insert(std::pair<std::string, float *>(CurrentLeaf->GetName(),
+                  new float[CurrentLeaf->GetNdata()]));
+               BranchType.insert(std::pair<std::string, int>(CurrentLeaf->GetName(), BranchType_Float));
+               BranchSize.insert(std::pair<std::string, int>(CurrentLeaf->GetName(), CurrentLeaf->GetNdata()));
             }
             if(CurrentLeaf->GetTypeName() == TString("Int_t"))
             {
                IntegerBranches.insert(std::pair<std::string, int *>(CurrentLeaf->GetName(),
-                  new int[CurrentLeaf->GetLenStatic()]));
+                  new int[CurrentLeaf->GetNdata()]));
                BranchType.insert(std::pair<std::string, int>(CurrentLeaf->GetName(), BranchType_Integer));
-               BranchSize.insert(std::pair<std::string, int>(CurrentLeaf->GetName(), CurrentLeaf->GetLenStatic()));
+               BranchSize.insert(std::pair<std::string, int>(CurrentLeaf->GetName(), CurrentLeaf->GetNdata()));
             }
             if(CurrentLeaf->GetTypeName() == TString("Bool_t"))
             {
                BooleanBranches.insert(std::pair<std::string, bool *>(CurrentLeaf->GetName(),
-                  new bool[CurrentLeaf->GetLenStatic()]));
+                  new bool[CurrentLeaf->GetNdata()]));
                BranchType.insert(std::pair<std::string, int>(CurrentLeaf->GetName(), BranchType_Boolean));
-               BranchSize.insert(std::pair<std::string, int>(CurrentLeaf->GetName(), CurrentLeaf->GetLenStatic()));
+               BranchSize.insert(std::pair<std::string, int>(CurrentLeaf->GetName(), CurrentLeaf->GetNdata()));
             }
-
          }
       }
    }
@@ -207,12 +255,16 @@ bool QuickViewHelper::LoadTree(TTree *tree)
 
          if(CurrentLeaf->GetLenStatic() == 1 && CurrentLeaf->GetTypeName() == TString("Double_t"))
             Tree->SetBranchAddress(CurrentBranch->GetName(), &DoubleBranches[Name][0]);
+         if(CurrentLeaf->GetLenStatic() == 1 && CurrentLeaf->GetTypeName() == TString("Float_t"))
+            Tree->SetBranchAddress(CurrentBranch->GetName(), &FloatBranches[Name][0]);
          if(CurrentLeaf->GetLenStatic() == 1 && CurrentLeaf->GetTypeName() == TString("Int_t"))
             Tree->SetBranchAddress(CurrentBranch->GetName(), &IntegerBranches[Name][0]);
          if(CurrentLeaf->GetLenStatic() == 1 && CurrentLeaf->GetTypeName() == TString("Bool_t"))
             Tree->SetBranchAddress(CurrentBranch->GetName(), &BooleanBranches[Name][0]);
          if(CurrentLeaf->GetLenStatic() > 1 && CurrentLeaf->GetTypeName() == TString("Double_t"))
             Tree->SetBranchAddress(CurrentBranch->GetName(), DoubleBranches[Name]);
+         if(CurrentLeaf->GetLenStatic() > 1 && CurrentLeaf->GetTypeName() == TString("Float_t"))
+            Tree->SetBranchAddress(CurrentBranch->GetName(), FloatBranches[Name]);
          if(CurrentLeaf->GetLenStatic() > 1 && CurrentLeaf->GetTypeName() == TString("Int_t"))
             Tree->SetBranchAddress(CurrentBranch->GetName(), IntegerBranches[Name]);
          if(CurrentLeaf->GetLenStatic() > 1 && CurrentLeaf->GetTypeName() == TString("Bool_t"))
@@ -228,6 +280,17 @@ void QuickViewHelper::PrintBranches()
    std::cout << "Double Branches: " << std::endl;
    for(std::map<std::string, double *>::iterator iter = DoubleBranches.begin();
       iter != DoubleBranches.end(); iter++)
+   {
+      if(BranchSize[iter->first] == 1)
+         std::cout << "   " << iter->first << std::endl;
+      else
+         std::cout << "   " << iter->first << "[" << BranchSize[iter->first] << "]" << std::endl;
+   }
+   std::cout << std::endl;
+   
+   std::cout << "Float Branches: " << std::endl;
+   for(std::map<std::string, float *>::iterator iter = FloatBranches.begin();
+      iter != FloatBranches.end(); iter++)
    {
       if(BranchSize[iter->first] == 1)
          std::cout << "   " << iter->first << std::endl;
@@ -267,6 +330,9 @@ void QuickViewHelper::Execute()
    int NumberOfEntries = Tree->GetEntries();
    for(int iEntry = 0; iEntry < NumberOfEntries; iEntry++)
    {
+      if(VerbosityLevel >= VerbosityLevel_Information && (iEntry + 1) % 10000 == 0)
+         std::cout << "Processing entry " << iEntry + 1 << "/" << NumberOfEntries << std::endl;
+
       Tree->GetEntry(iEntry);
 
       for(std::map<std::string, HistogramRecord>::iterator iter = HistogramRecords.begin();
@@ -279,14 +345,7 @@ void QuickViewHelper::Execute()
                continue;
 
             for(int i = 0; i < BranchSize[iter->second.Variable1]; i++)
-            {
-               if(BranchType[iter->second.Variable1] == BranchType_Double)
-                  H->Fill(DoubleBranches[iter->second.Variable1][i]);
-               if(BranchType[iter->second.Variable1] == BranchType_Integer)
-                  H->Fill(IntegerBranches[iter->second.Variable1][i]);
-               if(BranchType[iter->second.Variable1] == BranchType_Boolean)
-                  H->Fill(BooleanBranches[iter->second.Variable1][i]);
-            }
+               H->Fill(GetValue(iter->second.Variable1, i));
          }
          else   // 2D
          {
@@ -294,24 +353,10 @@ void QuickViewHelper::Execute()
             if(H == NULL)
                continue;
 
-            for(int i = 0; i < BranchSize[iter->second.Variable1]; i++)
+            for(int i = 0; i < BranchSize[iter->second.Variable1] && i < BranchSize[iter->second.Variable2]; i++)
             {
-               double Variable1 = 1000000;
-               double Variable2 = 1000000;
-
-               if(BranchType[iter->second.Variable1] == BranchType_Double)
-                  Variable1 = DoubleBranches[iter->second.Variable1][i];
-               if(BranchType[iter->second.Variable1] == BranchType_Integer)
-                  Variable1 = IntegerBranches[iter->second.Variable1][i];
-               if(BranchType[iter->second.Variable1] == BranchType_Boolean)
-                  Variable1 = BooleanBranches[iter->second.Variable1][i];
-
-               if(BranchType[iter->second.Variable2] == BranchType_Double)
-                  Variable2 = DoubleBranches[iter->second.Variable2][i];
-               if(BranchType[iter->second.Variable2] == BranchType_Integer)
-                  Variable2 = IntegerBranches[iter->second.Variable2][i];
-               if(BranchType[iter->second.Variable2] == BranchType_Boolean)
-                  Variable2 = BooleanBranches[iter->second.Variable2][i];
+               double Variable1 = GetValue(iter->second.Variable1, i);
+               double Variable2 = GetValue(iter->second.Variable2, i);
 
                H->Fill(Variable1, Variable2);
             }
@@ -388,6 +433,38 @@ TH1 *QuickViewHelper::GetHistogram(std::string HistogramName)
 TH1 *QuickViewHelper::operator [](std::string HistogramName)
 {
    return GetHistogram(HistogramName);
+}
+//-------------------------------------------------------------------------
+bool QuickViewHelper::BuildExpression(std::string ExpressionName, std::string ExpressionFormula)
+{
+   return false;
+}
+//-------------------------------------------------------------------------
+double QuickViewHelper::GetValue(const std::string Name, int Instance)
+{
+   if(BranchType.find(Name) == BranchType.end())
+   {
+      std::cerr << "Unknown branch requested: " << Name << std::endl;
+      return -100000;
+   }
+   if(Instance >= BranchSize[Name] || Instance < 0)
+   {
+      std::cerr << "Instance " << Instance << " requested for branch " << Name << std::endl;
+      return -100000;
+   }
+   
+   if(BranchType[Name] == BranchType_Double)
+      return DoubleBranches[Name][Instance];
+   if(BranchType[Name] == BranchType_Float)
+      return FloatBranches[Name][Instance];
+   if(BranchType[Name] == BranchType_Integer)
+      return IntegerBranches[Name][Instance];
+   if(BranchType[Name] == BranchType_Boolean)
+      return BooleanBranches[Name][Instance];
+   if(BranchType[Name] == BranchType_Expression)
+      return ExpressionBranches[Name][Instance];
+
+   return -100000;
 }
 //-------------------------------------------------------------------------
 #endif
