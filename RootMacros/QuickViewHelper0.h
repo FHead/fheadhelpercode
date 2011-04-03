@@ -26,37 +26,9 @@
 #include "TH2D.h"
 #include "TH1.h"
 //-------------------------------------------------------------------------
-#define BranchType_Double 1
-#define BranchType_Float 2
-#define BranchType_Integer 3
-#define BranchType_Boolean 4
-#define BranchType_Expression 5
-//-------------------------------------------------------------------------
 #define VerbosityLevel_Quiet 0
 #define VerbosityLevel_Information 1
 #define VerbosityLevel_Noisy 2
-//-------------------------------------------------------------------------
-#define Expression_Plus 1
-#define Expression_Minus 2
-#define Expression_Multiply 3
-#define Expression_Divide 4
-#define Expression_Negative 5
-#define Expression_Sine 6
-#define Expression_Cosine 7
-#define Expression_Tangent 8
-#define Expression_Cotangent 9
-#define Expression_Second 10
-#define Expression_Cosecond 11
-#define Expression_Sinh 12
-#define Expression_Cosh 13
-#define Expression_Tanh 14
-#define Expression_Exp 15
-#define Expression_Log 16
-#define Expression_ASin 17
-#define Expression_ACos 18
-#define Expression_ATan 19
-#define Expression_Instance 20
-#define Expression_Sqrt 21
 //-------------------------------------------------------------------------
 class HistogramRecord;
 class ExpressionNode;
@@ -77,6 +49,16 @@ public:
 class ExpressionNode
 {
 public:
+   enum ExpressionType
+   {
+      Expression_Plus = 1, Expression_Minus, Expression_Multiply, Expression_Divide, Expression_Negative,
+      Expression_Sine, Expression_Cosine, Expression_Tangent, Expression_Cotangent,
+      Expression_Second, Expression_Cosecond, Expression_Sinh, Expression_Cosh, Expression_Tanh,
+      Expression_Exp, Expression_Log, Expression_ASin, Expression_ACos, Expression_ATan, Expression_Instance,
+      Expression_Sqrt, Expression_Greater, Expression_GreaterEqual, Expression_Equal, Expression_NotEqual,
+      Expression_Less, Expression_LessEqual
+   };
+public:
    std::string ID;
    std::string Name;
    ExpressionNode *ChildNode1;
@@ -85,7 +67,7 @@ public:
    QuickViewHelper *OwnerLink;
    bool IsConstant;
    double ConstantNumber;
-   int Action;
+   ExpressionType Action;
 public:
    ExpressionNode();
    ~ExpressionNode();
@@ -98,6 +80,9 @@ public:
 class QuickViewHelper
 {
 private:
+   enum BranchTypes {BranchType_Double, BranchType_Integer, BranchType_Float,
+      BranchType_Boolean, BranchType_Expression};
+private:
    TTree *Tree;
    std::map<std::string, double *> DoubleBranches;
    std::map<std::string, float *> FloatBranches;
@@ -105,7 +90,7 @@ private:
    std::map<std::string, bool *> BooleanBranches;
    std::map<std::string, std::vector<double> > ExpressionBranches;
    std::vector<ExpressionNode *> ExpressionCommands;
-   std::map<std::string, int> BranchType;
+   std::map<std::string, BranchTypes> BranchType;
    std::map<std::string, int> BranchSize;
 private:
    std::map<std::string, TH1D *> Histogram1D;
@@ -262,28 +247,28 @@ bool QuickViewHelper::LoadTree(TTree *tree)
             {
                DoubleBranches.insert(std::pair<std::string, double *>(CurrentLeaf->GetName(),
                   new double[CurrentLeaf->GetNdata()]));
-               BranchType.insert(std::pair<std::string, int>(CurrentLeaf->GetName(), BranchType_Double));
+               BranchType.insert(std::pair<std::string, BranchTypes>(CurrentLeaf->GetName(), BranchType_Double));
                BranchSize.insert(std::pair<std::string, int>(CurrentLeaf->GetName(), CurrentLeaf->GetNdata()));
             }
             if(CurrentLeaf->GetTypeName() == TString("Float_t"))
             {
                FloatBranches.insert(std::pair<std::string, float *>(CurrentLeaf->GetName(),
                   new float[CurrentLeaf->GetNdata()]));
-               BranchType.insert(std::pair<std::string, int>(CurrentLeaf->GetName(), BranchType_Float));
+               BranchType.insert(std::pair<std::string, BranchTypes>(CurrentLeaf->GetName(), BranchType_Float));
                BranchSize.insert(std::pair<std::string, int>(CurrentLeaf->GetName(), CurrentLeaf->GetNdata()));
             }
             if(CurrentLeaf->GetTypeName() == TString("Int_t"))
             {
                IntegerBranches.insert(std::pair<std::string, int *>(CurrentLeaf->GetName(),
                   new int[CurrentLeaf->GetNdata()]));
-               BranchType.insert(std::pair<std::string, int>(CurrentLeaf->GetName(), BranchType_Integer));
+               BranchType.insert(std::pair<std::string, BranchTypes>(CurrentLeaf->GetName(), BranchType_Integer));
                BranchSize.insert(std::pair<std::string, int>(CurrentLeaf->GetName(), CurrentLeaf->GetNdata()));
             }
             if(CurrentLeaf->GetTypeName() == TString("Bool_t"))
             {
                BooleanBranches.insert(std::pair<std::string, bool *>(CurrentLeaf->GetName(),
                   new bool[CurrentLeaf->GetNdata()]));
-               BranchType.insert(std::pair<std::string, int>(CurrentLeaf->GetName(), BranchType_Boolean));
+               BranchType.insert(std::pair<std::string, BranchTypes>(CurrentLeaf->GetName(), BranchType_Boolean));
                BranchSize.insert(std::pair<std::string, int>(CurrentLeaf->GetName(), CurrentLeaf->GetNdata()));
             }
          }
@@ -517,7 +502,7 @@ bool QuickViewHelper::BuildExpression(std::string ExpressionName, std::string Ex
    ExpressionBranches.insert(std::pair<std::string, std::vector<double> >(ExpressionName,
       std::vector<double>(MinSize)));
 
-   BranchType.insert(std::pair<std::string, int>(ExpressionName, BranchType_Expression));
+   BranchType.insert(std::pair<std::string, BranchTypes>(ExpressionName, BranchType_Expression));
    BranchSize.insert(std::pair<std::string, int>(ExpressionName, MinSize));
 
    NewNode->ID = ExpressionName;
@@ -662,7 +647,7 @@ void ExpressionNode::Initialize(QuickViewHelper *Link, std::string Expression)
 
    // Step 2: Parse into parts
    std::vector<std::string> Parts;
-   std::vector<char> Operators;
+   std::vector<std::string> Operators;
    int QuoteLevel = 0;
    int MaxQuoteLevel = 0;
    int StartTemp = 0;
@@ -675,13 +660,24 @@ void ExpressionNode::Initialize(QuickViewHelper *Link, std::string Expression)
          QuoteLevel = QuoteLevel - 1;
          assert(QuoteLevel >= 0);
       }
-      else if((Expression[i] == '+' || Expression[i] == '-' || Expression[i] == '*'
-         || Expression[i] == '/') && QuoteLevel == 0)
+      else if((Expression.substr(i, 2) == "==" || Expression.substr(i, 2) == "!="
+         || Expression.substr(i, 2) == "!=" || Expression.substr(i, 2) == "<="
+         || Expression.substr(i, 2) == ">=") && QuoteLevel == 0)
       {
          assert(i != StartTemp);
 
          Parts.push_back(Expression.substr(StartTemp, i - StartTemp));
-         Operators.push_back(Expression[i]);
+         Operators.push_back(Expression.substr(i, 2));
+         StartTemp = i + 2;
+      }
+      else if((Expression[i] == '+' || Expression[i] == '-' || Expression[i] == '*'
+         || Expression[i] == '/' || Expression[i] == '<' || Expression[i] == '>')
+         && QuoteLevel == 0)
+      {
+         assert(i != StartTemp);
+
+         Parts.push_back(Expression.substr(StartTemp, i - StartTemp));
+         Operators.push_back(Expression.substr(i, 1));
          StartTemp = i + 1;
       }
 
@@ -860,98 +856,70 @@ void ExpressionNode::Initialize(QuickViewHelper *Link, std::string Expression)
       return;
    }
 
-   // pick out '+' first
-   for(int i = 0; i < (int)Operators.size(); i++)
+   // comparison operators
+   for(int i = (int)Operators.size() - 1; i >= 0; i--)
    {
-      if(Operators[i] == '+')
-      {
-         std::string FirstPart = Parts[0];
-         std::string SecondPart = "";
+      if(Operators[i] != "<" && Operators[i] != ">" && Operators[i] != "<=" && Operators[i] != ">="
+         && Operators[i] != "==" && Operators[i] != "!=")
+         continue;
 
-         for(int j = 0; j < i; j++)
-         {
-            FirstPart.push_back(Operators[j]);
-            FirstPart = FirstPart + Parts[j+1];
-         }
-         for(int j = i + 1; j < Operators.size(); j++)
-         {
-            SecondPart = SecondPart + Parts[j];
-            SecondPart.push_back(Operators[j]);
-         }
+      std::string FirstPart = Parts[0];
+      std::string SecondPart = "";
 
-         SecondPart = SecondPart + Parts[Parts.size()-1];
+      for(int j = 0; j < i; j++)
+         FirstPart = FirstPart + Operators[j] + Parts[j+1];
+      for(int j = i + 1; j < Operators.size(); j++)
+         SecondPart = SecondPart + Parts[j] + Operators[j];
 
-         if(FirstNegative == true)
-            FirstPart = "-" + FirstPart;
+      SecondPart = SecondPart + Parts[Parts.size()-1];
 
-         // std::cout << "\"" << FirstPart << "\" [+] \"" << SecondPart << "\"" << std::endl;
+      if(FirstNegative == true)
+         FirstPart = "-" + FirstPart;
+         
+      ChildNode1 = new ExpressionNode;
+      ChildNode2 = new ExpressionNode;
 
-         ChildNode1 = new ExpressionNode;
-         ChildNode2 = new ExpressionNode;
+      ChildNode1->Initialize(Link, FirstPart);
+      ChildNode2->Initialize(Link, SecondPart);
 
-         ChildNode1->Initialize(Link, FirstPart);
-         ChildNode2->Initialize(Link, SecondPart);
+      if(Operators[i] == "<")    Action = Expression_Less;
+      if(Operators[i] == "<=")   Action = Expression_LessEqual;
+      if(Operators[i] == ">")    Action = Expression_Greater;
+      if(Operators[i] == ">=")   Action = Expression_GreaterEqual;
+      if(Operators[i] == "==")   Action = Expression_Equal;
+      if(Operators[i] == "!=")   Action = Expression_NotEqual;
 
-         Action = Expression_Plus;
-
-         return;
-      }
+      return;
    }
 
-   // pick out '-'
-   for(int i = 0; i < (int)Operators.size(); i++)
+   // +, -, *, /
+   std::vector<std::string> OperatorsToConsider;
+   OperatorsToConsider.push_back("+");
+   OperatorsToConsider.push_back("-");
+   OperatorsToConsider.push_back("*");
+   OperatorsToConsider.push_back("/");
+
+   for(int k = 0; k < (int)OperatorsToConsider.size(); k++)
    {
-      if(Operators[i] == '-')
+      for(int i = 0; i < (int)Operators.size(); i++)
       {
+         if(Operators[i] != OperatorsToConsider[k])
+            continue;
+         
          std::string FirstPart = Parts[0];
          std::string SecondPart = "";
 
          for(int j = 0; j < i; j++)
-         {
-            FirstPart.push_back(Operators[j]);
-            FirstPart = FirstPart + Parts[j+1];
-         }
+            FirstPart = FirstPart + Operators[j] + Parts[j+1];
          for(int j = i + 1; j < Operators.size(); j++)
          {
             SecondPart = SecondPart + Parts[j];
-            if(Operators[j] == '-')        SecondPart.push_back('+');
-            else                           SecondPart.push_back(Operators[j]);
-         }
 
-         SecondPart = SecondPart + Parts[Parts.size()-1];
-
-         if(FirstNegative == true)
-            FirstPart = "-" + FirstPart;
-
-         ChildNode1 = new ExpressionNode;
-         ChildNode2 = new ExpressionNode;
-
-         ChildNode1->Initialize(Link, FirstPart);
-         ChildNode2->Initialize(Link, SecondPart);
-
-         Action = Expression_Minus;
-
-         return;
-      }
-   }
-
-   // pick out "*"
-   for(int i = 0; i < (int)Operators.size(); i++)
-   {
-      if(Operators[i] == '*')
-      {
-         std::string FirstPart = Parts[0];
-         std::string SecondPart = "";
-
-         for(int j = 0; j < i; j++)
-         {
-            FirstPart.push_back(Operators[j]);
-            FirstPart = FirstPart + Parts[j+1];
-         }
-         for(int j = i + 1; j < Operators.size(); j++)
-         {
-            SecondPart = SecondPart + Parts[j];
-            SecondPart.push_back(Operators[j]);
+            if(Operators[i] == "-" && Operators[j] == "+")        SecondPart = SecondPart + "-";
+            else if(Operators[i] == "-" && Operators[j] == "-")   SecondPart = SecondPart + "+";
+            else if(Operators[i] == "/" && Operators[j] == "*")   SecondPart = SecondPart + "/";
+            else if(Operators[i] == "/" && Operators[j] == "/")   SecondPart = SecondPart + "*";
+            else                                                  SecondPart = SecondPart + Operators[j];
          }
 
          SecondPart = SecondPart + Parts[Parts.size()-1];
@@ -965,51 +933,16 @@ void ExpressionNode::Initialize(QuickViewHelper *Link, std::string Expression)
          ChildNode1->Initialize(Link, FirstPart);
          ChildNode2->Initialize(Link, SecondPart);
 
-         Action = Expression_Multiply;
-
-         return;
-      }
-   }
-   
-   // divide!
-   for(int i = 0; i < (int)Operators.size(); i++)
-   {
-      if(Operators[i] == '/')
-      {
-         std::string FirstPart = Parts[0];
-         std::string SecondPart = "";
-
-         for(int j = 0; j < i; j++)
-         {
-            FirstPart.push_back(Operators[j]);
-            FirstPart = FirstPart + Parts[j+1];
-         }
-         for(int j = i + 1; j < Operators.size(); j++)
-         {
-            SecondPart = SecondPart + Parts[j];
-
-            if(Operators[j] == '/')        SecondPart.push_back('*');
-            else                           assert(false);
-         }
-
-         SecondPart = SecondPart + Parts[Parts.size()-1];
-
-         if(FirstNegative == true)
-            FirstPart = "-" + FirstPart;
-
-         ChildNode1 = new ExpressionNode;
-         ChildNode2 = new ExpressionNode;
-
-         ChildNode1->Initialize(Link, FirstPart);
-         ChildNode2->Initialize(Link, SecondPart);
-
-         Action = Expression_Divide;
+         if(Operators[i] == "+")   Action = Expression_Plus;
+         if(Operators[i] == "-")   Action = Expression_Minus;
+         if(Operators[i] == "*")   Action = Expression_Multiply;
+         if(Operators[i] == "/")   Action = Expression_Divide;
 
          return;
       }
    }
 
-   assert(false);
+   assert(std::string("Unsupported operator detected") == "ERROR");
 }
 //-------------------------------------------------------------------------
 double ExpressionNode::Evaluate(int Instance)
@@ -1063,6 +996,18 @@ double ExpressionNode::Evaluate(int Instance)
       return atan(ChildNode1->Evaluate(Instance));
    if(Action == Expression_Sqrt)
       return sqrt(ChildNode1->Evaluate(Instance));
+   if(Action == Expression_Less)
+      return ChildNode1->Evaluate(Instance) < ChildNode2->Evaluate(Instance);
+   if(Action == Expression_LessEqual)
+      return ChildNode1->Evaluate(Instance) <= ChildNode2->Evaluate(Instance);
+   if(Action == Expression_Equal)
+      return ChildNode1->Evaluate(Instance) == ChildNode2->Evaluate(Instance);
+   if(Action == Expression_NotEqual)
+      return ChildNode1->Evaluate(Instance) != ChildNode2->Evaluate(Instance);
+   if(Action == Expression_Greater)
+      return ChildNode1->Evaluate(Instance) > ChildNode2->Evaluate(Instance);
+   if(Action == Expression_GreaterEqual)
+      return ChildNode1->Evaluate(Instance) >= ChildNode2->Evaluate(Instance);
 
    return 0;
 }
@@ -1124,6 +1069,12 @@ void ExpressionNode::ExportToDotFormat(std::ofstream &out)
    else if(Action == Expression_ACos)               str << "acos";
    else if(Action == Expression_ATan)               str << "atan";
    else if(Action == Expression_Sqrt)               str << "sqrt";
+   else if(Action == Expression_Greater)            str << ">";
+   else if(Action == Expression_GreaterEqual)       str << ">=";
+   else if(Action == Expression_Equal)              str << "==";
+   else if(Action == Expression_NotEqual)           str << "!=";
+   else if(Action == Expression_Less)               str << "<";
+   else if(Action == Expression_LessEqual)          str << "<=";
    else                                             str << "none";
 
    str << "\" ] ";
