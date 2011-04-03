@@ -56,7 +56,7 @@ public:
       Expression_Second, Expression_Cosecond, Expression_Sinh, Expression_Cosh, Expression_Tanh,
       Expression_Exp, Expression_Log, Expression_ASin, Expression_ACos, Expression_ATan, Expression_Instance,
       Expression_Sqrt, Expression_Greater, Expression_GreaterEqual, Expression_Equal, Expression_NotEqual,
-      Expression_Less, Expression_LessEqual
+      Expression_Less, Expression_LessEqual, Expression_And, Expression_Or
    };
 public:
    std::string ID;
@@ -114,6 +114,10 @@ public:
       int NumberOfBins1, double Minimum1, double Maximum1,
       std::string Variable2, int NumberOfBins2, double Minimum2, double Maximum2, std::string Title = "",
       std::string Selection = "");
+   void RegisterBoolHistogram1DSimple(std::string HistogramName, std::string Variable,
+      std::string Title = "", std::string Selection = "");
+   void RegisterBoolHistogram2DSimple(std::string HistogramName, std::string Variable1, std::string Variable2,
+      std::string Title = "", std::string Selection = "");
    std::map<std::string, TH1D *> GetHistogram1D();
    std::map<std::string, TH2D *> GetHistogram2D();
    TH1 *GetHistogram(std::string HistogramName);
@@ -458,6 +462,26 @@ void QuickViewHelper::RegisterHistogram2DSimple(std::string HistogramName, std::
       NumberOfBins2, Minimum2, Maximum2)));
 }
 //-------------------------------------------------------------------------
+void QuickViewHelper::RegisterBoolHistogram1DSimple(std::string HistogramName, std::string Variable,
+   std::string Title, std::string Selection)
+{
+   RegisterHistogram1DSimple(HistogramName, Variable, 2, 0, 2, Title, Selection);
+
+   Histogram1D[HistogramName]->GetXaxis()->SetBinLabel(1, "False");
+   Histogram1D[HistogramName]->GetXaxis()->SetBinLabel(2, "True");
+}
+//-------------------------------------------------------------------------
+void QuickViewHelper::RegisterBoolHistogram2DSimple(std::string HistogramName,
+   std::string Variable1, std::string Variable2, std::string Title, std::string Selection)
+{
+   RegisterHistogram2DSimple(HistogramName, Variable1, 2, 0, 2, Variable2, 2, 0, 2, Title, Selection);
+   
+   Histogram2D[HistogramName]->GetXaxis()->SetBinLabel(1, "False");
+   Histogram2D[HistogramName]->GetXaxis()->SetBinLabel(2, "True");
+   Histogram2D[HistogramName]->GetYaxis()->SetBinLabel(1, "False");
+   Histogram2D[HistogramName]->GetYaxis()->SetBinLabel(2, "True");
+}
+//-------------------------------------------------------------------------
 std::map<std::string, TH1D *> QuickViewHelper::GetHistogram1D()
 {
    return Histogram1D;
@@ -662,7 +686,8 @@ void ExpressionNode::Initialize(QuickViewHelper *Link, std::string Expression)
       }
       else if((Expression.substr(i, 2) == "==" || Expression.substr(i, 2) == "!="
          || Expression.substr(i, 2) == "!=" || Expression.substr(i, 2) == "<="
-         || Expression.substr(i, 2) == ">=") && QuoteLevel == 0)
+         || Expression.substr(i, 2) == ">=" || Expression.substr(i, 2) == "&&"
+         || Expression.substr(i, 2) == "||") && QuoteLevel == 0)
       {
          assert(i != StartTemp);
 
@@ -856,6 +881,37 @@ void ExpressionNode::Initialize(QuickViewHelper *Link, std::string Expression)
       return;
    }
 
+   // and, or
+   for(int i = (int)Operators.size() - 1; i >= 0; i--)
+   {
+      if(Operators[i] != "&&" && Operators[i] != "||")
+         continue;
+
+      std::string FirstPart = Parts[0];
+      std::string SecondPart = "";
+
+      for(int j = 0; j < i; j++)
+         FirstPart = FirstPart + Operators[j] + Parts[j+1];
+      for(int j = i + 1; j < Operators.size(); j++)
+         SecondPart = SecondPart + Parts[j] + Operators[j];
+
+      SecondPart = SecondPart + Parts[Parts.size()-1];
+
+      if(FirstNegative == true)
+         FirstPart = "-" + FirstPart;
+         
+      ChildNode1 = new ExpressionNode;
+      ChildNode2 = new ExpressionNode;
+
+      ChildNode1->Initialize(Link, FirstPart);
+      ChildNode2->Initialize(Link, SecondPart);
+
+      if(Operators[i] == "&&")   Action = Expression_And;
+      if(Operators[i] == "||")   Action = Expression_Or;
+
+      return;
+   }
+
    // comparison operators
    for(int i = (int)Operators.size() - 1; i >= 0; i--)
    {
@@ -1008,6 +1064,10 @@ double ExpressionNode::Evaluate(int Instance)
       return ChildNode1->Evaluate(Instance) > ChildNode2->Evaluate(Instance);
    if(Action == Expression_GreaterEqual)
       return ChildNode1->Evaluate(Instance) >= ChildNode2->Evaluate(Instance);
+   if(Action == Expression_And)
+      return ChildNode1->Evaluate(Instance) && ChildNode2->Evaluate(Instance);
+   if(Action == Expression_Or)
+      return ChildNode1->Evaluate(Instance) || ChildNode2->Evaluate(Instance);
 
    return 0;
 }
@@ -1075,6 +1135,8 @@ void ExpressionNode::ExportToDotFormat(std::ofstream &out)
    else if(Action == Expression_NotEqual)           str << "!=";
    else if(Action == Expression_Less)               str << "<";
    else if(Action == Expression_LessEqual)          str << "<=";
+   else if(Action == Expression_And)                str << "&&";
+   else if(Action == Expression_Or)                 str << "||";
    else                                             str << "none";
 
    str << "\" ] ";
