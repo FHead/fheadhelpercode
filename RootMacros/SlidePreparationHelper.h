@@ -4,15 +4,17 @@
 //---------------------------------------------------------------------------
 // Slide preparation helper, 6671 version
 // An attempt to simplify time needed to do the same repetitive tasks
-//    in making basic adjustments to the histograms (SetStats(0), etc.)
+//    in making basic adjustments to the Figures (SetStats(0), etc.)
 //---------------------------------------------------------------------------
 #include <string>
 using namespace std;   // meow!
 //---------------------------------------------------------------------------
 #include "TFile.h"
 #include "TH1.h"
+#include "TGraph.h"
 #include "TCanvas.h"
 #include "TLegend.h"
+#include "TClass.h"
 //---------------------------------------------------------------------------
 class PlotRecord;
 class PlotList;
@@ -28,7 +30,8 @@ void CreateTwoByThreePanelPlot(PlotList UpperLeft, PlotList UpperCentral, PlotLi
 class PlotRecord
 {
 public:
-   TH1 *Histogram;
+   bool IsHistogram;
+   TObject *Figure;
    string Title;
    string XTitle;
    string YTitle;
@@ -44,6 +47,9 @@ public:
       string label, string option = "", bool logy = false, bool logz = false, bool grid = false,
       bool logx = false);
    PlotRecord(TH1 *h, string title, string xtitle, string ytitle,
+      string label, string option = "", bool logy = false, bool logz = false, bool grid = false,
+      bool logx = false);
+   PlotRecord(TGraph *g, string title, string xtitle, string ytitle,
       string label, string option = "", bool logy = false, bool logz = false, bool grid = false,
       bool logx = false);
    ~PlotRecord() {}
@@ -77,7 +83,7 @@ public:
 //---------------------------------------------------------------------------
 PlotRecord::PlotRecord()
 {
-   Histogram = NULL;
+   Figure = NULL;
    Title = "";
    XTitle = "";
    YTitle = "";
@@ -92,12 +98,18 @@ PlotRecord::PlotRecord()
 PlotRecord::PlotRecord(TFile *f, string name, string title, string xtitle, string ytitle,
    string label, string option, bool logy, bool logz, bool grid, bool logx)
 {
-   Histogram = NULL;
+   Figure = NULL;
 
    if(f == NULL)
       return;
 
-   Histogram = (TH1 *)f->Get(name.c_str());
+   Figure = (TObject *)f->Get(name.c_str());
+
+   string ClassName = Figure->IsA()->GetName();
+   if(ClassName[0] == 'T' && ClassName[1] == 'H')   // not rigorous!
+      IsHistogram = true;
+   else
+      IsHistogram = false;
    
    Title = title;
    XTitle = xtitle;
@@ -113,7 +125,24 @@ PlotRecord::PlotRecord(TFile *f, string name, string title, string xtitle, strin
 PlotRecord::PlotRecord(TH1 *h, string title, string xtitle, string ytitle,
    string label, string option, bool logy, bool logz, bool grid, bool logx)
 {
-   Histogram = h;
+   IsHistogram = true;
+   Figure = h;
+   Title = title;
+   XTitle = xtitle;
+   YTitle = ytitle;
+   Label = label;
+   Option = option;
+   LogY = logy;
+   LogZ = logz;
+   Grid = grid;
+   LogX = logx;
+}
+//---------------------------------------------------------------------------
+PlotRecord::PlotRecord(TGraph *g, string title, string xtitle, string ytitle,
+   string label, string option, bool logy, bool logz, bool grid, bool logx)
+{
+   IsHistogram = false;
+   Figure = g;
    Title = title;
    XTitle = xtitle;
    YTitle = ytitle;
@@ -127,17 +156,28 @@ PlotRecord::PlotRecord(TH1 *h, string title, string xtitle, string ytitle,
 //---------------------------------------------------------------------------
 void PlotRecord::Draw(TCanvas *Canvas, int SubPad)
 {
-   if(Histogram != NULL)
+   if(Figure != NULL)
    {
       if(SubPad > 0)
          Canvas->cd(SubPad);
 
-      if(Title != "")    Histogram->SetTitle(Title.c_str());
-      if(XTitle != "")   Histogram->GetXaxis()->SetTitle(XTitle.c_str());
-      if(YTitle != "")   Histogram->GetYaxis()->SetTitle(YTitle.c_str());
+      if(IsHistogram == true)
+      {
+         if(Title != "")    ((TH1D *)Figure)->SetTitle(Title.c_str());
+         if(XTitle != "")   ((TH1D *)Figure)->GetXaxis()->SetTitle(XTitle.c_str());
+         if(YTitle != "")   ((TH1D *)Figure)->GetYaxis()->SetTitle(YTitle.c_str());
 
-      Histogram->Draw(Option.c_str());
-      Histogram->SetStats(0);
+         ((TH1D *)Figure)->Draw(Option.c_str());
+         ((TH1D *)Figure)->SetStats(0);
+      }
+      else
+      {
+         if(Title != "")    ((TGraph *)Figure)->SetTitle(Title.c_str());
+         if(XTitle != "")   ((TGraph *)Figure)->GetXaxis()->SetTitle(XTitle.c_str());
+         if(YTitle != "")   ((TGraph *)Figure)->GetYaxis()->SetTitle(YTitle.c_str());
+
+         ((TGraph *)Figure)->Draw(Option.c_str());
+      }
 
       if(LogX == true)   Canvas->cd(SubPad)->SetLogx();
       if(LogY == true)   Canvas->cd(SubPad)->SetLogy();
@@ -246,12 +286,18 @@ void PlotList::Draw(TCanvas *Canvas, int SubPad)
    {
       string OptionTemp = PlotRecords[i].Option;
 
-      if(i != 0 && OptionTemp != "")
-         PlotRecords[i].Option = PlotRecords[i].Option + " same";
-      else if(i != 0 && OptionTemp == "")
-         PlotRecords[i].Option = "same";
+      if(PlotRecords[i].IsHistogram == true)
+      {
+         if(i != 0 && OptionTemp != "")
+            PlotRecords[i].Option = PlotRecords[i].Option + " same";
+         else if(i != 0 && OptionTemp == "")
+            PlotRecords[i].Option = "same";
+      }
 
-      PlotRecords[i].Histogram->SetLineColor(i + 1);
+      if(PlotRecords[i].IsHistogram == true)
+         ((TH1D *)PlotRecords[i].Figure)->SetLineColor(i + 1);
+      else
+         ((TGraph *)PlotRecords[i].Figure)->SetLineColor(i + 1);
       PlotRecords[i].Draw(Canvas, SubPad);
 
       PlotRecords[i].Option = OptionTemp;
@@ -267,7 +313,7 @@ void PlotList::Draw(TCanvas *Canvas, int SubPad)
       Legend->SetFillColor(0);
 
       for(int i = 0; i < (int)PlotRecords.size(); i++)
-         Legend->AddEntry(PlotRecords[i].Histogram, PlotRecords[i].Label.c_str(), "lpf");
+         Legend->AddEntry(PlotRecords[i].Figure, PlotRecords[i].Label.c_str(), "lpf");
 
       Legend->Draw();
    }
