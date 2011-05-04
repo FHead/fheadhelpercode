@@ -164,7 +164,7 @@ void PsFileHelper::Close(bool Convert)
 
    if(Convert == true)
    {
-      gROOT->ProcessLine((".! ps2pdf " + FileName).c_str());
+      gROOT->ProcessLine((".! ps2pdf14 " + FileName).c_str());
       gROOT->ProcessLine((".! rm " + FileName).c_str());
    }
 
