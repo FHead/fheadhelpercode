@@ -3,6 +3,7 @@
 #define DATAHELPER_H_6427_FHEAD_JANHIWFWKIGHWKIDAGFBAFKER
 //---------------------------------------------------------------------------
 #include <string>
+#include <cstring>
 #include <istream>
 #include <ostream>
 #include <fstream>
