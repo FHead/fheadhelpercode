@@ -29,8 +29,11 @@ double GetMT(const FourVector P1, const FourVector P2);
 double GetMinRadius(const FourVector P1, const FourVector P2, const FourVector P3);   // in eta-phi space
 double GetMinRadius(const double X1, const double Y1, const double X2, const double Y2, const double X3, const double Y3);
 double GetMR(const FourVector P1, const FourVector P2);
+double GetMRStar(const FourVector P1, const FourVector P2);
 double GetMRT(const FourVector P1, const FourVector P2, const FourVector ME);
 double GetR(const FourVector P1, const FourVector P2, const FourVector ME);
+double GetRStar(const FourVector P1, const FourVector P2, const FourVector ME);
+double GetGammaRStar(const FourVector P1, const FourVector P2);
 double BetaToGamma(double Beta);
 double GammaToBeta(double Gamma);
 vector<FourVector> SplitIntoGroups(vector<FourVector> &Input);
@@ -556,6 +559,15 @@ double GetMR(const FourVector P1, const FourVector P2)
    return 2 * sqrt(Temp1 * Temp1 / (Temp2 * Temp2 - Temp3 * Temp3));
 }
 
+double GetMRStar(const FourVector P1, const FourVector P2)
+{
+   double Temp1 = P1[0] + P2[0];
+   double Temp2 = P1[3] + P2[3];
+   double Temp3 = P1.GetPT() * P1.GetPT() - P2.GetPT() * P2.GetPT();
+   double Temp4 = (P1 + P2).GetPT();
+   return sqrt((Temp1 * Temp1) - (Temp2 * Temp2) - (Temp3 * Temp3) / (Temp4 * Temp4));
+}
+
 double GetMRT(const FourVector P1, const FourVector P2, const FourVector ME)
 {
    double Temp1 = ME.GetPT() * (P1.GetPT() + P2.GetPT());
@@ -566,6 +578,23 @@ double GetMRT(const FourVector P1, const FourVector P2, const FourVector ME)
 double GetR(const FourVector P1, const FourVector P2, const FourVector ME)
 {
    return GetMRT(P1, P2, ME) / GetMR(P1, P2);
+}
+
+double GetRStar(const FourVector P1, const FourVector P2, const FourVector ME)
+{
+   return GetMRT(P1, P2, ME) / GetMRStar(P1, P2);
+}
+
+double GetGammaRStar(const FourVector P1, const FourVector P2)
+{
+   double Temp1 = P1[0] + P2[0];
+   double Temp2 = P1[3] + P2[3];
+   double Temp3 = P1.GetPT() * P1.GetPT() - P2.GetPT() * P2.GetPT();
+   double Temp4 = (P1 + P2).GetPT();
+
+   double Upper = Temp1 * Temp1 - Temp2 * Temp2;
+   double Lower = Temp1 * Temp1 - Temp2 * Temp2 - Temp3 * Temp3 / Temp4 / Temp4;
+   return sqrt(Upper / Lower);
 }
 
 double BetaToGamma(double Beta)
