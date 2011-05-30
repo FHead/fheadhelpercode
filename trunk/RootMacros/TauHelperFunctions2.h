@@ -36,7 +36,7 @@ double GetRStar(const FourVector P1, const FourVector P2, const FourVector ME);
 double GetGammaRStar(const FourVector P1, const FourVector P2);
 double BetaToGamma(double Beta);
 double GammaToBeta(double Gamma);
-vector<FourVector> SplitIntoGroups(vector<FourVector> &Input);
+vector<FourVector> SplitIntoGroups(vector<FourVector> &Input, bool ZeroMass = false);
 int FindCategory(GenParticleTree &Tree, int index);
 
 class FourVector
@@ -607,7 +607,7 @@ double GammaToBeta(double Gamma)
    return sqrt(1 - 1 / (Gamma * Gamma));
 }
 
-vector<FourVector> SplitIntoGroups(vector<FourVector> &Input)
+vector<FourVector> SplitIntoGroups(vector<FourVector> &Input, bool ZeroMass)
 {
    vector<FourVector> Result;
    
@@ -669,6 +669,12 @@ vector<FourVector> SplitIntoGroups(vector<FourVector> &Input)
             Groups[i+1] = Groups[i+1] + 1;
          }
       }
+   }
+
+   if(ZeroMass == true)
+   {
+      Group1[0] = Group1.GetP();
+      Group2[0] = Group2.GetP();
    }
 
    Result.push_back(Group1);
