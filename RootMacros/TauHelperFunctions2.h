@@ -582,7 +582,7 @@ double GetR(const FourVector P1, const FourVector P2, const FourVector ME)
 
 double GetRStar(const FourVector P1, const FourVector P2, const FourVector ME)
 {
-   return GetMRT(P1, P2, ME) / GetMRStar(P1, P2);
+   return GetMRT(P1, P2, ME) / GetMRStar(P1, P2) / GetGammaRStar(P1, P2);
 }
 
 double GetGammaRStar(const FourVector P1, const FourVector P2)
