@@ -595,6 +595,12 @@ double GetGammaRStar(const FourVector P1, const FourVector P2)
    double Upper = Temp1 * Temp1 - Temp2 * Temp2;
    double Lower = Temp1 * Temp1 - Temp2 * Temp2 - Temp3 * Temp3 / Temp4 / Temp4;
    return sqrt(Upper / Lower);
+
+   /*
+   double Beta2 = (Temp3 * Temp3) / (Temp4 * Temp4 * (Temp1 * Temp1 - Temp2 * Temp2));
+   double Gamma = 1.0 / sqrt(1.0 - Beta2);
+   return Gamma;
+   */
 }
 
 double BetaToGamma(double Beta)
@@ -634,6 +640,7 @@ vector<FourVector> SplitIntoGroups(vector<FourVector> &Input, bool ZeroMass)
    vector<int> Groups(InputSize);
    for(int i = 0; i < InputSize; i++)
       Groups[i] = 0;
+   Groups[0] = 1;
 
    FourVector Group1;
    FourVector Group2;
