@@ -1,3 +1,5 @@
+#!/bin/sh
+
 input=$1
 output=$2
 
@@ -12,7 +14,7 @@ fi
 
 root_cflags=`sh $ROOTSYS/bin/root-config --cflags`
 root_libs=`sh $ROOTSYS/bin/root-config --libs`
-roofit_libs="-lRooFitCore -lRooFit -lMinuit -lFoam"
+roofit_libs="-lRooFitCore -lRooFit -lMinuit -lFoam -lMathMore"
 fastjet_cflags=`fastjet-config --cxxflags`
 fastjet_libs=`fastjet-config --libs`
 extrainclude="-I/home/$USER/RootMacros"

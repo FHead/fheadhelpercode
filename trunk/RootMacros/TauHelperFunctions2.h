@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <cmath>
+#include <ostream>
 using namespace std;
 
 #include "DrawRandom.h"
@@ -22,6 +23,7 @@ using namespace std;
 #define PI 3.14159265358979323846264338327950288479716939937510
 
 class FourVector;
+ostream &operator <<(ostream &out, FourVector &P);
 double GetAngle(const FourVector P1, const FourVector P2);
 double GetDR(const FourVector P1, const FourVector P2);
 double GetDPhi(const FourVector P1, const FourVector P2);
@@ -30,9 +32,11 @@ double GetMinRadius(const FourVector P1, const FourVector P2, const FourVector P
 double GetMinRadius(const double X1, const double Y1, const double X2, const double Y2, const double X3, const double Y3);
 double GetMR(const FourVector P1, const FourVector P2);
 double GetMRStar(const FourVector P1, const FourVector P2);
+double Get2011MR(const FourVector P1, const FourVector P2);
 double GetMRT(const FourVector P1, const FourVector P2, const FourVector ME);
 double GetR(const FourVector P1, const FourVector P2, const FourVector ME);
 double GetRStar(const FourVector P1, const FourVector P2, const FourVector ME);
+double Get2011R(const FourVector P1, const FourVector P2, const FourVector ME);
 double GetGammaRStar(const FourVector P1, const FourVector P2);
 double BetaToGamma(double Beta);
 double GammaToBeta(double Gamma);
@@ -62,6 +66,7 @@ public:
    FourVector operator -() const;
    FourVector operator -(const FourVector &Other) const;
    FourVector operator *(double Scale) const;
+   FourVector operator /(double Scale) const;
 public:
    double GetMass() const;
    double GetMass2() const;
@@ -226,6 +231,16 @@ FourVector FourVector::operator *(double Scale) const
    Out.P[1] = P[1] * Scale;
    Out.P[2] = P[2] * Scale;
    Out.P[3] = P[3] * Scale;
+   return Out;
+}
+
+FourVector FourVector::operator /(double Scale) const
+{
+   FourVector Out;
+   Out.P[0] = P[0] / Scale;
+   Out.P[1] = P[1] / Scale;
+   Out.P[2] = P[2] / Scale;
+   Out.P[3] = P[3] / Scale;
    return Out;
 }
 
@@ -433,6 +448,12 @@ double FourVector::MetricDot(const FourVector &Other) const
    return P[0] * Other.P[0] - SpatialDot(Other);
 }
 
+ostream &operator <<(ostream &out, FourVector &P)
+{
+   out << "(" << P[0] << ", " << P[1] << ", " << P[2] << ", " << P[3] << ")";
+   return out;
+}
+
 double GetAngle(const FourVector P1, const FourVector P2)
 {
    return acos(P1.SpatialDot(P2) / P1.GetP() / P2.GetP());
@@ -568,6 +589,11 @@ double GetMRStar(const FourVector P1, const FourVector P2)
    return sqrt((Temp1 * Temp1) - (Temp2 * Temp2) - (Temp3 * Temp3) / (Temp4 * Temp4));
 }
 
+double Get2011MR(const FourVector P1, const FourVector P2)
+{
+   return GetMRStar(P1, P2) * GetGammaRStar(P1, P2);
+}
+
 double GetMRT(const FourVector P1, const FourVector P2, const FourVector ME)
 {
    double Temp1 = ME.GetPT() * (P1.GetPT() + P2.GetPT());
@@ -581,6 +607,11 @@ double GetR(const FourVector P1, const FourVector P2, const FourVector ME)
 }
 
 double GetRStar(const FourVector P1, const FourVector P2, const FourVector ME)
+{
+   return GetMRT(P1, P2, ME) / GetMRStar(P1, P2) / GetGammaRStar(P1, P2);
+}
+
+double Get2011R(const FourVector P1, const FourVector P2, const FourVector ME)
 {
    return GetMRT(P1, P2, ME) / GetMRStar(P1, P2) / GetGammaRStar(P1, P2);
 }
