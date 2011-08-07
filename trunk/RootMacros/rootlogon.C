@@ -3,7 +3,7 @@
    cout << "Welcome to FHead-customized ROOT!" << endl;
    cout << endl;
 
-   gROOT->SetStyle("Plain");
+   // gROOT->SetStyle("Plain");
    gROOT->ProcessLine(".include /home/yichen/RootMacros");
 
    // nice palette!
