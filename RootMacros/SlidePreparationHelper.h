@@ -327,7 +327,7 @@ PlotList::~PlotList()
 //---------------------------------------------------------------------------
 void CreateOnePanelPlot(PlotList Plot, string FileNameBase)
 {
-   TCanvas Canvas("C", "C", 1024, 768);
+   TCanvas Canvas("C", "C", 1024, 1024);
 
    Plot.Draw(&Canvas, 1);
 

@@ -21,7 +21,7 @@ extrainclude="-I/home/$USER/RootMacros"
 pythia_include="-I$PYTHIA8/include"
 pythia_libs="-L$PYTHIA8/lib/archive -lpythia8 -llhapdfdummy"
 cxxflags="-g -fPIC -Wno-deprecated -O -ansi -D_GNU_SOURCE -g -O2"
-cxx="-m64"
+# cxx="-m64"
 
 libs="$root_libs $roofit_libs $fastjet_libs $pythia_libs"
 flags="$cxx $cxxflags $fastjet_cflags $root_cflags"
