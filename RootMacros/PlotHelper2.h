@@ -379,6 +379,7 @@ void PsFileHelper::AddTextPage(string Text, double X, double Y, double TextSize)
    TCanvas canvas;
 
    TLatex text(X, Y, Text.c_str());
+   text.SetTextFont(42);
    text.SetTextSize(TextSize);
    text.Draw();
 
@@ -398,6 +399,7 @@ void PsFileHelper::AddTextPage(vector<string> Text, double X, double Y, double T
    {
       texts.push_back(new TLatex(X, Y - i * TextSize * 1.75, Text[i].c_str()));
       texts[i]->SetName(Form("TextLine%d", i));
+      texts[i]->SetTextFont(42);
       texts[i]->SetTextSize(TextSize);
    }
 

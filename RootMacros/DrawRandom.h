@@ -16,6 +16,7 @@ double DrawCruijff(double center, double sigmal, double sigmar, double alphal, d
 double DrawExponential(double exponent, double left, double right);
 double DrawExponential(double exponent, double side);
 double DrawPoisson(double mean);
+double DrawPoissonDouble(double mean);
 
 double DrawRandom()
 {
