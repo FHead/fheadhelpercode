@@ -43,12 +43,14 @@ ValueWithError CalculatePoissonError(double Count, double BestGuess, double Erro
 
    // How do I calculate this......?
 
-   // Central value - impose that it is positive
+   // Central value - impose that it is positive --- note that -4AC > 0
    double Error2OnBestGuess = ErrorOnBestGuess * ErrorOnBestGuess;
    double A = 1;
    double B = -(BestGuess - Error2OnBestGuess);
    double C = -Error2OnBestGuess * Count;
-   double CentralValue = (-B + sqrt(B * B - 4 * A * C)) / (2 * A);
+   double CentralValue = (-B + sqrt(B * B - 4 * A * C)) / (2 * A);   // constrain central value to be positive
+   if(Count < 1e-5)
+      CentralValue = BestGuess - Error2OnBestGuess;
 
    if(Flat == true)
       CentralValue = Count;
@@ -59,7 +61,10 @@ ValueWithError CalculatePoissonError(double Count, double BestGuess, double Erro
       LogHeight = PlugFormula(CentralValue, Count, BestGuess, ErrorOnBestGuess);
    else
       LogHeight = PlugFormulaFlat(CentralValue, Count);
-   double TotalArea = EstimateLogIntegral(Count, BestGuess, ErrorOnBestGuess, 0, 10000, CentralValue, Flat);
+
+   double AreaMin = 0;
+   double AreaMax = max(CentralValue * 5 + 200, BestGuess + ErrorOnBestGuess * 20);
+   double TotalArea = EstimateLogIntegral(Count, BestGuess, ErrorOnBestGuess, AreaMin, AreaMax, CentralValue, Flat);
 
    double HeightGuess = LogHeight - log(1.1);
    double LowerGuess = FindLowerPosition(CentralValue, Count, BestGuess, ErrorOnBestGuess, HeightGuess, Flat);
@@ -79,7 +84,7 @@ ValueWithError CalculatePoissonError(double Count, double BestGuess, double Erro
 
    CurrentStep = (LogHeight - HeightGuess) / 2; 
 
-   while(fabs(exp(GuessArea - TotalArea) - Confidence) > 0.01)
+   while(fabs(exp(GuessArea - TotalArea) - Confidence) > 0.00001)
    {
       if(exp(GuessArea - TotalArea) > Confidence)
          HeightGuess = HeightGuess + CurrentStep;
@@ -106,7 +111,7 @@ double EstimateLogIntegral(double Count, double BestGuess, double ErrorOnBestGue
    if(Min > Max)
       swap(Min, Max);
 
-   int Segmentation = 10000;
+   int Segmentation = 1000000;
 
    double LogMaxHeight = Count * log(CentralValue) - CentralValue
       - (CentralValue - BestGuess) * (CentralValue - BestGuess) / (2 * ErrorOnBestGuess * ErrorOnBestGuess);
@@ -144,7 +149,7 @@ double FindLowerPosition(double CentralValue, double Count, double BestGuess, do
    if(Count < 1e-5)
       return 0;
 
-   double CurrentStep = 1;
+   double CurrentStep = 0.1;
    double CurrentGuess = CentralValue - CurrentStep;
    if(CurrentGuess <= 0)
       CurrentGuess = 1e-5;
@@ -168,7 +173,7 @@ double FindLowerPosition(double CentralValue, double Count, double BestGuess, do
 
    CurrentStep = (CentralValue - CurrentGuess) / 2;
 
-   while(fabs(CurrentHeight - Height) > 0.0001)
+   while(fabs(CurrentHeight - Height) > 0.000001)
    {
       if(CurrentHeight > Height)
          CurrentGuess = CurrentGuess - CurrentStep;
@@ -189,7 +194,7 @@ double FindLowerPosition(double CentralValue, double Count, double BestGuess, do
 double FindUpperPosition(double CentralValue, double Count, double BestGuess, double ErrorOnBestGuess, double Height,
    bool Flat)
 {
-   double CurrentStep = 1;
+   double CurrentStep = 0.1;
    double CurrentGuess = CentralValue + CurrentStep;
 
    double CurrentHeight = 0;
@@ -210,7 +215,7 @@ double FindUpperPosition(double CentralValue, double Count, double BestGuess, do
 
    CurrentStep = (CurrentGuess - CentralValue) / 2;
 
-   while(fabs(CurrentHeight - Height) > 0.00001)
+   while(fabs(CurrentHeight - Height) > 0.000001)
    {
       if(CurrentHeight > Height)
          CurrentGuess = CurrentGuess + CurrentStep;
@@ -236,7 +241,10 @@ double PlugFormula(double Value, double Count, double BestGuess, double ErrorOnB
 
 double PlugFormulaFlat(double Value, double Count)
 {
+   if(Value == 0)
+      return 0;
    return Count * log(Value) - Value;
 }
+
 
 

@@ -227,6 +227,9 @@ double DrawPoisson(double mean)
    if(mean <= 0)
       return 0;
 
+   if(mean > 20)
+      return DrawGaussian(mean, sqrt(mean));
+
    int value = 0;
    bool OK = false;
 
