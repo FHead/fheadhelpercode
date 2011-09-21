@@ -5,6 +5,11 @@
 #include "TROOT.h"
 #include "TColor.h"
 
+void SetStyle();
+void SetStyleOriginal();
+void SetTDRStyle();
+void AddCMSPreliminary(double X = 0.15, double Y = 0.875, double Luminosity = -1, double FontSize = 0.03);
+
 void SetStyle()
 {
    gStyle->SetFrameBorderMode(0);
@@ -262,5 +267,47 @@ void SetTDRStyle()
 
   //gROOT->ForceStyle();  // Try this if stuff doesn't work right
 }
+
+void AddCMSPreliminary(double X, double Y, double Luminosity, double FontSize)
+{
+   TLatex latex;
+   latex.SetTextAlign(12);
+   latex.SetTextSize(FontSize);
+   latex.SetTextFont(42);
+   latex.SetNDC();
+
+   string Unit = "pb^{-1}";
+   if(Luminosity < 1 && Luminosity >= 0.001)
+   {
+      Unit = "nb^{-1}";
+      Luminosity = Luminosity * 1000;
+   }
+   if(Luminosity < 0.001 && Luminosity >= 0.000001)
+   {
+      Unit = "#mu b^{-1}";
+      Luminosity = Luminosity * 1000000;
+   }
+   if(Luminosity < 0.000001 && Luminosity >= 0.000000001)
+   {
+      Unit = "mb^{-1}";
+      Luminosity = Luminosity * 1000000000;
+   }
+   if(Luminosity < 1000000 && Luminosity >= 1000)
+   {
+      Unit = "fb^{-1}";
+      Luminosity = Luminosity / 1000;
+   }
+   if(Luminosity < 1000000000 && Luminosity >= 1000000)
+   {
+      Unit = "ab^{-1}";
+      Luminosity = Luminosity / 1000000;
+   }
+
+   if(Luminosity > 0)
+      latex.DrawLatex(X, Y, Form("CMS Preliminary #sqrt{s}=7 TeV  #int L dt = %.3f %s", Luminosity, Unit.c_str()));
+   else
+      latex.DrawLatex(X, Y, "CMS Preliminary #sqrt{s}=7 TeV");
+}
+
 
 #endif
