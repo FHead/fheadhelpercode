@@ -108,6 +108,8 @@ PlotRecord::PlotRecord(TFile *f, string name, string title, string xtitle, strin
    string ClassName = Figure->IsA()->GetName();
    if(ClassName[0] == 'T' && ClassName[1] == 'H')   // not rigorous!
       IsHistogram = true;
+   else if(ClassName[0] == 'T' && ClassName[1] == 'P')   // not rigorous! - for TProfile
+      IsHistogram = true;
    else
       IsHistogram = false;
    
@@ -295,9 +297,15 @@ void PlotList::Draw(TCanvas *Canvas, int SubPad)
       }
 
       if(PlotRecords[i].IsHistogram == true)
+      {
          ((TH1D *)PlotRecords[i].Figure)->SetLineColor(i + 1);
+         ((TH1D *)PlotRecords[i].Figure)->SetMarkerColor(i + 1);
+      }
       else
+      {
          ((TGraph *)PlotRecords[i].Figure)->SetLineColor(i + 1);
+         ((TGraph *)PlotRecords[i].Figure)->SetMarkerColor(i + 1);
+      }
       PlotRecords[i].Draw(Canvas, SubPad);
 
       PlotRecords[i].Option = OptionTemp;
