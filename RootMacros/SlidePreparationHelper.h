@@ -165,6 +165,8 @@ void PlotRecord::Draw(TCanvas *Canvas, int SubPad)
 
       if(IsHistogram == true)
       {
+         // ((TH1D *)Figure)->SetMinimum(0.1);
+
          if(Title != "")    ((TH1D *)Figure)->SetTitle(Title.c_str());
          if(XTitle != "")   ((TH1D *)Figure)->GetXaxis()->SetTitle(XTitle.c_str());
          if(YTitle != "")   ((TH1D *)Figure)->GetYaxis()->SetTitle(YTitle.c_str());
@@ -342,6 +344,7 @@ void CreateOnePanelPlot(PlotList Plot, string FileNameBase)
    Canvas.SaveAs((FileNameBase + ".png").c_str());
    Canvas.SaveAs((FileNameBase + ".C").c_str());
    Canvas.SaveAs((FileNameBase + ".eps").c_str());
+   Canvas.SaveAs((FileNameBase + ".pdf").c_str());
 }
 //---------------------------------------------------------------------------
 void CreateTwoPanelPlot(PlotList Left, PlotList Right, string FileNameBase)
@@ -356,6 +359,7 @@ void CreateTwoPanelPlot(PlotList Left, PlotList Right, string FileNameBase)
    Canvas.SaveAs((FileNameBase + ".png").c_str());
    Canvas.SaveAs((FileNameBase + ".C").c_str());
    Canvas.SaveAs((FileNameBase + ".eps").c_str());
+   Canvas.SaveAs((FileNameBase + ".pdf").c_str());
 }
 //---------------------------------------------------------------------------
 void CreateThreePanelPlot(PlotList Left, PlotList Middle, PlotList Right, string FileNameBase)
@@ -371,6 +375,7 @@ void CreateThreePanelPlot(PlotList Left, PlotList Middle, PlotList Right, string
    Canvas.SaveAs((FileNameBase + ".png").c_str());
    Canvas.SaveAs((FileNameBase + ".C").c_str());
    Canvas.SaveAs((FileNameBase + ".eps").c_str());
+   Canvas.SaveAs((FileNameBase + ".pdf").c_str());
 }
 //---------------------------------------------------------------------------
 void CreateTwoByTwoPanelPlot(PlotList UpperLeft, PlotList UpperRight, PlotList LowerLeft, PlotList LowerRight,
@@ -388,6 +393,7 @@ void CreateTwoByTwoPanelPlot(PlotList UpperLeft, PlotList UpperRight, PlotList L
    Canvas.SaveAs((FileNameBase + ".png").c_str());
    Canvas.SaveAs((FileNameBase + ".C").c_str());
    Canvas.SaveAs((FileNameBase + ".eps").c_str());
+   Canvas.SaveAs((FileNameBase + ".pdf").c_str());
 }
 //---------------------------------------------------------------------------
 void CreateTwoByThreePanelPlot(PlotList UpperLeft, PlotList UpperCentral, PlotList UpperRight,
@@ -407,6 +413,7 @@ void CreateTwoByThreePanelPlot(PlotList UpperLeft, PlotList UpperCentral, PlotLi
    Canvas.SaveAs((FileNameBase + ".png").c_str());
    Canvas.SaveAs((FileNameBase + ".C").c_str());
    Canvas.SaveAs((FileNameBase + ".eps").c_str());
+   Canvas.SaveAs((FileNameBase + ".pdf").c_str());
 }
 //---------------------------------------------------------------------------
 #endif
