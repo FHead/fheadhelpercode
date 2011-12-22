@@ -3,6 +3,7 @@
 
 #include "TStyle.h"
 #include "TROOT.h"
+#include "TLatex.h"
 #include "TColor.h"
 #include "TLatex.h"
 
