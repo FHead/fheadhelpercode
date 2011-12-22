@@ -306,8 +306,10 @@ void AddCMSPreliminary(double X, double Y, double Luminosity, double FontSize)
       Luminosity = Luminosity / 1000000;
    }
 
-   if(Luminosity > 0)
+   if(Luminosity > 0 && Luminosity < 10)
       latex.DrawLatex(X, Y, Form("CMS Preliminary #sqrt{s}=7 TeV  #int L dt = %.1f %s", Luminosity, Unit.c_str()));
+   else if(Luminosity >= 0)
+      latex.DrawLatex(X, Y, Form("CMS Preliminary #sqrt{s}=7 TeV  #int L dt = %.0f %s", Luminosity, Unit.c_str()));
    else
       latex.DrawLatex(X, Y, "CMS Preliminary #sqrt{s}=7 TeV");
 }

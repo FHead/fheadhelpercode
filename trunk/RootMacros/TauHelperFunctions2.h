@@ -33,10 +33,14 @@ double GetMinRadius(const double X1, const double Y1, const double X2, const dou
 double GetMR(const FourVector P1, const FourVector P2);
 double GetMRStar(const FourVector P1, const FourVector P2);
 double Get2011MR(const FourVector P1, const FourVector P2);
+double GetISRRemovedMR(const FourVector P1, const FourVector P2, const FourVector POther, double ME3Assumption = 0);
+double GetISRRemoved2011MR(const FourVector P1, const FourVector P2, const FourVector POther, double ME3Assumption = 0);
 double GetMRT(const FourVector P1, const FourVector P2, const FourVector ME);
 double GetR(const FourVector P1, const FourVector P2, const FourVector ME);
 double GetRStar(const FourVector P1, const FourVector P2, const FourVector ME);
 double Get2011R(const FourVector P1, const FourVector P2, const FourVector ME);
+double GetISRRemovedR(const FourVector P1, const FourVector P2, const FourVector POther, double ME3Assumption = 0);
+double GetISRRemoved2011R(const FourVector P1, const FourVector P2, const FourVector POther, double ME3Assumption = 0);
 double GetGammaRStar(const FourVector P1, const FourVector P2);
 double BetaToGamma(double Beta);
 double GammaToBeta(double Gamma);
@@ -605,6 +609,40 @@ double Get2011MR(const FourVector P1, const FourVector P2)
    return GetMRStar(P1, P2) * GetGammaRStar(P1, P2);
 }
 
+double GetISRRemovedMR(const FourVector P1, const FourVector P2, const FourVector POther, double ME3Assumption)
+{
+   FourVector ME = -(P1 + P2 + POther);
+   ME[3] = ME3Assumption;
+   ME[0] = ME.GetP();
+
+   FourVector Total = P1 + P2 + ME;
+
+   double Beta = Total.GetPT() / Total[0];
+   FourVector Direction = -Total;
+
+   FourVector NewP1 = P1.Boost(Direction, Beta);
+   FourVector NewP2 = P2.Boost(Direction, Beta);
+
+   return GetMR(NewP1, NewP2);
+}
+
+double GetISRRemoved2011MR(const FourVector P1, const FourVector P2, const FourVector POther, double ME3Assumption)
+{
+   FourVector ME = -(P1 + P2 + POther);
+   ME[3] = ME3Assumption;
+   ME[0] = ME.GetP();
+
+   FourVector Total = P1 + P2 + ME;
+
+   double Beta = Total.GetPT() / Total[0];
+   FourVector Direction = -Total;
+
+   FourVector NewP1 = P1.Boost(Direction, Beta);
+   FourVector NewP2 = P2.Boost(Direction, Beta);
+
+   return Get2011MR(NewP1, NewP2);
+}
+
 double GetMRT(const FourVector P1, const FourVector P2, const FourVector ME)
 {
    double Temp1 = ME.GetPT() * (P1.GetPT() + P2.GetPT());
@@ -625,6 +663,42 @@ double GetRStar(const FourVector P1, const FourVector P2, const FourVector ME)
 double Get2011R(const FourVector P1, const FourVector P2, const FourVector ME)
 {
    return GetMRT(P1, P2, ME) / GetMRStar(P1, P2) / GetGammaRStar(P1, P2);
+}
+
+double GetISRRemovedR(const FourVector P1, const FourVector P2, const FourVector POther, double ME3Assumption)
+{
+   FourVector ME = -(P1 + P2 + POther);
+   ME[3] = ME3Assumption;
+   ME[0] = ME.GetP();
+
+   FourVector Total = P1 + P2 + ME;
+
+   double Beta = Total.GetPT() / Total[0];
+   FourVector Direction = -Total;
+
+   FourVector NewP1 = P1.Boost(Direction, Beta);
+   FourVector NewP2 = P2.Boost(Direction, Beta);
+   FourVector NewME = ME.Boost(Direction, Beta);
+
+   return GetR(NewP1, NewP2, NewME);
+}
+
+double GetISRRemoved2011R(const FourVector P1, const FourVector P2, const FourVector POther, double ME3Assumption)
+{
+   FourVector ME = -(P1 + P2 + POther);
+   ME[3] = ME3Assumption;
+   ME[0] = ME.GetP();
+
+   FourVector Total = P1 + P2 + ME;
+
+   double Beta = Total.GetPT() / Total[0];
+   FourVector Direction = -Total;
+
+   FourVector NewP1 = P1.Boost(Direction, Beta);
+   FourVector NewP2 = P2.Boost(Direction, Beta);
+   FourVector NewME = ME.Boost(Direction, Beta);
+
+   return Get2011R(NewP1, NewP2, NewME);
 }
 
 double GetGammaRStar(const FourVector P1, const FourVector P2)
