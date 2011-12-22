@@ -73,6 +73,7 @@ public:
    double GetP() const;
    double GetPT() const;
    double GetEta() const;
+   double GetAbsEta() const;
    double GetRapidity() const;
    double GetY() const;
    double GetPhi() const;
@@ -273,6 +274,16 @@ double FourVector::GetEta() const
    double Momentum = GetP();
 
    return 0.5 * log((Momentum + P[3]) / (Momentum - P[3]));
+}
+
+double FourVector::GetAbsEta() const
+{
+   double Eta = GetEta();
+
+   if(Eta < 0)
+      Eta = -Eta;
+
+   return Eta;
 }
 
 double FourVector::GetRapidity() const
