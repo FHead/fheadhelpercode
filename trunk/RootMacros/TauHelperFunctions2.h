@@ -23,7 +23,7 @@ using namespace std;
 #define PI 3.14159265358979323846264338327950288479716939937510
 
 class FourVector;
-ostream &operator <<(ostream &out, FourVector &P);
+ostream &operator <<(ostream &out, FourVector P);
 double GetAngle(const FourVector P1, const FourVector P2);
 double GetDR(const FourVector P1, const FourVector P2);
 double GetDPhi(const FourVector P1, const FourVector P2);
@@ -35,12 +35,14 @@ double GetMRStar(const FourVector P1, const FourVector P2);
 double Get2011MR(const FourVector P1, const FourVector P2);
 double GetISRRemovedMR(const FourVector P1, const FourVector P2, const FourVector POther, double ME3Assumption = 0);
 double GetISRRemoved2011MR(const FourVector P1, const FourVector P2, const FourVector POther, double ME3Assumption = 0);
+double GetISR2011MR(const FourVector P1, const FourVector P2, const FourVector ME, int Assumption = 0);
 double GetMRT(const FourVector P1, const FourVector P2, const FourVector ME);
 double GetR(const FourVector P1, const FourVector P2, const FourVector ME);
 double GetRStar(const FourVector P1, const FourVector P2, const FourVector ME);
 double Get2011R(const FourVector P1, const FourVector P2, const FourVector ME);
 double GetISRRemovedR(const FourVector P1, const FourVector P2, const FourVector POther, double ME3Assumption = 0);
 double GetISRRemoved2011R(const FourVector P1, const FourVector P2, const FourVector POther, double ME3Assumption = 0);
+double GetISR2011R(const FourVector P1, const FourVector P2, const FourVector ME, int Assumption = 0);
 double GetGammaRStar(const FourVector P1, const FourVector P2);
 double BetaToGamma(double Beta);
 double GammaToBeta(double Gamma);
@@ -75,6 +77,7 @@ public:
    double GetMass() const;
    double GetMass2() const;
    double GetP() const;
+   double GetP2() const;
    double GetPT() const;
    double GetEta() const;
    double GetAbsEta() const;
@@ -266,6 +269,11 @@ double FourVector::GetMass2() const
 double FourVector::GetP() const
 {
    return sqrt(SpatialDot(*this));
+}
+
+double FourVector::GetP2() const
+{
+   return SpatialDot(*this);
 }
 
 double FourVector::GetPT() const
@@ -463,7 +471,7 @@ double FourVector::MetricDot(const FourVector &Other) const
    return P[0] * Other.P[0] - SpatialDot(Other);
 }
 
-ostream &operator <<(ostream &out, FourVector &P)
+ostream &operator <<(ostream &out, FourVector P)
 {
    out << "(" << P[0] << ", " << P[1] << ", " << P[2] << ", " << P[3] << ")";
    return out;
@@ -643,6 +651,155 @@ double GetISRRemoved2011MR(const FourVector P1, const FourVector P2, const FourV
    return Get2011MR(NewP1, NewP2);
 }
 
+double GetISR2011MR(const FourVector P1, const FourVector P2, const FourVector ME, int Assumption)
+{
+   if(Assumption == 1)
+   {
+      FourVector ME1 = ME;
+      ME1[3] = 0;
+      ME1[0] = ME1.GetP();
+
+      FourVector Total1 = P1 + P2 + ME1;
+      double Beta1 = Total1.GetPT() / Total1[0];
+      Total1[3] = 0;
+      FourVector BP1 = P1.Boost(-Total1, Beta1);
+      FourVector BP2 = P2.Boost(-Total1, Beta1);
+      ME1 = ME1.Boost(-Total1, Beta1);
+
+      return Get2011MR(BP1, BP2);
+   }
+   if(Assumption == 2)
+   {
+      FourVector ME2 = ME;
+      ME2[3] = 0;
+      double Bottom = P1.SpatialDot(P2) * P1.SpatialDot(P2) - P1.GetP2() * P2.GetP2();
+      double Projection1Top = P2.SpatialDot(ME2) * P2.SpatialDot(P1) - P1.SpatialDot(ME2) * P2.GetP2();
+      double Projection2Top = P1.SpatialDot(ME2) * P1.SpatialDot(P2) - P2.SpatialDot(ME2) * P1.GetP2();
+      FourVector ME2P1rojection = P1 * Projection1Top / Bottom;
+      FourVector ME2P2rojection = P2 * Projection2Top / Bottom;
+      ME2[0] = ME2P1rojection.GetP() + ME2P2rojection.GetP();
+
+      FourVector Total2 = P1 + P2 + ME2;
+      double Beta2 = Total2.GetPT() / Total2[0];
+      Total2[3] = 0;
+      FourVector P12 = P1.Boost(-Total2, Beta2);
+      FourVector P22 = P2.Boost(-Total2, Beta2);
+      ME2 = ME2.Boost(-Total2, Beta2);
+
+      return Get2011MR(P12, P22);
+   }
+   if(Assumption == 3)
+   {
+      FourVector ME3 = ME;
+      ME3[3] = -(P1[3] + P2[3]);
+      ME3[0] = ME3.GetP();
+
+      FourVector Total3 = P1 + P2 + ME3;
+      double Beta3 = Total3.GetPT() / Total3[0];
+      Total3[3] = 0;
+      FourVector P13 = P1.Boost(-Total3, Beta3);
+      FourVector P23 = P2.Boost(-Total3, Beta3);
+      ME3 = ME3.Boost(-Total3, Beta3);
+
+      return Get2011MR(P13, P23);
+   }
+   if(Assumption == 4)
+   {
+      FourVector ME4 = ME;
+      ME4[3] = -(P1[3] + P2[3]);
+      double Bottom4 = P1.SpatialDot(P2) * P1.SpatialDot(P2) - P1.GetP2() * P2.GetP2();
+      double Projection1Top4 = P2.SpatialDot(ME4) * P2.SpatialDot(P1) - P1.SpatialDot(ME4) * P2.GetP2();
+      double Projection2Top4 = P1.SpatialDot(ME4) * P1.SpatialDot(P2) - P2.SpatialDot(ME4) * P1.GetP2();
+      FourVector ME2P1rojection4 = P1 * Projection1Top4 / Bottom4;
+      FourVector ME2P2rojection4 = P2 * Projection2Top4 / Bottom4;
+      ME4[0] = ME2P1rojection4.GetP() + ME2P2rojection4.GetP();
+
+      FourVector Total4 = P1 + P2 + ME4;
+      double Beta4 = Total4.GetPT() / Total4[0];
+      Total4[3] = 0;
+      FourVector P14 = P1.Boost(-Total4, Beta4);
+      FourVector P24 = P2.Boost(-Total4, Beta4);
+      ME4 = ME4.Boost(-Total4, Beta4);
+
+      return Get2011MR(P14, P24);
+   }
+   if(Assumption == 5)
+   {
+      FourVector P1Temp5 = P1;
+      FourVector P2Temp5 = P2;
+      FourVector METemp5 = ME;
+      FourVector Total5 = P1 + P2 + ME;
+
+      P1Temp5[3] = 0;   P1Temp5[0] = P1Temp5.GetPT();
+      P2Temp5[3] = 0;   P2Temp5[0] = P2Temp5.GetPT();
+      METemp5[3] = 0;
+      Total5[3] = 0;
+
+      P1Temp5 = P1Temp5.RotateZ(-Total5.GetPhi());
+      P2Temp5 = P2Temp5.RotateZ(-Total5.GetPhi());
+      METemp5 = METemp5.RotateZ(-Total5.GetPhi());
+
+      // visible: particle 1 (B1) and 3 (B2), partners: particle 2 and 4
+      // rotated so that boost is in the x direction
+      // y direction is then trivial
+      double P2XPrime5 = (P1Temp5[1] + P2Temp5[1] + METemp5[1]) / 2 - P1Temp5[1];
+      double P2YPrime5 = -P1Temp5[2];
+      double P4XPrime5 = (P1Temp5[1] + P2Temp5[1] + METemp5[1]) / 2 - P2Temp5[1];
+      double P4YPrime5 = -P2Temp5[2];
+      double E2 = sqrt(P2XPrime5 * P2XPrime5 + P2YPrime5 * P2YPrime5);
+      double E4 = sqrt(P4XPrime5 * P4XPrime5 + P4YPrime5 * P4YPrime5);
+      double Beta5 = (P1Temp5[1] + P2XPrime5 + P2Temp5[1] + P4XPrime5) / (P1Temp5[0] + E2 + P2Temp5[0] + E4);
+      METemp5[0] = E2 + E4;
+
+      FourVector ME5 = ME;
+      ME5[3] = 0;
+      ME5[0] = sqrt((E2 + E4) * (E2 + E4) + ME5[3] * ME5[3]);
+
+      FourVector P15 = P1.Boost(-Total5, Beta5);
+      FourVector P25 = P2.Boost(-Total5, Beta5);
+      ME5 = ME5.Boost(-Total5, Beta5);
+
+      return Get2011MR(P15, P25);
+   }
+   if(Assumption == 6)
+   {
+      FourVector P1Temp6 = P1;
+      FourVector P2Temp6 = P2;
+      FourVector METemp6 = ME;
+      FourVector Total6 = P1 + P2 + ME;
+
+      P1Temp6[3] = 0;   P1Temp6[0] = P1Temp6.GetPT();
+      P2Temp6[3] = 0;   P2Temp6[0] = P2Temp6.GetPT();
+      METemp6[3] = 0;
+      Total6[3] = 0;
+
+      P1Temp6 = P1Temp6.RotateZ(-Total6.GetPhi());
+      P2Temp6 = P2Temp6.RotateZ(-Total6.GetPhi());
+      METemp6 = METemp6.RotateZ(-Total6.GetPhi());
+
+      double E13_6 = P1Temp6[0] + P2Temp6[0];
+      double P13x_6 = P1Temp6[1] + P2Temp6[1];
+      double P24x_6 = METemp6[1];
+      double P1234x_6 = P13x_6 + P24x_6;
+      double Beta6 = (-E13_6 + sqrt(E13_6 * E13_6 + P24x_6 * P24x_6 - P13x_6 * P13x_6)) / P1234x_6;
+
+      double E24_6 = (-P1234x_6 - Beta6 * E13_6) / Beta6;
+
+      FourVector ME6 = ME;
+      ME6[3] = 0;
+      ME6[0] = sqrt(E24_6 * E24_6 + ME6[3] * ME6[3]);
+
+      Total6 = P1Temp6 + P2Temp6 + ME6;
+      FourVector P16 = P1.Boost(-Total6, fabs(Beta6));
+      FourVector P26 = P2.Boost(-Total6, fabs(Beta6));
+      ME6 = ME6.Boost(-Total6, fabs(Beta6));
+
+      return Get2011MR(P16, P26);
+   }
+
+   return 0;
+}
+
 double GetMRT(const FourVector P1, const FourVector P2, const FourVector ME)
 {
    double Temp1 = ME.GetPT() * (P1.GetPT() + P2.GetPT());
@@ -699,6 +856,155 @@ double GetISRRemoved2011R(const FourVector P1, const FourVector P2, const FourVe
    FourVector NewME = ME.Boost(Direction, Beta);
 
    return Get2011R(NewP1, NewP2, NewME);
+}
+
+double GetISR2011R(const FourVector P1, const FourVector P2, const FourVector ME, int Assumption)
+{
+   if(Assumption == 1)
+   {
+      FourVector ME1 = ME;
+      ME1[3] = 0;
+      ME1[0] = ME1.GetP();
+
+      FourVector Total1 = P1 + P2 + ME1;
+      double Beta1 = Total1.GetPT() / Total1[0];
+      Total1[3] = 0;
+      FourVector BP1 = P1.Boost(-Total1, Beta1);
+      FourVector BP2 = P2.Boost(-Total1, Beta1);
+      ME1 = ME1.Boost(-Total1, Beta1);
+
+      return Get2011R(BP1, BP2, ME1);
+   }
+   if(Assumption == 2)
+   {
+      FourVector ME2 = ME;
+      ME2[3] = 0;
+      double Bottom = P1.SpatialDot(P2) * P1.SpatialDot(P2) - P1.GetP2() * P2.GetP2();
+      double Projection1Top = P2.SpatialDot(ME2) * P2.SpatialDot(P1) - P1.SpatialDot(ME2) * P2.GetP2();
+      double Projection2Top = P1.SpatialDot(ME2) * P1.SpatialDot(P2) - P2.SpatialDot(ME2) * P1.GetP2();
+      FourVector ME2P1rojection = P1 * Projection1Top / Bottom;
+      FourVector ME2P2rojection = P2 * Projection2Top / Bottom;
+      ME2[0] = ME2P1rojection.GetP() + ME2P2rojection.GetP();
+
+      FourVector Total2 = P1 + P2 + ME2;
+      double Beta2 = Total2.GetPT() / Total2[0];
+      Total2[3] = 0;
+      FourVector P12 = P1.Boost(-Total2, Beta2);
+      FourVector P22 = P2.Boost(-Total2, Beta2);
+      ME2 = ME2.Boost(-Total2, Beta2);
+
+      return Get2011R(P12, P22, ME2);
+   }
+   if(Assumption == 3)
+   {
+      FourVector ME3 = ME;
+      ME3[3] = -(P1[3] + P2[3]);
+      ME3[0] = ME3.GetP();
+
+      FourVector Total3 = P1 + P2 + ME3;
+      double Beta3 = Total3.GetPT() / Total3[0];
+      Total3[3] = 0;
+      FourVector P13 = P1.Boost(-Total3, Beta3);
+      FourVector P23 = P2.Boost(-Total3, Beta3);
+      ME3 = ME3.Boost(-Total3, Beta3);
+
+      return Get2011R(P13, P23, ME3);
+   }
+   if(Assumption == 4)
+   {
+      FourVector ME4 = ME;
+      ME4[3] = -(P1[3] + P2[3]);
+      double Bottom4 = P1.SpatialDot(P2) * P1.SpatialDot(P2) - P1.GetP2() * P2.GetP2();
+      double Projection1Top4 = P2.SpatialDot(ME4) * P2.SpatialDot(P1) - P1.SpatialDot(ME4) * P2.GetP2();
+      double Projection2Top4 = P1.SpatialDot(ME4) * P1.SpatialDot(P2) - P2.SpatialDot(ME4) * P1.GetP2();
+      FourVector ME2P1rojection4 = P1 * Projection1Top4 / Bottom4;
+      FourVector ME2P2rojection4 = P2 * Projection2Top4 / Bottom4;
+      ME4[0] = ME2P1rojection4.GetP() + ME2P2rojection4.GetP();
+
+      FourVector Total4 = P1 + P2 + ME4;
+      double Beta4 = Total4.GetPT() / Total4[0];
+      Total4[3] = 0;
+      FourVector P14 = P1.Boost(-Total4, Beta4);
+      FourVector P24 = P2.Boost(-Total4, Beta4);
+      ME4 = ME4.Boost(-Total4, Beta4);
+
+      return Get2011R(P14, P24, ME4);
+   }
+   if(Assumption == 5)
+   {
+      FourVector P1Temp5 = P1;
+      FourVector P2Temp5 = P2;
+      FourVector METemp5 = ME;
+      FourVector Total5 = P1 + P2 + ME;
+
+      P1Temp5[3] = 0;   P1Temp5[0] = P1Temp5.GetPT();
+      P2Temp5[3] = 0;   P2Temp5[0] = P2Temp5.GetPT();
+      METemp5[3] = 0;
+      Total5[3] = 0;
+
+      P1Temp5 = P1Temp5.RotateZ(-Total5.GetPhi());
+      P2Temp5 = P2Temp5.RotateZ(-Total5.GetPhi());
+      METemp5 = METemp5.RotateZ(-Total5.GetPhi());
+
+      // visible: particle 1 (B1) and 3 (B2), partners: particle 2 and 4
+      // rotated so that boost is in the x direction
+      // y direction is then trivial
+      double P2XPrime5 = (P1Temp5[1] + P2Temp5[1] + METemp5[1]) / 2 - P1Temp5[1];
+      double P2YPrime5 = -P1Temp5[2];
+      double P4XPrime5 = (P1Temp5[1] + P2Temp5[1] + METemp5[1]) / 2 - P2Temp5[1];
+      double P4YPrime5 = -P2Temp5[2];
+      double E2 = sqrt(P2XPrime5 * P2XPrime5 + P2YPrime5 * P2YPrime5);
+      double E4 = sqrt(P4XPrime5 * P4XPrime5 + P4YPrime5 * P4YPrime5);
+      double Beta5 = (P1Temp5[1] + P2XPrime5 + P2Temp5[1] + P4XPrime5) / (P1Temp5[0] + E2 + P2Temp5[0] + E4);
+      METemp5[0] = E2 + E4;
+
+      FourVector ME5 = ME;
+      ME5[3] = 0;
+      ME5[0] = sqrt((E2 + E4) * (E2 + E4) + ME5[3] * ME5[3]);
+
+      FourVector P15 = P1.Boost(-Total5, Beta5);
+      FourVector P25 = P2.Boost(-Total5, Beta5);
+      ME5 = ME5.Boost(-Total5, Beta5);
+
+      return Get2011R(P15, P25, ME5);
+   }
+   if(Assumption == 6)
+   {
+      FourVector P1Temp6 = P1;
+      FourVector P2Temp6 = P2;
+      FourVector METemp6 = ME;
+      FourVector Total6 = P1 + P2 + ME;
+
+      P1Temp6[3] = 0;   P1Temp6[0] = P1Temp6.GetPT();
+      P2Temp6[3] = 0;   P2Temp6[0] = P2Temp6.GetPT();
+      METemp6[3] = 0;
+      Total6[3] = 0;
+
+      P1Temp6 = P1Temp6.RotateZ(-Total6.GetPhi());
+      P2Temp6 = P2Temp6.RotateZ(-Total6.GetPhi());
+      METemp6 = METemp6.RotateZ(-Total6.GetPhi());
+
+      double E13_6 = P1Temp6[0] + P2Temp6[0];
+      double P13x_6 = P1Temp6[1] + P2Temp6[1];
+      double P24x_6 = METemp6[1];
+      double P1234x_6 = P13x_6 + P24x_6;
+      double Beta6 = (-E13_6 + sqrt(E13_6 * E13_6 + P24x_6 * P24x_6 - P13x_6 * P13x_6)) / P1234x_6;
+
+      double E24_6 = (-P1234x_6 - Beta6 * E13_6) / Beta6;
+
+      FourVector ME6 = ME;
+      ME6[3] = 0;
+      ME6[0] = sqrt(E24_6 * E24_6 + ME6[3] * ME6[3]);
+
+      Total6 = P1Temp6 + P2Temp6 + ME6;
+      FourVector P16 = P1.Boost(-Total6, fabs(Beta6));
+      FourVector P26 = P2.Boost(-Total6, fabs(Beta6));
+      ME6 = ME6.Boost(-Total6, fabs(Beta6));
+
+      return Get2011R(P16, P26, ME6);
+   }
+
+   return 0;
 }
 
 double GetGammaRStar(const FourVector P1, const FourVector P2)
