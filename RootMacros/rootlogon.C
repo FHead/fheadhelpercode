@@ -1,10 +1,10 @@
 {
    cout << endl;
-   cout << "Welcome to FHead-customized ROOT!" << endl;
+   cout << "Welcome to FHead-customized ROOT!!" << endl;
    cout << endl;
 
    // gROOT->SetStyle("Plain");
-   gROOT->ProcessLine(".include /home/yichen/RootMacros");
+   gROOT->ProcessLine(".include $HOME/RootMacros");
 
    // nice palette!
    // courtesy of Segev, http://ultrahigh.org/2007/08/20/making-pretty-root-color-palettes/
