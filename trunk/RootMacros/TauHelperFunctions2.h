@@ -98,6 +98,7 @@ public:
    FourVector SmearAngle(double Angle) const;
    FourVector SmearMomentum(double Scale) const;
    FourVector SpatialCross(const FourVector Other) const;
+   FourVector SpatialNormalize() const;
    double SpatialDot(const FourVector &Other) const;
    double MetricDot(const FourVector &Other) const;
 };
@@ -459,6 +460,13 @@ FourVector FourVector::SpatialCross(const FourVector Other) const
    Out.P[1] = P[2] * Other.P[3] - P[3] * Other.P[2];
    Out.P[2] = P[3] * Other.P[1] - P[1] * Other.P[3];
    Out.P[3] = P[1] * Other.P[2] - P[2] * Other.P[1];
+}
+
+FourVector FourVector::SpatialNormalize() const
+{
+   FourVector Out;
+   Out = (*this) / GetP();
+   return Out;
 }
 
 double FourVector::SpatialDot(const FourVector &Other) const
