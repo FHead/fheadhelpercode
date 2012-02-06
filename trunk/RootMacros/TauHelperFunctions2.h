@@ -79,6 +79,7 @@ public:
    double GetP() const;
    double GetP2() const;
    double GetPT() const;
+   double GetPT2() const;
    double GetEta() const;
    double GetAbsEta() const;
    double GetRapidity() const;
@@ -280,6 +281,11 @@ double FourVector::GetP2() const
 double FourVector::GetPT() const
 {
    return sqrt(P[1] * P[1] + P[2] * P[2]);
+}
+
+double FourVector::GetPT2() const
+{
+   return (P[1] * P[1] + P[2] * P[2]);
 }
 
 double FourVector::GetEta() const

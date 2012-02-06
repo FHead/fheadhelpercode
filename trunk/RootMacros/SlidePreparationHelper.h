@@ -320,7 +320,9 @@ void PlotList::Draw(TCanvas *Canvas, int SubPad)
 
       Legend = new TLegend(X1, Y1, X2, Y2);
 
-      Legend->SetFillColor(0);
+      Legend->SetFillStyle(0);
+      Legend->SetTextFont(42);
+      Legend->SetBorderSize(0);
 
       for(int i = 0; i < (int)PlotRecords.size(); i++)
          Legend->AddEntry(PlotRecords[i].Figure, PlotRecords[i].Label.c_str(), "lpf");

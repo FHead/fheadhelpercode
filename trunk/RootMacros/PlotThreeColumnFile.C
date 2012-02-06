@@ -6,6 +6,8 @@ using namespace std;
 #include "TFile.h"
 #include "TGraphErrors.h"
 
+void PlotThreeColumnFile(char *filename, char *outputfilename);
+
 void PlotThreeColumnFile(char *filename, char *outputfilename)
 {
    ifstream in(filename);
@@ -51,3 +53,10 @@ void PlotThreeColumnFile(char *filename, char *outputfilename)
 
    in.close();
 }
+
+
+
+
+
+
+
