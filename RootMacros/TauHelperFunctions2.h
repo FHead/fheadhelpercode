@@ -47,6 +47,9 @@ double GetGammaRStar(const FourVector P1, const FourVector P2);
 double BetaToGamma(double Beta);
 double GammaToBeta(double Gamma);
 vector<FourVector> SplitIntoGroups(vector<FourVector> &Input, bool ZeroMass = false);
+double FindMR11MinimumPz(FourVector J1, FourVector J2, FourVector ME, FourVector ISR);
+double EstimateMass11(FourVector J1, FourVector J2, FourVector ME, FourVector ISR);
+double EstimateTransverseMass11(FourVector J1, FourVector J2, FourVector ME, FourVector ISR, char Variant = 'g');
 int FindCategory(GenParticleTree &Tree, int index);
 
 class FourVector
@@ -810,6 +813,158 @@ double GetISR2011MR(const FourVector P1, const FourVector P2, const FourVector M
 
       return Get2011MR(P16, P26);
    }
+   if(Assumption == 7)
+   {
+      FourVector P1Temp7 = P1;
+      FourVector P2Temp7 = P2;
+      FourVector METemp7 = ME;
+      FourVector Total7 = P1 + P2 + ME;
+
+      P1Temp7[3] = 0;   P1Temp7[0] = P1Temp7.GetPT();
+      P2Temp7[3] = 0;   P2Temp7[0] = P2Temp7.GetPT();
+      METemp7[3] = 0;
+      Total7[3] = 0;
+
+      P1Temp7 = P1Temp7.RotateZ(-Total7.GetPhi());
+      P2Temp7 = P2Temp7.RotateZ(-Total7.GetPhi());
+      METemp7 = METemp7.RotateZ(-Total7.GetPhi());
+
+      double PxJet7 = P1Temp7[1] + P2Temp7[1];
+      double EJet7 = P1Temp7[0] + P2Temp7[0];
+
+      double Beta7 = (EJet7 - sqrt(EJet7 * EJet7 - PxJet7 * PxJet7 + METemp7[1] * METemp7[1]))
+         / (PxJet7 - METemp7[1]);
+
+      METemp7[3] = 0;
+      METemp7[0] = EJet7 + Beta7 * (METemp7[1] - PxJet7);
+
+      Total7 = P1Temp7 + P2Temp7 + METemp7;
+      FourVector P17 = P1Temp7.Boost(-Total7, -Beta7);
+      FourVector P27 = P2Temp7.Boost(-Total7, -Beta7);
+      FourVector ME7 = METemp7.Boost(-Total7, -Beta7);
+
+      return Get2011MR(P17, P27);
+   }
+   if(Assumption == 8)
+   {
+      FourVector B1PTemp8 = P1;
+      FourVector B2PTemp8 = P2;
+      FourVector METemp8 = ME;
+      FourVector Total8 = P1 + P2 + ME;
+
+      B1PTemp8 = B1PTemp8.RotateZ(-Total8.GetPhi());
+      B2PTemp8 = B2PTemp8.RotateZ(-Total8.GetPhi());
+      METemp8 = METemp8.RotateZ(-Total8.GetPhi());
+
+      double MinimumBetaX = 1000;
+      double MinimumDifference = 999999;
+      double SearchCenter = 0;
+      double SearchStep = 0.1;
+      for(int i = 0; i < 5; i++)
+      {
+         for(double BetaX = SearchCenter - SearchStep * 10; BetaX < SearchCenter + SearchStep * 10;
+            BetaX = BetaX + SearchStep)
+         {
+            double Difference = GetDifference8(B1PTemp8, B2PTemp8, METemp8, BetaX);
+
+            if(fabs(Difference) < MinimumDifference)
+            {
+               MinimumBetaX = BetaX;
+               MinimumDifference = fabs(Difference);
+            }
+         }
+
+         SearchCenter = MinimumBetaX;
+         SearchStep = SearchStep / 10;
+      }
+         
+      double Beta8 = MinimumBetaX;
+
+      double GammaX8 = BetaToGamma(Beta8);
+      double BetaZ8 = GammaX8 * ((B1PTemp8[0] - B2PTemp8[0]) - Beta8 * (B1PTemp8[1] - B2PTemp8[1]))
+         / (P1[3] - P2[3]);
+      double GammaZ8 = BetaToGamma(BetaZ8);
+      // double Beta8E8 = METemp8[1] + B1PTemp8[1] + B2PTemp8[1] - Beta8 * (B1PTemp8[0] + B2PTemp8[0]);
+
+      // double FinalMEx = GammaX8 * METemp8[1] - GammaX8 * Beta8E8;
+      // double FinalMEy = METemp8[2];
+      // double FinalMET = sqrt(FinalMEx * FinalMEx + FinalMEy * FinalMEy);
+
+      // double FinalJx = GammaX8 * B1PTemp8[1] - GammaX8 * Beta8 * B1PTemp8[0]
+      //    + GammaX8 * B2PTemp8[1] - GammaX8 * Beta8 * B2PTemp8[0];
+      // double FinalJy = B1PTemp8[2] + B2PTemp8[2];
+      // double FinalJT = sqrt(FinalJx * FinalJx + FinalJy * FinalJy);
+
+      double MR8 = GammaZ8 * ((GammaX8 * (B1PTemp8[0] + B2PTemp8[0])
+         - GammaX8 * Beta8 * (B1PTemp8[1] + B2PTemp8[1]))
+         - BetaZ8 * (P1[3] + P2[3]));
+      // double MT8 = sqrt(2 * (FinalMET * FinalJT - FinalMEx * FinalJx - FinalMEy * FinalJy));
+
+      return MR8;
+   }
+   if(Assumption == 9)
+   {
+      FourVector B1PTemp9 = P1;
+      FourVector B2PTemp9 = P2;
+      FourVector METemp9 = ME;
+      FourVector Total9 = P1 + P2 + ME;
+
+      B1PTemp9 = B1PTemp9.RotateZ(-Total9.GetPhi());
+      B2PTemp9 = B2PTemp9.RotateZ(-Total9.GetPhi());
+      METemp9 = METemp9.RotateZ(-Total9.GetPhi());
+
+      double MinimumBetaZ = 1000;
+      double MinimumDifference9 = 99999999;
+      double SearchCenter9 = 0;
+      double SearchStep9 = 0.05;
+      for(int i = 0; i < 5; i++)
+      {
+         for(double BetaZ = SearchCenter9 - SearchStep9 * 20; BetaZ < SearchCenter9 + SearchStep9 * 20;
+            BetaZ = BetaZ + SearchStep9)
+         {
+            double Difference = GetDifference9(B1PTemp9, B2PTemp9, METemp9, BetaZ);
+
+            if(fabs(Difference) < MinimumDifference9)
+            {
+               MinimumBetaZ = BetaZ;
+               MinimumDifference9 = fabs(Difference);
+            }
+         }
+
+         SearchCenter9 = MinimumBetaZ;
+         SearchStep9 = SearchStep9 / 10;
+      }
+
+      double GammaZ9 = BetaToGamma(MinimumBetaZ);
+      double BetaX9 = (GammaZ9 * (B1PTemp9[0] - B2PTemp9[0])
+         - GammaZ9 * MinimumBetaZ * (B1PTemp9[3] - B2PTemp9[3]))
+         / (B1PTemp9[1] - B2PTemp9[1]);
+      double GammaX9 = BetaToGamma(BetaX9);
+
+      double FinalJE = GammaX9 * (GammaZ9 * (B1PTemp9[0] + B2PTemp9[0])
+         - GammaZ9 * MinimumBetaZ * (B1PTemp9[3] - B2PTemp9[3]))
+         - GammaX9 * BetaX9 * (B1PTemp9[1] + B2PTemp9[0]);
+      double FinalJx9 = GammaX9 * (B1PTemp9[1] + B2PTemp9[1]) - GammaX9 * BetaX9
+         * (GammaZ9 * (B1PTemp9[0] + B2PTemp9[0]) - GammaZ9 * MinimumBetaZ * (B1PTemp9[3] - B2PTemp9[3]));
+      double FinalJy9 = B1PTemp9[2] + B2PTemp9[2];
+      double FinalJT9 = sqrt(FinalJx9 * FinalJx9 + FinalJy9 * FinalJy9);
+
+      double MR9 = FinalJE;
+      double MT9 = 2 * FinalJT9;
+      double R9 = MT9 / MR9 / 2;
+
+      return MR9;
+   }
+   if(Assumption == 11)
+   {
+      double JJMass2 = (P1 + P2).GetMass2();
+      FourVector METemp11 = ME;
+
+      METemp11[3] = FindMR11MinimumPz(P1, P2, METemp11, ISR);
+      METemp11[0] = sqrt(JJMass2 + METemp11.GetP2());
+
+      return EstimateMass11(P1, P2, METemp11, ISR);
+   }
 
    return 0;
 }
@@ -1017,6 +1172,161 @@ double GetISR2011R(const FourVector P1, const FourVector P2, const FourVector ME
 
       return Get2011R(P16, P26, ME6);
    }
+   if(Assumption == 7)
+   {
+      FourVector P1Temp7 = P1;
+      FourVector P2Temp7 = P2;
+      FourVector METemp7 = ME;
+      FourVector Total7 = P1 + P2 + ME;
+
+      P1Temp7[3] = 0;   P1Temp7[0] = P1Temp7.GetPT();
+      P2Temp7[3] = 0;   P2Temp7[0] = P2Temp7.GetPT();
+      METemp7[3] = 0;
+      Total7[3] = 0;
+
+      P1Temp7 = P1Temp7.RotateZ(-Total7.GetPhi());
+      P2Temp7 = P2Temp7.RotateZ(-Total7.GetPhi());
+      METemp7 = METemp7.RotateZ(-Total7.GetPhi());
+
+      double PxJet7 = P1Temp7[1] + P2Temp7[1];
+      double EJet7 = P1Temp7[0] + P2Temp7[0];
+
+      double Beta7 = (EJet7 - sqrt(EJet7 * EJet7 - PxJet7 * PxJet7 + METemp7[1] * METemp7[1]))
+         / (PxJet7 - METemp7[1]);
+
+      METemp7[3] = 0;
+      METemp7[0] = EJet7 + Beta7 * (METemp7[1] - PxJet7);
+
+      Total7 = P1Temp7 + P2Temp7 + METemp7;
+      FourVector P17 = P1Temp7.Boost(-Total7, -Beta7);
+      FourVector P27 = P2Temp7.Boost(-Total7, -Beta7);
+      FourVector ME7 = METemp7.Boost(-Total7, -Beta7);
+
+      return Get2011R(P17, P27, ME7);
+   }
+   if(Assumption == 8)
+   {
+      FourVector B1PTemp8 = P1;
+      FourVector B2PTemp8 = P2;
+      FourVector METemp8 = ME;
+      FourVector Total8 = P1 + P2 + ME;
+
+      B1PTemp8 = B1PTemp8.RotateZ(-Total8.GetPhi());
+      B2PTemp8 = B2PTemp8.RotateZ(-Total8.GetPhi());
+      METemp8 = METemp8.RotateZ(-Total8.GetPhi());
+
+      double MinimumBetaX = 1000;
+      double MinimumDifference = 999999;
+      double SearchCenter = 0;
+      double SearchStep = 0.1;
+
+      for(int i = 0; i < 5; i++)
+      {
+         for(double BetaX = SearchCenter - SearchStep * 10; BetaX < SearchCenter + SearchStep * 10;
+            BetaX = BetaX + SearchStep)
+         {
+            double Difference = GetDifference8(B1PTemp8, B2PTemp8, METemp8, BetaX);
+
+            if(fabs(Difference) < MinimumDifference)
+            {
+               MinimumBetaX = BetaX;
+               MinimumDifference = fabs(Difference);
+            }
+         }
+
+         SearchCenter = MinimumBetaX;
+         SearchStep = SearchStep / 10;
+      }
+         
+      double Beta8 = MinimumBetaX;
+
+      double GammaX8 = BetaToGamma(Beta8);
+      double BetaZ8 = GammaX8 * ((B1PTemp8[0] - B2PTemp8[0]) - Beta8 * (B1PTemp8[1] - B2PTemp8[1]))
+         / (P1[3] - P2[3]);
+      double GammaZ8 = BetaToGamma(BetaZ8);
+      double Beta8E8 = METemp8[1] + B1PTemp8[1] + B2PTemp8[1] - Beta8 * (B1PTemp8[0] + B2PTemp8[0]);
+
+      double FinalMEx = GammaX8 * METemp8[1] - GammaX8 * Beta8E8;
+      double FinalMEy = METemp8[2];
+      double FinalMET = sqrt(FinalMEx * FinalMEx + FinalMEy * FinalMEy);
+      double FinalJx = GammaX8 * B1PTemp8[1] - GammaX8 * Beta8 * B1PTemp8[0]
+         + GammaX8 * B2PTemp8[1] - GammaX8 * Beta8 * B2PTemp8[0];
+      double FinalJy = B1PTemp8[2] + B2PTemp8[2];
+      double FinalJT = sqrt(FinalJx * FinalJx + FinalJy * FinalJy);
+
+      double MR8 = GammaZ8 * ((GammaX8 * (B1PTemp8[0] + B2PTemp8[0])
+         - GammaX8 * Beta8 * (B1PTemp8[1] + B2PTemp8[1]))
+         - BetaZ8 * (P1[3] + P2[3]));
+      double MT8 = sqrt(2 * (FinalMET * FinalJT - FinalMEx * FinalJx - FinalMEy * FinalJy));
+
+      return MT8 / MR8 / 2;
+   }
+   if(Assumption == 9)
+   {
+      FourVector B1PTemp9 = P1;
+      FourVector B2PTemp9 = P2;
+      FourVector METemp9 = ME;
+      FourVector Total9 = P1 + P2 + ME;
+
+      B1PTemp9 = B1PTemp9.RotateZ(-Total9.GetPhi());
+      B2PTemp9 = B2PTemp9.RotateZ(-Total9.GetPhi());
+      METemp9 = METemp9.RotateZ(-Total9.GetPhi());
+
+      double MinimumBetaZ = 1000;
+      double MinimumDifference9 = 99999999;
+      double SearchCenter9 = 0;
+      double SearchStep9 = 0.05;
+      for(int i = 0; i < 5; i++)
+      {
+         for(double BetaZ = SearchCenter9 - SearchStep9 * 20; BetaZ < SearchCenter9 + SearchStep9 * 20;
+            BetaZ = BetaZ + SearchStep9)
+         {
+            double Difference = GetDifference9(B1PTemp9, B2PTemp9, METemp9, BetaZ);
+
+            if(fabs(Difference) < MinimumDifference9)
+            {
+               MinimumBetaZ = BetaZ;
+               MinimumDifference9 = fabs(Difference);
+            }         }
+
+         SearchCenter9 = MinimumBetaZ;
+         SearchStep9 = SearchStep9 / 10;
+      }
+
+      double GammaZ9 = BetaToGamma(MinimumBetaZ);
+      double BetaX9 = (GammaZ9 * (B1PTemp9[0] - B2PTemp9[0])
+         - GammaZ9 * MinimumBetaZ * (B1PTemp9[3] - B2PTemp9[3]))
+         / (B1PTemp9[1] - B2PTemp9[1]);
+      double GammaX9 = BetaToGamma(BetaX9);
+
+      double FinalJE = GammaX9 * (GammaZ9 * (B1PTemp9[0] + B2PTemp9[0])
+         - GammaZ9 * MinimumBetaZ * (B1PTemp9[3] - B2PTemp9[3]))
+         - GammaX9 * BetaX9 * (B1PTemp9[1] + B2PTemp9[0]);
+      double FinalJx9 = GammaX9 * (B1PTemp9[1] + B2PTemp9[1]) - GammaX9 * BetaX9
+         * (GammaZ9 * (B1PTemp9[0] + B2PTemp9[0]) - GammaZ9 * MinimumBetaZ * (B1PTemp9[3] - B2PTemp9[3]));
+      double FinalJy9 = B1PTemp9[2] + B2PTemp9[2];
+      double FinalJT9 = sqrt(FinalJx9 * FinalJx9 + FinalJy9 * FinalJy9);
+
+      double MR9 = FinalJE;
+      double MT9 = 2 * FinalJT9;
+      double R9 = MT9 / MR9 / 2;
+
+      return R9;
+   }
+   if(Assumption == 11)
+   {
+      double JJMass2 = (P1 + P2).GetMass2();
+      FourVector METemp11 = ME;
+
+      METemp11[3] = FindMR11MinimumPz(P1, P2, METemp11, ISR);
+      METemp11[0] = sqrt(JJMass2 + METemp11.GetP2());
+
+      double MR11 = EstimateMass11(P1, P2, METemp11, ISR);
+      double MRT11 = EstimateTransverseMass11(P1, P2, METemp11, ISR, AdditionalVariant);
+
+      return MRT11 / MR11;
+   }
+
 
    return 0;
 }
@@ -1124,6 +1434,272 @@ vector<FourVector> SplitIntoGroups(vector<FourVector> &Input, bool ZeroMass)
    Result.push_back(Group2);
 
    return Result;
+}
+
+double FindMR11MinimumPz(FourVector J1, FourVector J2, FourVector ME, FourVector ISR)
+{
+   // do some basic caching to save time repeating search for MR and R
+   static FourVector PreviousJ1 = FourVector(0, 0, 0, 0);
+   static FourVector PreviousJ2 = FourVector(0, 0, 0, 0);
+   static FourVector PreviousME = FourVector(0, 0, 0, 0);
+   static FourVector PreviousISR = FourVector(0, 0, 0, 0);
+   static double PreviousPz = 0;
+
+   if((J1 - PreviousJ1).GetP() < 0.1
+      && (J2 - PreviousJ2).GetP() < 0.1
+      && (ME - PreviousME).GetP() < 0.1
+      && (ISR - PreviousISR).GetP() < 0.1)
+      return PreviousPz;
+
+   // start calculation
+   double JJMass2 = (J1 + J2).GetMass2();
+
+   int InitialStep = 400;
+   double InitialStepSize = 5;
+   double InitialCenter = 0;
+   int SearchStep = 10;
+   double SearchStepSize = 1;
+
+   vector<double> Masses;
+   for(int i = 0; i <= InitialStep; i++)
+   {
+      ME[3] = InitialCenter - InitialStep / 2 * InitialStepSize + i * InitialStepSize;
+      ME[0] = sqrt(JJMass2 + ME.GetP2());
+
+      double Mass = EstimateMass11(J1, J2, ME, ISR);
+      Masses.push_back(Mass);
+   }
+
+   vector<double> LocalMinima;
+   for(int i = 1; i < InitialStep; i++)
+      if(Masses[i] <= Masses[i-1] && Masses[i] <= Masses[i+1])
+         LocalMinima.push_back(InitialCenter - InitialStep / 2 * InitialStepSize + i * InitialStepSize);
+   if(Masses[0] <= Masses[1])
+      LocalMinima.push_back(InitialCenter - InitialStep / 2 * InitialStepSize);
+   if(Masses[InitialStep] <= Masses[InitialStep-1])
+      LocalMinima.push_back(InitialCenter + InitialStep / 2 * InitialStepSize);
+
+   for(int i = 0; i <= 5; i++)
+   {
+      vector<double> NewMinima;
+      for(int j = 0; j < (int)LocalMinima.size(); j++)
+      {
+         double SearchCenter = LocalMinima[j];
+
+         Masses.clear();
+         for(int k = 0; k <= SearchStep; k++)
+         {
+            ME[3] = SearchCenter - SearchStep / 2 * SearchStepSize + k * SearchStepSize;
+            ME[0] = sqrt(JJMass2 + ME.GetP2());
+            
+            double Mass = EstimateMass11(J1, J2, ME, ISR);
+            Masses.push_back(Mass);
+         }
+
+         for(int k = 1; k < SearchStep; k++)
+            if(Masses[k] <= Masses[k-1] && Masses[k] <= Masses[k+1])
+               NewMinima.push_back(SearchCenter - SearchStep / 2 * SearchStepSize + k * SearchStepSize);
+         if(Masses[0] <= Masses[1])
+            NewMinima.push_back(SearchCenter - SearchStep / 2 * SearchStepSize);
+         if(Masses[InitialStep] <= Masses[InitialStep-1])
+            NewMinima.push_back(SearchCenter + SearchStep / 2 * SearchStepSize);
+      }
+
+      SearchStepSize = SearchStepSize / 5;
+      LocalMinima = NewMinima;
+   }
+
+   double BestPz = -1;
+   double BestMass = -1;
+   for(int i = 0; i < (int)LocalMinima.size(); i++)
+   {
+      ME[3] = LocalMinima[i];
+      ME[0] = sqrt(JJMass2 + ME.GetP2());
+
+      double Mass = EstimateMass11(J1, J2, ME, ISR);
+
+      if(Mass < BestMass || BestMass < 0)
+      {
+         BestPz = LocalMinima[i];
+         BestMass = Mass;
+      }
+   }
+
+   PreviousJ1 = J1;
+   PreviousJ2 = J2;
+   PreviousME = ME;
+   PreviousISR = ISR;
+   PreviousPz = BestPz;
+
+   return BestPz;
+}
+
+double EstimateMass11(FourVector J1, FourVector J2, FourVector ME, FourVector ISR)
+{
+   FourVector TempTotal = ME + J1 + J2 + ISR;
+   double TempBetaZ = TempTotal[3] / TempTotal[0];
+
+   FourVector TempJ1 = J1.Boost(FourVector(1, 0, 0, 1), TempBetaZ);
+   FourVector TempJ2 = J2.Boost(FourVector(1, 0, 0, 1), TempBetaZ);
+   FourVector TempME = ME.Boost(FourVector(1, 0, 0, 1), TempBetaZ);
+   FourVector TempISR = ISR.Boost(FourVector(1, 0, 0, 1), TempBetaZ);
+
+   TempTotal = TempJ1 + TempJ2 + TempME;
+   double TempBeta = TempTotal.GetP() / TempTotal[0];
+
+   TempJ1 = TempJ1.Boost(TempTotal, TempBeta);
+   TempJ2 = TempJ2.Boost(TempTotal, TempBeta);
+   TempME = TempME.Boost(TempTotal, TempBeta);
+
+   double EMET = TempME[0];
+   double SumE = TempJ1[0] + TempJ2[0];
+   double DeltaE = TempJ1[0] - TempJ2[0];
+   double ES = (TempJ1 + TempJ2).GetP();
+   double ED = (TempJ1 - TempJ2).GetP();
+   double A = SumE * DeltaE / ES;
+   double B = sqrt(ED * ED - A * A);
+
+   double m0 = (SumE - EMET) / (2 * DeltaE) - SumE * DeltaE / ES / ES;
+   double m1 = DeltaE * (SumE + EMET) / 2;
+
+   double EQA = m0 * m0 + B * B / ES / ES;
+   double EQB = 2 * m0 * m1 - B * B;
+   double EQC = m1 * m1;
+
+   double X2Max = (-EQB + sqrt(EQB * EQB - 4 * EQA * EQC)) / (2 * EQA);
+   double X2Min = (-EQB - sqrt(EQB * EQB - 4 * EQA * EQC)) / (2 * EQA);
+
+   if(X2Min > ES * ES)
+      return -1;
+   if(X2Max < 0)
+      return -1;
+
+   if(X2Max > ES * ES)
+      X2Max = ES * ES;
+
+   double X = sqrt(X2Max);
+   double Y = ((X * X + DeltaE * DeltaE) * SumE - (X * X - DeltaE * DeltaE) * EMET) / (2 * X * DeltaE);
+
+   double M2 = (SumE * X - DeltaE * Y) * (SumE * X - DeltaE * Y) / (X * X - DeltaE * DeltaE) / 4;
+
+   if(M2 < 0)
+      return -1;
+
+   return sqrt(M2) * 2;
+}
+
+double EstimateTransverseMass11(FourVector J1, FourVector J2, FourVector ME, FourVector ISR, char Variant)
+{
+   FourVector TempTotal = ME + J1 + J2 + ISR;
+   double TempBetaZ = TempTotal[3] / TempTotal[0];
+
+   FourVector TempJ1 = J1.Boost(FourVector(1, 0, 0, 1), TempBetaZ);
+   FourVector TempJ2 = J2.Boost(FourVector(1, 0, 0, 1), TempBetaZ);
+   FourVector TempME = ME.Boost(FourVector(1, 0, 0, 1), TempBetaZ);
+   FourVector TempISR = ISR.Boost(FourVector(1, 0, 0, 1), TempBetaZ);
+
+   TempTotal = TempJ1 + TempJ2 + TempME;
+   double TempBeta = TempTotal.GetP() / TempTotal[0];
+
+   TempJ1 = TempJ1.Boost(TempTotal, TempBeta);
+   TempJ2 = TempJ2.Boost(TempTotal, TempBeta);
+   TempME = TempME.Boost(TempTotal, TempBeta);
+
+   double MT = 0;
+
+   double EMET = TempME[0];
+   double SumE = TempJ1[0] + TempJ2[0];
+   double DeltaE = TempJ1[0] - TempJ2[0];
+   double ES = (TempJ1 + TempJ2).GetP();
+   double ED = (TempJ1 - TempJ2).GetP();
+   double A = SumE * DeltaE / ES;
+   double B = sqrt(ED * ED - A * A);
+
+   double P1P1 = TempJ1.SpatialDot(TempJ1);
+   double P1P2 = TempJ1.SpatialDot(TempJ2);
+
+   double m0 = (SumE - EMET) / (2 * DeltaE) - SumE * DeltaE / ES / ES;
+   double m1 = DeltaE * (SumE + EMET) / 2;
+
+   double EQA = m0 * m0 + B * B / ES / ES;
+   double EQB = 2 * m0 * m1 - B * B;
+   double EQC = m1 * m1;
+
+   double X2Max = (-EQB + sqrt(EQB * EQB - 4 * EQA * EQC)) / (2 * EQA);
+   double X2Min = (-EQB - sqrt(EQB * EQB - 4 * EQA * EQC)) / (2 * EQA);
+
+   double X = sqrt(X2Max);
+   double Y = ((X * X + DeltaE * DeltaE) * SumE - (X * X - DeltaE * DeltaE) * EMET) / (2 * X * DeltaE);
+   double M2 = (SumE * X - DeltaE * Y) * (SumE * X - DeltaE * Y) / (X * X - DeltaE * DeltaE) / 4;
+
+   double A0 = X / ES;
+   double B0 = (Y - A * A0) / B;
+   double C0 = sqrt(1 - A0 * A0 - B0 * B0);
+   if(A0 * A0 + B0 * B0 >= 1)
+      C0 = 0;
+
+   FourVector DirectionA = (TempJ1 + TempJ2).SpatialNormalize();
+   FourVector DirectionB = ((TempJ1 - TempJ2) - DirectionA * A).SpatialNormalize();
+   FourVector DirectionC = DirectionA.SpatialCross(DirectionB);   // ambiguity in direction...
+
+   double BetaCMSize = DeltaE / X;
+   FourVector BetaCM = (DirectionA * A0 + DirectionB * B0 + DirectionC * C0).SpatialNormalize() * BetaCMSize;
+      
+   FourVector J1Boosted = TempJ1.Boost(BetaCM, -BetaCMSize);
+   FourVector J2Boosted = TempJ2.Boost(BetaCM, BetaCMSize);
+
+   if(fabs(J1Boosted.GetP() - J2Boosted.GetP()) > 0.1)   // wrong boost direction!
+   {
+      J1Boosted = TempJ1.Boost(BetaCM, BetaCMSize);
+      J2Boosted = TempJ2.Boost(BetaCM, -BetaCMSize);
+   }
+
+   if(Variant == 'a')
+      MT = GetMRT(TempJ1, TempJ2, TempME);
+   if(Variant == 'b')
+   {
+      FourVector TransverseVector = (TempJ1 - (TempJ1 + TempJ2) * (P1P1 + P1P2) / (ES * ES)) * 2;
+      MT = sqrt(M2 * 4 - TransverseVector.GetP2());
+   }
+   if(Variant == 'c')
+   {
+      double MT1 = J1Boosted.GetPT();
+      double MT2 = J2Boosted.GetPT();
+      MT = sqrt(M2) * 2 - (MT1 + MT2);
+      J2Boosted = TempJ2.Boost(BetaCM, -BetaCMSize);
+   }
+
+   if(Variant == 'a')
+      MT = GetMRT(TempJ1, TempJ2, TempME);
+   if(Variant == 'b')
+   {
+      FourVector TransverseVector = (TempJ1 - (TempJ1 + TempJ2) * (P1P1 + P1P2) / (ES * ES)) * 2;
+      MT = sqrt(M2 * 4 - TransverseVector.GetP2());
+   }
+   if(Variant == 'c')
+   {
+      double MT1 = J1Boosted.GetPT();
+      double MT2 = J2Boosted.GetPT();
+      MT = sqrt(M2) * 2 - (MT1 + MT2);
+   }
+   if(Variant == 'd')
+   {
+      double MT1 = J1Boosted.GetPT();
+      double MT2 = J2Boosted.GetPT();
+      MT = sqrt(M2) * 2 - sqrt(MT1 * MT1 + MT2 * MT2) * sqrt(2);
+   }
+   if(Variant == 'e')
+      MT = (J1Boosted + J2Boosted).GetPT();
+   if(Variant == 'f')
+   {
+      double MT1 = J1Boosted.GetPT();
+      double MT2 = J2Boosted.GetPT();
+      MT = sqrt(2 * M2 - MT1 * MT1 - MT2 * MT2);
+   }
+   if(Variant == 'g')
+      MT = GetMRT(TempJ1, TempJ2, TempME) / BetaToGamma(BetaCMSize);
+
+   return MT;
 }
 
 int FindCategory(GenParticleTree &Tree, int index)
