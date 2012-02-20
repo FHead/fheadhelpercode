@@ -668,7 +668,7 @@ double GetISRRemoved2011MR(const FourVector P1, const FourVector P2, const FourV
    return Get2011MR(NewP1, NewP2);
 }
 
-double GetISR2011MR(const FourVector P1, const FourVector P2, const FourVector ME, int Assumption)
+double GetISR2011MR(const FourVector P1, const FourVector P2, const FourVector ME, const FourVector ISR, int Assumption)
 {
    if(Assumption == 1)
    {
@@ -1027,7 +1027,7 @@ double GetISRRemoved2011R(const FourVector P1, const FourVector P2, const FourVe
    return Get2011R(NewP1, NewP2, NewME);
 }
 
-double GetISR2011R(const FourVector P1, const FourVector P2, const FourVector ME, int Assumption)
+double GetISR2011R(const FourVector P1, const FourVector P2, const FourVector ME, const FourVector ISR, int Assumption, char AdditionalAssumption)
 {
    if(Assumption == 1)
    {
