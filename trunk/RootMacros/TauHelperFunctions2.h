@@ -42,11 +42,13 @@ double GetRStar(const FourVector P1, const FourVector P2, const FourVector ME);
 double Get2011R(const FourVector P1, const FourVector P2, const FourVector ME);
 double GetISRRemovedR(const FourVector P1, const FourVector P2, const FourVector POther, double ME3Assumption = 0);
 double GetISRRemoved2011R(const FourVector P1, const FourVector P2, const FourVector POther, double ME3Assumption = 0);
-double GetISR2011R(const FourVector P1, const FourVector P2, const FourVector ME, int Assumption = 0);
+double GetISR2011R(const FourVector P1, const FourVector P2, const FourVector ME, int Assumption = 0, char AdditionalVariant = 'g');
 double GetGammaRStar(const FourVector P1, const FourVector P2);
 double BetaToGamma(double Beta);
 double GammaToBeta(double Gamma);
 vector<FourVector> SplitIntoGroups(vector<FourVector> &Input, bool ZeroMass = false);
+double GetDifference8(FourVector &P1, FourVector &P2, FourVector &ME, double BetaX);
+double GetDifference9(FourVector &P1, FourVector &P2, FourVector &ME, double BetaZ);
 double FindMR11MinimumPz(FourVector J1, FourVector J2, FourVector ME, FourVector ISR);
 double EstimateMass11(FourVector J1, FourVector J2, FourVector ME, FourVector ISR);
 double EstimateTransverseMass11(FourVector J1, FourVector J2, FourVector ME, FourVector ISR, char Variant = 'g');
@@ -1027,7 +1029,7 @@ double GetISRRemoved2011R(const FourVector P1, const FourVector P2, const FourVe
    return Get2011R(NewP1, NewP2, NewME);
 }
 
-double GetISR2011R(const FourVector P1, const FourVector P2, const FourVector ME, const FourVector ISR, int Assumption, char AdditionalAssumption)
+double GetISR2011R(const FourVector P1, const FourVector P2, const FourVector ME, const FourVector ISR, int Assumption, char AdditionalVariant)
 {
    if(Assumption == 1)
    {
@@ -1434,6 +1436,57 @@ vector<FourVector> SplitIntoGroups(vector<FourVector> &Input, bool ZeroMass)
    Result.push_back(Group2);
 
    return Result;
+}
+
+double GetDifference8(FourVector &P1, FourVector &P2, FourVector &ME, double BetaX)
+{
+   double DeltaPx = P1[1] - P2[1];
+   double Pxj = P1[1] + P2[1];
+   double Px = ME[1];
+   double DeltaPz = P1[3] - P2[3];
+   double Pzj = P1[3] + P2[3];
+   double DeltaE = P1[0] - P2[0];
+   double Ej = P1[0] + P2[0];
+
+   double GammaX = BetaToGamma(BetaX);
+   double DeltaPzBetaZ = GammaX * DeltaE - GammaX * BetaX * DeltaPx;
+   double BetaXE = Px + Pxj - BetaX * Ej;
+   double BetaXDeltaPzPz = -BetaX * DeltaPz * Pzj
+      + DeltaPzBetaZ * GammaX * (BetaXE + BetaX * Ej - BetaX * BetaX * (Px + Pxj));
+   double Left = DeltaPz * DeltaPz * BetaX * GammaX * Ej
+      - GammaX * BetaX * BetaX * DeltaPz * Pxj * DeltaPz
+      - Pzj * BetaX * DeltaPzBetaZ * DeltaPz;
+   double Right = GammaX * BetaXE * DeltaPz * DeltaPz
+      - GammaX * BetaX * BetaX * Px * DeltaPz * DeltaPz
+      - DeltaPzBetaZ * BetaXDeltaPzPz;
+
+   return Left - Right;
+}
+
+double GetDifference9(FourVector &P1, FourVector &P2, FourVector &ME, double BetaZ)
+{
+   double DeltaPx = P1[1] - P2[1];
+   double Pxj = P1[1] + P2[1];
+   double Px = ME[1];
+   double DeltaPz = P1[3] - P2[3];
+   double Pzj = P1[3] + P2[3];
+   double DeltaE = P1[0] - P2[0];
+   double Ej = P1[0] + P2[0];
+
+   double GammaZ = BetaToGamma(BetaZ);
+   double InvGammaZ = sqrt(1 - BetaZ * BetaZ);
+   double DeltaPxBetaX = GammaZ * DeltaE - GammaZ * BetaZ * DeltaPz;
+   double DeltaPxInvGammaE = GammaZ * Ej * DeltaPx * (1 + BetaZ * BetaZ)
+      - 2 * GammaZ * BetaZ * Pzj * DeltaPx
+      + DeltaPxBetaX * (Px - Pxj);
+   double DeltaPxInvGammaPz = DeltaPx * InvGammaZ * Ej * BetaZ
+      - DeltaPx * InvGammaZ * Pzj + BetaZ * DeltaPxInvGammaE;
+
+   double Left = DeltaPx * DeltaPx * InvGammaZ * (Pxj + Px);
+   double Right = DeltaPxBetaX * (GammaZ * (DeltaPxInvGammaE + DeltaPx * InvGammaZ * Ej)
+         - GammaZ * BetaZ * (DeltaPxInvGammaPz + DeltaPx * InvGammaZ * Pzj));
+
+   return fabs(Left - Right);
 }
 
 double FindMR11MinimumPz(FourVector J1, FourVector J2, FourVector ME, FourVector ISR)
