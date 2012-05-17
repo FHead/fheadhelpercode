@@ -39,6 +39,8 @@ private:
    double HomeButtonY;
    double HomeButtonSize;
    string HomeButtonDestination;
+   bool PrintPageNumber;
+   int NextPageNumber;
 public:
    PsFileHelper();
    PsFileHelper(string filename);
@@ -91,6 +93,8 @@ public:
    void InsertHomeButtonAbsolute(double X, double Y, double Size, string Destination);
    void SetAutomaticHomeButton(bool newvalue = true, string Destination = "HomePage",
       double X = 50, double Y = 50, double Size = 75);
+   void SetPageNumber(bool printnumber);
+   void InsertPageNumber(TCanvas &Canvas, int PageNumber = -1);
 };
 
 PsFileHelper::PsFileHelper()
@@ -104,6 +108,8 @@ PsFileHelper::PsFileHelper()
    HomeButtonY = 50;
    HomeButtonSize = 75;
    HomeButtonDestination = "";
+   PrintPageNumber = true;
+   NextPageNumber = 1;
 }
 
 PsFileHelper::PsFileHelper(string filename)
@@ -115,6 +121,8 @@ PsFileHelper::PsFileHelper(string filename)
    HomeButtonY = 50;
    HomeButtonSize = 75;
    HomeButtonDestination = "";
+   PrintPageNumber = true;
+   NextPageNumber = 1;
    
    Open(filename);
 }
@@ -128,6 +136,8 @@ PsFileHelper::PsFileHelper(string filename, string option)
    HomeButtonY = 50;
    HomeButtonSize = 75;
    HomeButtonDestination = "";
+   PrintPageNumber = true;
+   NextPageNumber = 1;
 
    Open(filename);
 }
@@ -155,6 +165,8 @@ void PsFileHelper::Open(string filename)
       PSHandle->PrintStr("/pdfmark where {pop} {userdict /pdfmark /cleartomark load put} ifelse\n");
       PSHandle->PrintStr("\n");
    }
+
+   NextPageNumber = 1;
 }
 
 void PsFileHelper::Close(bool Convert)
@@ -170,6 +182,7 @@ void PsFileHelper::Close(bool Convert)
 
    Status = false;
    FileName = "";
+   NextPageNumber = -1;
 }
 
 string PsFileHelper::GetFileName()
@@ -344,7 +357,10 @@ void PsFileHelper::AddCanvas(TCanvas *Canvas)
    if(Canvas == NULL)
       return;
 
+   if(PrintPageNumber == true)
+      InsertPageNumber(*Canvas, NextPageNumber);
    Canvas->Print(FileName.c_str(), Option.c_str());
+   NextPageNumber = NextPageNumber + 1;
 
    if(AutomaticHomeButton == true)
       InsertHomeButtonAbsolute(HomeButtonX, HomeButtonY, HomeButtonSize, HomeButtonDestination);
@@ -363,7 +379,10 @@ void PsFileHelper::AddCanvasWithText(TCanvas *Canvas, string Text, double X, dou
    text.SetTextSize(TextSize);
    text.Draw();
 
+   if(PrintPageNumber == true)
+      InsertPageNumber(*Canvas, NextPageNumber);
    Canvas->Print(FileName.c_str(), Option.c_str());
+   NextPageNumber = NextPageNumber + 1;
 
    if(AutomaticHomeButton == true)
       InsertHomeButtonAbsolute(HomeButtonX, HomeButtonY, HomeButtonSize, HomeButtonDestination);
@@ -383,7 +402,10 @@ void PsFileHelper::AddTextPage(string Text, double X, double Y, double TextSize)
    text.SetTextSize(TextSize);
    text.Draw();
 
+   if(PrintPageNumber == true)
+      InsertPageNumber(canvas, NextPageNumber);
    canvas.Print(FileName.c_str(), Option.c_str());
+   NextPageNumber = NextPageNumber + 1;
 
    if(AutomaticHomeButton == true)
       InsertHomeButtonAbsolute(HomeButtonX, HomeButtonY, HomeButtonSize, HomeButtonDestination);
@@ -406,7 +428,10 @@ void PsFileHelper::AddTextPage(vector<string> Text, double X, double Y, double T
    for(int i = 0; i < (int)Text.size(); i++)
       texts[i]->Draw();
 
+   if(PrintPageNumber == true)
+      InsertPageNumber(canvas, NextPageNumber);
    canvas.Print(FileName.c_str(), Option.c_str());
+   NextPageNumber = NextPageNumber + 1;
 
    if(AutomaticHomeButton == true)
       InsertHomeButtonAbsolute(HomeButtonX, HomeButtonY, HomeButtonSize, HomeButtonDestination);
@@ -447,7 +472,10 @@ void PsFileHelper::AddTableOfContentPage(vector<string> Items, vector<string> De
    for(int i = 0; i < (int)texts.size(); i++)
       texts[i]->Draw();
 
+   if(PrintPageNumber == true)
+      InsertPageNumber(canvas, NextPageNumber);
    canvas.Print(FileName.c_str(), Option.c_str());
+   NextPageNumber = NextPageNumber + 1;
 
    if(AutomaticHomeButton == true)
       InsertHomeButtonAbsolute(HomeButtonX, HomeButtonY, HomeButtonSize, HomeButtonDestination);
@@ -589,6 +617,25 @@ void PsFileHelper::SetAutomaticHomeButton(bool newvalue, string Destination, dou
    HomeButtonX = X;
    HomeButtonY = Y;
    HomeButtonSize = Size;
+}
+
+void PsFileHelper::SetPageNumber(bool printnumber)
+{
+   PrintPageNumber = printnumber;
+}
+
+void PsFileHelper::InsertPageNumber(TCanvas &Canvas, int PageNumber)
+{
+   if(PageNumber < 0)
+      PageNumber = NextPageNumber;
+
+   Canvas.cd();
+
+   TLatex Latex;
+   Latex.SetTextFont(42);
+   Latex.SetTextSize(0.02);
+   Latex.SetNDC(true);
+   Latex.DrawLatex(0.98, 0.01, Form("%d", PageNumber));
 }
 
 #endif

@@ -50,8 +50,8 @@ vector<FourVector> SplitIntoGroups(vector<FourVector> &Input, bool ZeroMass = fa
 double GetDifference8(FourVector &P1, FourVector &P2, FourVector &ME, double BetaX);
 double GetDifference9(FourVector &P1, FourVector &P2, FourVector &ME, double BetaZ);
 double FindMR11MinimumPz(FourVector J1, FourVector J2, FourVector ME, FourVector ISR);
-double EstimateMass11(FourVector J1, FourVector J2, FourVector ME, FourVector ISR);
-double EstimateTransverseMass11(FourVector J1, FourVector J2, FourVector ME, FourVector ISR, char Variant = 'g');
+double EstimateMass11(FourVector J1, FourVector J2, FourVector ME, FourVector ISR, bool Reversal = false);
+double EstimateTransverseMass11(FourVector J1, FourVector J2, FourVector ME, FourVector ISR, char Variant = 'g', bool Reversal = false);
 int FindCategory(GenParticleTree &Tree, int index);
 
 class FourVector
@@ -967,6 +967,16 @@ double GetISR2011MR(const FourVector P1, const FourVector P2, const FourVector M
 
       return EstimateMass11(P1, P2, METemp11, ISR);
    }
+   if(Assumption == -11)
+   {
+      double JJMass2 = (P1 + P2).GetMass2();
+      FourVector METemp11 = ME;
+
+      METemp11[3] = FindMR11MinimumPz(P1, P2, METemp11, ISR);
+      METemp11[0] = sqrt(JJMass2 + METemp11.GetP2());
+
+      return EstimateMass11(P1, P2, METemp11, ISR);
+   }
 
    return 0;
 }
@@ -1587,7 +1597,7 @@ double FindMR11MinimumPz(FourVector J1, FourVector J2, FourVector ME, FourVector
    return BestPz;
 }
 
-double EstimateMass11(FourVector J1, FourVector J2, FourVector ME, FourVector ISR)
+double EstimateMass11(FourVector J1, FourVector J2, FourVector ME, FourVector ISR, bool Reversal)
 {
    FourVector TempTotal = ME + J1 + J2 + ISR;
    double TempBetaZ = TempTotal[3] / TempTotal[0];
@@ -1641,7 +1651,7 @@ double EstimateMass11(FourVector J1, FourVector J2, FourVector ME, FourVector IS
    return sqrt(M2) * 2;
 }
 
-double EstimateTransverseMass11(FourVector J1, FourVector J2, FourVector ME, FourVector ISR, char Variant)
+double EstimateTransverseMass11(FourVector J1, FourVector J2, FourVector ME, FourVector ISR, char Variant, bool Reversal)
 {
    FourVector TempTotal = ME + J1 + J2 + ISR;
    double TempBetaZ = TempTotal[3] / TempTotal[0];
