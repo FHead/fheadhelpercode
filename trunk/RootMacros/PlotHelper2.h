@@ -161,7 +161,7 @@ void PsFileHelper::Open(string filename)
    if(PSHandle != NULL)
    {
       PSHandle->PrintStr("\n");
-      PSHandle->PrintStr("\%\% pdfmark prolog: tell ps reader to ignore pdfmark if it's not supported\n");
+      PSHandle->PrintStr("%% pdfmark prolog: tell ps reader to ignore pdfmark if it's not supported\n");
       PSHandle->PrintStr("/pdfmark where {pop} {userdict /pdfmark /cleartomark load put} ifelse\n");
       PSHandle->PrintStr("\n");
    }
