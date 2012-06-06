@@ -8,6 +8,7 @@
 //    the helper functions here will be mostly on *.ps files
 // Added feature compared to 6152: being able to insert a table of contents (and it's clickable!)
 //    automatic home button
+//    automatic page number
 // Developer: Yi Chen, 6612
 
 #include <iostream>
