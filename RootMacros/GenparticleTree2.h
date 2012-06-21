@@ -9,6 +9,8 @@
 #include <istream>
 using namespace std;
 
+#include "TauHelperFunctions2.h"
+
 #define DEFAULT_VALUE -999999
 #define PI 3.14159265358979323846264338327950288479716939937510
 
@@ -32,8 +34,8 @@ union SaveHelper
 class GenParticle
 {
 public:
-   double P[4];
-   double V[4];
+   FourVector P;
+   FourVector V;
    int PDGID;
    int StatusCode;
    vector<int> Mothers;
@@ -53,13 +55,8 @@ public:
    {
       bool operator()(const GenParticle &First, const GenParticle &Second) const
       {
-         double Phi1 = acos(First.P[1] / sqrt(First.P[1] * First.P[1] + First.P[2] * First.P[2]));
-         if(First.P[2] < 0)
-            Phi1 = -Phi1;
-
-         double Phi2 = acos(Second.P[1] / sqrt(Second.P[1] * Second.P[1] + Second.P[2] * Second.P[2]));
-         if(Second.P[2] < 0)
-            Phi2 = -Phi2;
+         double Phi1 = First.P.GetPhi();
+         double Phi2 = Second.P.GetPhi();
 
          if(Phi1 < Phi2)   return true;
          if(Phi1 > Phi2)   return false;
@@ -264,6 +261,9 @@ private:
    int NumberOfTrees;
    int RunNumber;
    int EventNumber;
+   double Weight;
+   vector<int> IntegerProperties;
+   vector<double> DoubleProperties;
 public:
    GenParticleTree();
    GenParticleTree(vector<GenParticle> &particles, int run, int event, bool IgnoreInfrastructure = false);
@@ -277,10 +277,26 @@ public:
    int TreeCount();
    int TreeMultiplicityCount(int index);
    void Dump(ostream &out);
-   int GetRunNumber() { return RunNumber; }
-   int GetEventNumber() { return EventNumber; }
    int RecommendTree();
    GenParticleTree operator +(const GenParticleTree &other) const;
+public:
+   int GetRunNumber() { return RunNumber; }
+   int GetEventNumber() { return EventNumber; }
+   double GetWeight() { return Weight; }
+   void SetRunNumber(int run) { RunNumber = run; }
+   void SetEventNumber(int event) { EventNumber = event; }
+   void SetWeight(double weight) { Weight = weight; }
+public:
+   int GetIntegerPropertiesCount() { return IntegerProperties.size(); }
+   int GetIntegerProperties(int index) { return index < (int)IntegerProperties.size() ? IntegerProperties[index] : -1; }
+   int GetDoublePropertiesCount() { return DoubleProperties.size(); }
+   double GetDoubleProperties(int index) { return index < (int)DoubleProperties.size() ? DoubleProperties[index] : -1; }
+   void SetIntegerProperties(int index, int value) { if(index < (int)IntegerProperties.size()) IntegerProperties[index] = value; }
+   void AppendIntegerProperties(int value) { IntegerProperties.push_back(value); }
+   void RemoveIntegerProperties(int index) { if(index < (int)IntegerProperties.size()) IntegerProperties.erase(IntegerProperties.begin() + index); }
+   void SetDoubleProperties(int index, double value) { if(index < (int)DoubleProperties.size()) DoubleProperties[index] = value; }
+   void AppendDoubleProperties(double value) { DoubleProperties.push_back(value); }
+   void RemoveDoubleProperties(int index) { if(index < (int)DoubleProperties.size()) DoubleProperties.erase(DoubleProperties.begin() + index); }
 public:
    void SaveToStream(ostream &out, bool ASCII = false);
    void LoadFromStream(istream &in, bool ASCII = false);
@@ -434,10 +450,18 @@ void GenParticleTree::SaveToStream(ostream &out, bool ASCII)
 {
    if(ASCII == true)
    {
-      out << RunNumber << " " << EventNumber;
+      out << RunNumber << " " << EventNumber << " " << Weight << endl;
+
+      out << IntegerProperties.size();
+      for(int i = 0; i < (int)IntegerProperties.size(); i++)
+         out << " " << IntegerProperties[i];
+
+      out << " " << DoubleProperties.size();
+      for(int i = 0; i < (int)DoubleProperties.size(); i++)
+         out << " " << DoubleProperties[i];
+      out << endl;
 
       out << " " << Particles.size() << endl;
-   
       for(int i = 0; i < (int)Particles.size(); i++)
          Particles[i].SaveToStream(out, true);
    }
@@ -446,6 +470,21 @@ void GenParticleTree::SaveToStream(ostream &out, bool ASCII)
       SaveHelper Helper;
       Helper.IntValue = RunNumber;   out.write(Helper.CharValue, 16);
       Helper.IntValue = EventNumber;   out.write(Helper.CharValue, 16);
+      Helper.Value = Weight;   out.write(Helper.CharValue, 16);
+      
+      Helper.IntValue = IntegerProperties.size();   out.write(Helper.CharValue, 16);
+      for(int i = 0; i < (int)IntegerProperties.size(); i++)
+      {
+         Helper.IntValue = IntegerProperties[i];
+         out.write(Helper.CharValue, 16);
+      }
+      
+      Helper.Value = DoubleProperties.size();   out.write(Helper.CharValue, 16);
+      for(int i = 0; i < (int)DoubleProperties.size(); i++)
+      {
+         Helper.Value = DoubleProperties[i];
+         out.write(Helper.CharValue, 16);
+      }
       
       Helper.IntValue = Particles.size();   out.write(Helper.CharValue, 16);
       for(int i = 0; i < (int)Particles.size(); i++)
@@ -459,11 +498,22 @@ void GenParticleTree::LoadFromStream(istream &in, bool ASCII)
 
    if(ASCII == true)
    {
-      in >> RunNumber >> EventNumber;
+      in >> RunNumber >> EventNumber >> Weight;
 
       int Size = 0;
       in >> Size;
+      IntegerProperties.resize(Size);
+      for(int i = 0; i < Size; i++)
+         in >> IntegerProperties[i];
    
+      Size = 0;
+      in >> Size;
+      DoubleProperties.resize(Size);
+      for(int i = 0; i < Size; i++)
+         in >> DoubleProperties[i];
+  
+      Size = 0;
+      in >> Size;
       particles.resize(Size);
       for(int i = 0; i < Size; i++)
          particles[i].LoadFromStream(in, true);   
@@ -474,9 +524,27 @@ void GenParticleTree::LoadFromStream(istream &in, bool ASCII)
 
       in.read(Helper.CharValue, 16);   RunNumber = Helper.IntValue;
       in.read(Helper.CharValue, 16);   EventNumber = Helper.IntValue;
+      in.read(Helper.CharValue, 16);   Weight = Helper.Value;
 
       int Size = 0;
       in.read(Helper.CharValue, 16);   Size = Helper.IntValue;
+      IntegerProperties.resize(Size);
+      for(int i = 0; i < Size; i++)
+      {
+         in.read(Helper.CharValue, 16);
+         IntegerProperties[i] = Helper.IntValue;
+      }
+      
+      in.read(Helper.CharValue, 16);   Size = Helper.IntValue;
+      DoubleProperties.resize(Size);
+      for(int i = 0; i < Size; i++)
+      {
+         in.read(Helper.CharValue, 16);
+         DoubleProperties[i] = Helper.Value;
+      }
+
+      in.read(Helper.CharValue, 16);   Size = Helper.IntValue;
+
       particles.resize(Size);
       for(int i = 0; i < Size; i++)
          particles[i].LoadFromStream(in, false);
