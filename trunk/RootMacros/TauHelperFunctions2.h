@@ -7,7 +7,7 @@
 using namespace std;
 
 #include "DrawRandom.h"
-#include "GenparticleTree.h"
+// #include "GenparticleTree.h"
 
 // Categories:
 //    -1. not final tau (goes into tau gamma)
@@ -52,7 +52,7 @@ double GetDifference9(FourVector &P1, FourVector &P2, FourVector &ME, double Bet
 double FindMR11MinimumPz(FourVector J1, FourVector J2, FourVector ME, FourVector ISR);
 double EstimateMass11(FourVector J1, FourVector J2, FourVector ME, FourVector ISR, bool Reversal = false);
 double EstimateTransverseMass11(FourVector J1, FourVector J2, FourVector ME, FourVector ISR, char Variant = 'g', bool Reversal = false);
-int FindCategory(GenParticleTree &Tree, int index);
+// int FindCategory(GenParticleTree &Tree, int index);
 
 class FourVector
 {
@@ -471,6 +471,7 @@ FourVector FourVector::SpatialCross(const FourVector Other) const
    Out.P[1] = P[2] * Other.P[3] - P[3] * Other.P[2];
    Out.P[2] = P[3] * Other.P[1] - P[1] * Other.P[3];
    Out.P[3] = P[1] * Other.P[2] - P[2] * Other.P[1];
+   return Out;
 }
 
 FourVector FourVector::SpatialNormalize() const
@@ -949,11 +950,11 @@ double GetISR2011MR(const FourVector P1, const FourVector P2, const FourVector M
       double FinalJx9 = GammaX9 * (B1PTemp9[1] + B2PTemp9[1]) - GammaX9 * BetaX9
          * (GammaZ9 * (B1PTemp9[0] + B2PTemp9[0]) - GammaZ9 * MinimumBetaZ * (B1PTemp9[3] - B2PTemp9[3]));
       double FinalJy9 = B1PTemp9[2] + B2PTemp9[2];
-      double FinalJT9 = sqrt(FinalJx9 * FinalJx9 + FinalJy9 * FinalJy9);
+      // double FinalJT9 = sqrt(FinalJx9 * FinalJx9 + FinalJy9 * FinalJy9);
 
       double MR9 = FinalJE;
-      double MT9 = 2 * FinalJT9;
-      double R9 = MT9 / MR9 / 2;
+      // double MT9 = 2 * FinalJT9;
+      // double R9 = MT9 / MR9 / 2;
 
       return MR9;
    }
@@ -1599,6 +1600,8 @@ double FindMR11MinimumPz(FourVector J1, FourVector J2, FourVector ME, FourVector
 
 double EstimateMass11(FourVector J1, FourVector J2, FourVector ME, FourVector ISR, bool Reversal)
 {
+   Reversal = false;
+
    FourVector TempTotal = ME + J1 + J2 + ISR;
    double TempBetaZ = TempTotal[3] / TempTotal[0];
 
@@ -1653,6 +1656,8 @@ double EstimateMass11(FourVector J1, FourVector J2, FourVector ME, FourVector IS
 
 double EstimateTransverseMass11(FourVector J1, FourVector J2, FourVector ME, FourVector ISR, char Variant, bool Reversal)
 {
+   Reversal = false;
+
    FourVector TempTotal = ME + J1 + J2 + ISR;
    double TempBetaZ = TempTotal[3] / TempTotal[0];
 
@@ -1689,7 +1694,7 @@ double EstimateTransverseMass11(FourVector J1, FourVector J2, FourVector ME, Fou
    double EQC = m1 * m1;
 
    double X2Max = (-EQB + sqrt(EQB * EQB - 4 * EQA * EQC)) / (2 * EQA);
-   double X2Min = (-EQB - sqrt(EQB * EQB - 4 * EQA * EQC)) / (2 * EQA);
+   // double X2Min = (-EQB - sqrt(EQB * EQB - 4 * EQA * EQC)) / (2 * EQA);
 
    double X = sqrt(X2Max);
    double Y = ((X * X + DeltaE * DeltaE) * SumE - (X * X - DeltaE * DeltaE) * EMET) / (2 * X * DeltaE);
@@ -1765,6 +1770,7 @@ double EstimateTransverseMass11(FourVector J1, FourVector J2, FourVector ME, Fou
    return MT;
 }
 
+/*
 int FindCategory(GenParticleTree &Tree, int index)
 {
    vector<int> Daughters = Tree[index].Daughters;
@@ -1831,6 +1837,7 @@ int FindCategory(GenParticleTree &Tree, int index)
 
    return 8;
 }
+*/
 
 #endif
 
