@@ -394,8 +394,8 @@ FourVector FourVector::BoostX(double Beta) const
    double Gamma = BetaToGamma(Beta);
 
    FourVector Out;
-   Out.P[0] = Gamma * P[0] - Beta * Gamma * P[1];
-   Out.P[1] = -Beta * Gamma * P[0] + Gamma * P[1];
+   Out.P[0] = Gamma * P[0] + Beta * Gamma * P[1];
+   Out.P[1] = Beta * Gamma * P[0] + Gamma * P[1];
    Out.P[2] = P[2];
    Out.P[3] = P[3];
    return Out;
@@ -406,9 +406,9 @@ FourVector FourVector::BoostY(double Beta) const
    double Gamma = BetaToGamma(Beta);
 
    FourVector Out;
-   Out.P[0] = Gamma * P[0] - Beta * Gamma * P[2];
+   Out.P[0] = Gamma * P[0] + Beta * Gamma * P[2];
    Out.P[1] = P[1];
-   Out.P[2] = -Beta * Gamma * P[0] + Gamma * P[2];
+   Out.P[2] = Beta * Gamma * P[0] + Gamma * P[2];
    Out.P[3] = P[3];
    return Out;
 }
@@ -418,10 +418,10 @@ FourVector FourVector::BoostZ(double Beta) const
    double Gamma = BetaToGamma(Beta);
 
    FourVector Out;
-   Out.P[0] = Gamma * P[0] - Beta * Gamma * P[3];
+   Out.P[0] = Gamma * P[0] + Beta * Gamma * P[3];
    Out.P[1] = P[1];
    Out.P[2] = P[2];
-   Out.P[3] = -Beta * Gamma * P[0] + Gamma * P[3];
+   Out.P[3] = Beta * Gamma * P[0] + Gamma * P[3];
    return Out;
 }
 
