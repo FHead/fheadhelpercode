@@ -12,27 +12,47 @@ if [ -z $2 ]; then
    output=a.out
 fi
 
-root_cflags=`sh $ROOTSYS/bin/root-config --cflags`
-root_libs=`sh $ROOTSYS/bin/root-config --glibs`
-roofit_libs="-lRooFitCore -lRooFit -lMinuit -lFoam"
-fastjet_cflags=`fastjet-config --cxxflags`
-fastjet_libs=`fastjet-config --libs`
-extrainclude="-I/$HOME/RootMacros"
-pythia_include="-I$PYTHIA8/include"
-pythia_libs="-L$PYTHIA8/lib/archive -lpythia8 -llhapdfdummy"
-cxxflags="-g -fPIC -Wno-deprecated -O -ansi -D_GNU_SOURCE -g -O2"
-# cxx="-m64"
+if [ $HOSTNAME == "t3-susy.ultralight.org" ]; then
+   cflags=`sh $ROOTSYS/bin/root-config --cflags`
+   libs=`sh $ROOTSYS/bin/root-config --libs`
+   cxxflags="-g -fPIC -Wno-deprecated -O -ansi -D_GNU_SOURCE -g -O2"
+   cxx="-m64"
+   extrainclude="-I/$HOME/RootMacros"
+   fastjet_cflags=`fastjet-config --cxxflags`
+   fastjet_libs=`fastjet-config --libs`
+   pythia_include="-I$PYTHIA8/include"
+   pythia_libs="-L$PYTHIA8/lib/archive -lpythia8 -llhapdfdummy"
 
-libs="$root_libs $roofit_libs $fastjet_libs $pythia_libs -lMathMore -lHistPainter"
-# libs="$root_libs $roofit_libs $fastjet_libs $pythia_libs"
-flags="$cxx $cxxflags $fastjet_cflags $root_cflags"
-include="$extrainclude $pythia_include"
 
-# quick fix....
-libs=`echo $libs | sed "s/-lz//g"`
+   # quick fix....
+   libs=`echo $libs | sed "s/-lz//g"`
 
-echo g++ $input $libs $flags $include -o $output
+   echo g++ $input $libs $cflags $cxx $cxxflags $extrainclude $fastjet_cflags $fastjet_libs $pythia_include $pythia_libs -o $output
+   g++ $input $libs $cflags $cxx $cxxflags $extrainclude $fastjet_cflags $fastjet_libs $pythia_include $pythia_libs -o $output
+
+elif [ $HOSTNAME == "pccit28" ]; then
+
+   root_cflags=`sh $ROOTSYS/bin/root-config --cflags`
+   root_libs=`sh $ROOTSYS/bin/root-config --glibs`
+   roofit_libs="-lRooFitCore -lRooFit -lMinuit -lFoam"
+   fastjet_cflags=`fastjet-config --cxxflags`
+   fastjet_libs=`fastjet-config --libs`
+   extrainclude="-I/$HOME/RootMacros"
+   pythia_include="-I$PYTHIA8/include"
+   pythia_libs="-L$PYTHIA8/lib/archive -lpythia8 -llhapdfdummy"
+   cxxflags="-g -fPIC -Wno-deprecated -O -ansi -D_GNU_SOURCE -g -O2"
+   # cxx="-m64"
+
+   libs="$root_libs $roofit_libs $fastjet_libs $pythia_libs -lMathMore -lHistPainter"
+   # libs="$root_libs $roofit_libs $fastjet_libs $pythia_libs"
+   flags="$cxx $cxxflags $fastjet_cflags $root_cflags"
+   include="$extrainclude $pythia_include"
+
+   # quick fix....
+   libs=`echo $libs | sed "s/-lz//g"`
+
+   echo g++ $input $libs $flags $include -o $output
 g++ $input $libs $flags $include -o $output
 
-
+fi
 

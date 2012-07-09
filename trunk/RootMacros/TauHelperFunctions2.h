@@ -65,6 +65,8 @@ public:
    ~FourVector();
    void SetPtEtaPhi(double pt, double eta, double phi);   // massless
    void SetPtEtaPhiMass(double pt, double eta, double phi, double mass = 0);
+   void SetPtYPhi(double pt, double y, double phi);   // massless
+   void SetPtYPhiMass(double pt, double y, double phi, double mass = 0);
    void SetSizeEtaPhi(double size, double eta, double phi);
    void SetSizeEtaPhiMass(double size, double eta, double phi, double mass = 0);
    void SetSizeEtaPhiEnergy(double size, double eta, double phi, double energy);
@@ -149,6 +151,19 @@ void FourVector::SetPtEtaPhiMass(double pt, double eta, double phi, double mass)
    P[3] = pt * sinh(eta);
 
    P[0] = sqrt(mass * mass + SpatialDot(*this));
+}
+
+void FourVector::SetPtYPhi(double pt, double y, double phi)
+{
+   SetPtYPhiMass(pt, y, phi, 0);
+}
+
+void FourVector::SetPtYPhiMass(double pt, double y, double phi, double mass)
+{
+   P[1] = pt * cos(phi);
+   P[2] = pt * sin(phi);
+   P[0] = sqrt(pt * pt +  mass * mass) * cosh(y);
+   P[3] = P[0] * tanh(y);
 }
 
 void FourVector::SetSizeEtaPhi(double size, double eta, double phi)
