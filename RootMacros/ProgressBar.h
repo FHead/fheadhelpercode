@@ -80,9 +80,19 @@ void ProgressBar::SanityCheck()
       Column = 100;
    }
 
-   if(Style != 0 && Style != 1)
+   if(Style < 0 || Style > 5)
    {
-      cerr << "[ProgressBar] Currently only supporting styles: \"0\", \"1\"" << endl;
+      cerr << "[ProgressBar] Style invalid.  Set to style \"0\"" << endl;
+      cerr << endl;
+      cerr << "FYI: available styles look like these" << endl;
+      cerr << "0: [==============================>                 ]  55%" << endl;
+      cerr << "1: [                            ><>                 ]  55%" << endl;
+      cerr << "2: [ooooooooooooooooooooooooooooooo                 ]  55%" << endl;
+      cerr << "3: [~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|                 ]  55%" << endl;
+      cerr << "4: [                  <=============================]  55%" << endl;
+      cerr << "5: [                  <><                           ]  55%" << endl;
+      cerr << endl;
+
       Style = 0;
    }
 
@@ -131,6 +141,72 @@ void ProgressBar::Print(double progress)
       if(FilledColumn >= 1)
          *Out << ">";
       for(int i = 0; i < AvailableColumn - FilledColumn; i++)
+         *Out << " ";
+      *Out << "] ";
+      *Out << setw(3) << setfill(' ') << (int)((progress - Min) / (Max - Min) * 100 + 0.5);
+      *Out << "\%" << flush;
+   }
+   if(Style == 2)
+   {
+      int AvailableColumn = Column - 2 - 5;
+      int FilledColumn = (int)(AvailableColumn * (progress - Min) / (Max - Min));
+
+      *Out << "\033[1G[";
+      for(int i = 0; i < FilledColumn; i++)
+         *Out << "o";
+      for(int i = 0; i < AvailableColumn - FilledColumn; i++)
+         *Out << " ";
+      *Out << "] ";
+      *Out << setw(3) << setfill(' ') << (int)((progress - Min) / (Max - Min) * 100 + 0.5);
+      *Out << "\%" << flush;
+   }
+   if(Style == 3)
+   {
+      int AvailableColumn = Column - 2 - 5;
+      int FilledColumn = (int)(AvailableColumn * (progress - Min) / (Max - Min));
+
+      *Out << "\033[1G[";
+      for(int i = 0; i < FilledColumn - 1; i++)
+         *Out << "~";
+      if(FilledColumn >= 1)
+         *Out << "|";
+      for(int i = 0; i < AvailableColumn - FilledColumn; i++)
+         *Out << " ";
+      *Out << "] ";
+      *Out << setw(3) << setfill(' ') << (int)((progress - Min) / (Max - Min) * 100 + 0.5);
+      *Out << "\%" << flush;
+   }
+   if(Style == 4)
+   {
+      int AvailableColumn = Column - 2 - 5;
+      int FilledColumn = (int)(AvailableColumn * (progress - Min) / (Max - Min));
+
+      *Out << "\033[1G[";
+      for(int i = 0; i < AvailableColumn - FilledColumn; i++)
+         *Out << " ";
+      if(FilledColumn >= 1)
+         *Out << "<";
+      for(int i = 0; i < FilledColumn - 1; i++)
+         *Out << "=";
+      *Out << "] ";
+      *Out << setw(3) << setfill(' ') << (int)((progress - Min) / (Max - Min) * 100 + 0.5);
+      *Out << "\%" << flush;
+   }
+   if(Style == 5)
+   {
+      int AvailableColumn = Column - 2 - 5;
+      int FilledColumn = (int)(AvailableColumn * (progress - Min) / (Max - Min));
+
+      *Out << "\033[1G[";
+      for(int i = 0; i < AvailableColumn - FilledColumn; i++)
+         *Out << " ";
+      if(FilledColumn >= 1)
+         *Out << "<";
+      if(FilledColumn >= 2)
+         *Out << ">";
+      if(FilledColumn >= 3)
+         *Out << "<";
+      for(int i = 0; i < FilledColumn - 3; i++)
          *Out << " ";
       *Out << "] ";
       *Out << setw(3) << setfill(' ') << (int)((progress - Min) / (Max - Min) * 100 + 0.5);
