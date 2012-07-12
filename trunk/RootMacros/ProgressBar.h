@@ -22,6 +22,7 @@ public:
    void Print();
    void Print(double progress);
    void ChangeLine() {*Out << endl;}
+   void PrintLine() {*Out << endl;}
    void Update(double progress) {SetProgress(progress);}
    void Increment(double change = 1) {Progress = Progress + change;}
 public:
