@@ -15,9 +15,9 @@ private:
    void SanityCheck();
 public:
    ProgressBar(ostream &out, double max = 100, double min = 0, int column = 80)
-      : Out(&out), Max(max), Min(min), Column(column), Progress(0), Style(0) {SanityCheck();}
+      : Out(&out), Max(max), Min(min), Column(column), Progress(0), Style(0) {srand(time(NULL));   SanityCheck();}
    ProgressBar(ostream *out, double max = 100, double min = 0, int column = 80)
-      : Out(out), Max(max), Min(min), Column(column), Progress(0), Style(0) {SanityCheck();}
+      : Out(out), Max(max), Min(min), Column(column), Progress(0), Style(0) {srand(time(NULL));   SanityCheck();}
    ~ProgressBar() {}
    void Print();
    void Print(double progress);
@@ -38,7 +38,7 @@ public:
    void SetMax(double max) {Max = max;   SanityCheck();}
    void SetProgress(double progress) {Progress = progress;   SanityCheck();}
    void SetColumn(int column) {Column = column;   SanityCheck();}
-   void SetStyle(int style) {Style = style;   SanityCheck();}
+   void SetStyle(int style) {if(style == -1) Style = rand() % 6; else Style = style;   SanityCheck();}
    void SetStream(ostream &out) {Out = &out;   SanityCheck();}
    void SetStream(ostream *out) {Out = out;   SanityCheck();}
 };
@@ -82,7 +82,7 @@ void ProgressBar::SanityCheck()
 
    if(Style < 0 || Style > 5)
    {
-      cerr << "[ProgressBar] Style invalid.  Set to style \"0\"" << endl;
+      cerr << "[ProgressBar] Style invalid.  Set to a random style." << endl;
       cerr << endl;
       cerr << "FYI: available styles look like these" << endl;
       cerr << "0: [==============================>                 ]  55%" << endl;
@@ -93,7 +93,7 @@ void ProgressBar::SanityCheck()
       cerr << "5: [                  <><                           ]  55%" << endl;
       cerr << endl;
 
-      Style = 0;
+      Style = rand() % 6;
    }
 
    if(Out == NULL)
