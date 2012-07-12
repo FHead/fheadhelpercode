@@ -5,6 +5,8 @@
 #include <cstdlib>
 using namespace std;
 
+#define PI 3.14159265358979323846264338327950288479716939937510
+
 double DrawRandom();
 double DrawRandom(double max);
 double DrawRandom(double min, double max);
@@ -12,11 +14,14 @@ double DrawSine(double min, double max);
 double DrawLorentzian(double center, double gamma);
 double DrawGaussian(double center, double sigma);
 double DrawGaussian(double sigma);
+double DrawGaussian();
 double DrawCruijff(double center, double sigmal, double sigmar, double alphal, double alphar);
 double DrawExponential(double exponent, double left, double right);
 double DrawExponential(double exponent, double side);
 double DrawPoisson(double mean);
 double DrawPoissonDouble(double mean);
+double DrawDoubleSidedCBShape(double Mean, double Sigma, double AlphaL, double AlphaR, double NL, double NR);
+double DrawDoubleSidedCBShape(double AlphaL, double AlphaR, double NL, double NR);
 
 double DrawRandom()
 {
@@ -102,6 +107,14 @@ double DrawGaussian(double sigma)
    }
 
    return value;
+}
+
+double DrawGaussianBoxMuller()
+{
+   double x1 = DrawRandom();
+   double x2 = DrawRandom();
+
+   return sqrt(-2 * log(x1)) * cos(2 * PI * x2);
 }
 
 double DrawCruijff(double center, double sigmal, double sigmar, double alphal, double alphar)
@@ -249,6 +262,45 @@ double DrawPoisson(double mean)
 
    return value;
 }
+
+double DrawDoubleSidedCBShape(double Mean, double Sigma, double AlphaL, double AlphaR, double NL, double NR)
+{
+   return Mean + DrawDoubleSidedCBShape(AlphaL, AlphaR, NL, NR) * Sigma;
+}
+
+double DrawDoubleSidedCBShape(double AlphaL, double AlphaR, double NL, double NR)
+{
+   double LeftTailIntegral = exp(-0.5 * AlphaL * AlphaL) * NL / AlphaL / (NL - 1);
+   double GaussianIntegral = sqrt(PI / 2) * (erf(AlphaR / sqrt(2)) + erf(AlphaL / sqrt(2)));
+   double RightTailIntegral = exp(-0.5 * AlphaR * AlphaR) * NR / AlphaR / (NR - 1);
+   double TotalIntegral = LeftTailIntegral + GaussianIntegral + RightTailIntegral;
+
+   double RandomNumber = DrawRandom(TotalIntegral);
+   
+   if(RandomNumber < LeftTailIntegral)
+   {
+      RandomNumber = DrawRandom();
+      return -(NL / AlphaL * pow(1 - RandomNumber, 1.0 / (1 - NL)) - NL / AlphaL + AlphaL);
+   }
+   else if(RandomNumber < LeftTailIntegral + GaussianIntegral)
+   {
+      RandomNumber = DrawGaussianBoxMuller();
+      while(RandomNumber < -AlphaL || RandomNumber > AlphaR)
+         RandomNumber = DrawGaussianBoxMuller();
+      return RandomNumber;
+   }
+   else
+   {
+      RandomNumber = DrawRandom();
+      return NR / AlphaR * pow(1 - RandomNumber, 1.0 / (1 - NR)) - NR / AlphaR + AlphaR;
+   }
+
+   return 0;
+}
+
+
+
+
 
 #endif
 
