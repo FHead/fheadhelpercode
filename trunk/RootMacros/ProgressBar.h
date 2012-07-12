@@ -80,9 +80,9 @@ void ProgressBar::SanityCheck()
       Column = 100;
    }
 
-   if(Style != 0)
+   if(Style != 0 && Style != 1)
    {
-      cerr << "[ProgressBar] Currently only supporting one style: \"0\"" << endl;
+      cerr << "[ProgressBar] Currently only supporting styles: \"0\", \"1\"" << endl;
       Style = 0;
    }
 
@@ -108,6 +108,26 @@ void ProgressBar::Print(double progress)
       *Out << "\033[1G[";
       for(int i = 0; i < FilledColumn - 1; i++)
          *Out << "=";
+      if(FilledColumn >= 1)
+         *Out << ">";
+      for(int i = 0; i < AvailableColumn - FilledColumn; i++)
+         *Out << " ";
+      *Out << "] ";
+      *Out << setw(3) << setfill(' ') << (int)((progress - Min) / (Max - Min) * 100 + 0.5);
+      *Out << "\%" << flush;
+   }
+   if(Style == 1)
+   {
+      int AvailableColumn = Column - 2 - 5;
+      int FilledColumn = (int)(AvailableColumn * (progress - Min) / (Max - Min));
+
+      *Out << "\033[1G[";
+      for(int i = 0; i < FilledColumn - 3; i++)
+         *Out << " ";
+      if(FilledColumn >= 3)
+         *Out << ">";
+      if(FilledColumn >= 2)
+         *Out << "<";
       if(FilledColumn >= 1)
          *Out << ">";
       for(int i = 0; i < AvailableColumn - FilledColumn; i++)
