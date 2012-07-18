@@ -1,14 +1,14 @@
+//----------------------------------------------------------------------------
 #ifndef TauHelperFunctions_6624_AJSDKGIRIKANSVCGKISNCGIKNHKZSG
 #define TauHelperFunctions_6624_AJSDKGIRIKANSVCGKISNCGIKNHKZSG
-
+//----------------------------------------------------------------------------
 #include <vector>
 #include <cmath>
 #include <ostream>
-using namespace std;
-
+//----------------------------------------------------------------------------
 #include "DrawRandom.h"
 // #include "GenparticleTree.h"
-
+//----------------------------------------------------------------------------
 // Categories:
 //    -1. not final tau (goes into tau gamma)
 //    1. mu nu nu
@@ -19,11 +19,12 @@ using namespace std;
 //    6. nu pi+ pi- pi-
 //    7. nu pi+ pi- pi- pi0
 //    8. Otherwise
-
+//----------------------------------------------------------------------------
 #define PI 3.14159265358979323846264338327950288479716939937510
-
+//----------------------------------------------------------------------------
 class FourVector;
 ostream &operator <<(ostream &out, FourVector P);
+FourVector operator *(double Scale, FourVector P);
 double GetAngle(const FourVector P1, const FourVector P2);
 double GetDR(const FourVector P1, const FourVector P2);
 double GetDPhi(const FourVector P1, const FourVector P2);
@@ -53,7 +54,7 @@ double FindMR11MinimumPz(FourVector J1, FourVector J2, FourVector ME, FourVector
 double EstimateMass11(FourVector J1, FourVector J2, FourVector ME, FourVector ISR, bool Reversal = false);
 double EstimateTransverseMass11(FourVector J1, FourVector J2, FourVector ME, FourVector ISR, char Variant = 'g', bool Reversal = false);
 // int FindCategory(GenParticleTree &Tree, int index);
-
+//----------------------------------------------------------------------------
 class FourVector
 {
 public:
@@ -110,15 +111,15 @@ public:
    double SpatialDot(const FourVector &Other) const;
    double MetricDot(const FourVector &Other) const;
 };
-
+//----------------------------------------------------------------------------
 FourVector::FourVector()
 {
    P[0] = 0;
-   P[1] = 1;
-   P[2] = 2;
-   P[3] = 3;
+   P[1] = 0;
+   P[2] = 0;
+   P[3] = 0;
 }
-
+//----------------------------------------------------------------------------
 FourVector::FourVector(double p[4])
 {
    P[0] = p[0];
@@ -126,7 +127,7 @@ FourVector::FourVector(double p[4])
    P[2] = p[2];
    P[3] = p[3];
 }
-
+//----------------------------------------------------------------------------
 FourVector::FourVector(double e, double px, double py, double pz)
 {
    P[0] = e;
@@ -134,16 +135,16 @@ FourVector::FourVector(double e, double px, double py, double pz)
    P[2] = py;
    P[3] = pz;
 }
-
+//----------------------------------------------------------------------------
 FourVector::~FourVector()
 {
 }
-
+//----------------------------------------------------------------------------
 void FourVector::SetPtEtaPhi(double pt, double eta, double phi)
 {
    SetPtEtaPhiMass(pt, eta, phi, 0);
 }
-
+//----------------------------------------------------------------------------
 void FourVector::SetPtEtaPhiMass(double pt, double eta, double phi, double mass)
 {
    P[1] = pt * cos(phi);
@@ -152,12 +153,12 @@ void FourVector::SetPtEtaPhiMass(double pt, double eta, double phi, double mass)
 
    P[0] = sqrt(mass * mass + SpatialDot(*this));
 }
-
+//----------------------------------------------------------------------------
 void FourVector::SetPtYPhi(double pt, double y, double phi)
 {
    SetPtYPhiMass(pt, y, phi, 0);
 }
-
+//----------------------------------------------------------------------------
 void FourVector::SetPtYPhiMass(double pt, double y, double phi, double mass)
 {
    P[1] = pt * cos(phi);
@@ -165,12 +166,12 @@ void FourVector::SetPtYPhiMass(double pt, double y, double phi, double mass)
    P[0] = sqrt(pt * pt +  mass * mass) * cosh(y);
    P[3] = P[0] * tanh(y);
 }
-
+//----------------------------------------------------------------------------
 void FourVector::SetSizeEtaPhi(double size, double eta, double phi)
 {
    SetSizeEtaPhiMass(size, eta, phi, 0);
 }
-
+//----------------------------------------------------------------------------
 void FourVector::SetSizeEtaPhiMass(double size, double eta, double phi, double mass)
 {
    P[0] = sqrt(size * size + mass * mass);
@@ -178,7 +179,7 @@ void FourVector::SetSizeEtaPhiMass(double size, double eta, double phi, double m
    P[2] = size / cosh(eta) * sin(phi);
    P[3] = size * tanh(eta);
 }
-
+//----------------------------------------------------------------------------
 void FourVector::SetSizeEtaPhiEnergy(double size, double eta, double phi, double energy)
 {
    P[0] = energy;
@@ -186,12 +187,12 @@ void FourVector::SetSizeEtaPhiEnergy(double size, double eta, double phi, double
    P[2] = size / cosh(eta) * sin(phi);
    P[3] = size * tanh(eta);
 }
-
+//----------------------------------------------------------------------------
 void FourVector::SetSizeThetaPhi(double size, double theta, double phi)
 {
    SetSizeThetaPhiMass(size, theta, phi, 0);
 }
-
+//----------------------------------------------------------------------------
 void FourVector::SetSizeThetaPhiMass(double size, double theta, double phi, double mass)
 {
    P[0] = sqrt(size * size + mass * mass);
@@ -199,21 +200,21 @@ void FourVector::SetSizeThetaPhiMass(double size, double theta, double phi, doub
    P[2] = size * sin(theta) * sin(phi);
    P[3] = size * cos(theta);
 }
-
+//----------------------------------------------------------------------------
 double &FourVector::operator [](int index)
 {
    if(index >= 0 && index <= 3)
       return P[index];
    return P[0];
 }
-
+//----------------------------------------------------------------------------
 double FourVector::operator [](int index) const
 {
    if(index >= 0 && index <= 3)
       return P[index];
    return 0;
 }
-
+//----------------------------------------------------------------------------
 FourVector &FourVector::operator =(const FourVector &Other)
 {
    P[0] = Other.P[0];
@@ -223,7 +224,7 @@ FourVector &FourVector::operator =(const FourVector &Other)
 
    return *this;
 }
-   
+//----------------------------------------------------------------------------
 FourVector FourVector::operator +(const FourVector &Other) const
 {
    FourVector Out;
@@ -233,7 +234,7 @@ FourVector FourVector::operator +(const FourVector &Other) const
    Out.P[3] = P[3] + Other.P[3];
    return Out;
 }
-
+//----------------------------------------------------------------------------
 FourVector FourVector::operator -() const
 {
    FourVector Out;
@@ -243,7 +244,7 @@ FourVector FourVector::operator -() const
    Out.P[3] = -P[3];
    return Out;
 }
-
+//----------------------------------------------------------------------------
 FourVector FourVector::operator -(const FourVector &Other) const
 {
    FourVector Out;
@@ -253,7 +254,7 @@ FourVector FourVector::operator -(const FourVector &Other) const
    Out.P[3] = P[3] - Other.P[3];
    return Out;
 }
-
+//----------------------------------------------------------------------------
 FourVector FourVector::operator *(double Scale) const
 {
    FourVector Out;
@@ -263,7 +264,7 @@ FourVector FourVector::operator *(double Scale) const
    Out.P[3] = P[3] * Scale;
    return Out;
 }
-
+//----------------------------------------------------------------------------
 FourVector FourVector::operator /(double Scale) const
 {
    FourVector Out;
@@ -273,7 +274,7 @@ FourVector FourVector::operator /(double Scale) const
    Out.P[3] = P[3] / Scale;
    return Out;
 }
-
+//----------------------------------------------------------------------------
 double FourVector::GetMass() const
 {
    double Mass2 = GetMass2();
@@ -282,39 +283,40 @@ double FourVector::GetMass() const
       return sqrt(Mass2);
    return 0;
 }
-
+//----------------------------------------------------------------------------
 double FourVector::GetMass2() const
 {
    return MetricDot(*this);
 }
 
+//----------------------------------------------------------------------------
 double FourVector::GetP() const
 {
    return sqrt(SpatialDot(*this));
 }
-
+//----------------------------------------------------------------------------
 double FourVector::GetP2() const
 {
    return SpatialDot(*this);
 }
-
+//----------------------------------------------------------------------------
 double FourVector::GetPT() const
 {
    return sqrt(P[1] * P[1] + P[2] * P[2]);
 }
-
+//----------------------------------------------------------------------------
 double FourVector::GetPT2() const
 {
    return (P[1] * P[1] + P[2] * P[2]);
 }
-
+//----------------------------------------------------------------------------
 double FourVector::GetEta() const
 {
    double Momentum = GetP();
 
    return 0.5 * log((Momentum + P[3]) / (Momentum - P[3]));
 }
-
+//----------------------------------------------------------------------------
 double FourVector::GetAbsEta() const
 {
    double Eta = GetEta();
@@ -324,17 +326,17 @@ double FourVector::GetAbsEta() const
 
    return Eta;
 }
-
+//----------------------------------------------------------------------------
 double FourVector::GetRapidity() const
 {
    return 0.5 * log((P[0] + P[3]) / (P[0] - P[3]));
 }
-
+//----------------------------------------------------------------------------
 double FourVector::GetY() const
 {
    return GetRapidity();
 }
-
+//----------------------------------------------------------------------------
 double FourVector::GetPhi() const
 {
    double PT = GetPT();
@@ -345,23 +347,23 @@ double FourVector::GetPhi() const
 
    return Angle;
 }
-
+//----------------------------------------------------------------------------
 double FourVector::GetTheta() const
 {
    return acos(P[3] / GetP());
 }
-
+//----------------------------------------------------------------------------
 double FourVector::GetBeta() const
 {
    double Gamma = GetGamma();
    return sqrt(1 - 1 / (Gamma * Gamma));
 }
-
+//----------------------------------------------------------------------------
 double FourVector::GetGamma() const
 {
    return P[0] / GetMass();
 }
-
+//----------------------------------------------------------------------------
 FourVector FourVector::RotateX(double Angle) const
 {
    FourVector Out;
@@ -372,6 +374,7 @@ FourVector FourVector::RotateX(double Angle) const
    return Out;
 }
 
+//----------------------------------------------------------------------------
 FourVector FourVector::RotateY(double Angle) const
 {
    FourVector Out;
@@ -382,6 +385,7 @@ FourVector FourVector::RotateY(double Angle) const
    return Out;
 }
 
+//----------------------------------------------------------------------------
 FourVector FourVector::RotateZ(double Angle) const
 {
    FourVector Out;
@@ -391,7 +395,7 @@ FourVector FourVector::RotateZ(double Angle) const
    Out.P[3] = P[3];
    return Out;
 }
-
+//----------------------------------------------------------------------------
 FourVector FourVector::Rotate(const FourVector Axis, double Angle) const
 {
    // rotate "axis" and input to y-z plane, then rotate "axis" to z axis,
@@ -403,7 +407,7 @@ FourVector FourVector::Rotate(const FourVector Axis, double Angle) const
 
    return RotateZ(Psi).RotateX(Theta).RotateZ(Angle).RotateX(-Theta).RotateZ(-Psi);
 }
-
+//----------------------------------------------------------------------------
 FourVector FourVector::BoostX(double Beta) const
 {
    double Gamma = BetaToGamma(Beta);
@@ -415,7 +419,7 @@ FourVector FourVector::BoostX(double Beta) const
    Out.P[3] = P[3];
    return Out;
 }
-
+//----------------------------------------------------------------------------
 FourVector FourVector::BoostY(double Beta) const
 {
    double Gamma = BetaToGamma(Beta);
@@ -427,7 +431,7 @@ FourVector FourVector::BoostY(double Beta) const
    Out.P[3] = P[3];
    return Out;
 }
-
+//----------------------------------------------------------------------------
 FourVector FourVector::BoostZ(double Beta) const
 {
    double Gamma = BetaToGamma(Beta);
@@ -439,7 +443,7 @@ FourVector FourVector::BoostZ(double Beta) const
    Out.P[3] = Beta * Gamma * P[0] + Gamma * P[3];
    return Out;
 }
-
+//----------------------------------------------------------------------------
 FourVector FourVector::Boost(const FourVector Axis, double Beta) const
 {
    if(Axis.GetPT() < 1e-8)   // axis along z direction
@@ -455,7 +459,7 @@ FourVector FourVector::Boost(const FourVector Axis, double Beta) const
 
    return RotateZ(Psi).RotateX(Theta).BoostZ(Beta).RotateX(-Theta).RotateZ(-Psi);
 }
-   
+//----------------------------------------------------------------------------
 FourVector FourVector::SmearAngle(double Angle) const
 {
    FourVector Reference(0, 1, 0, 0);
@@ -471,14 +475,14 @@ FourVector FourVector::SmearAngle(double Angle) const
    double SmearAngle = DrawGaussian(Angle);
    return Rotate(RealAxis, SmearAngle);
 }
-
+//----------------------------------------------------------------------------
 FourVector FourVector::SmearMomentum(double Scale) const
 {
    double Factor = 1 + DrawGaussian(Scale);
 
    return (*this) * Factor;
 }
-
+//----------------------------------------------------------------------------
 FourVector FourVector::SpatialCross(const FourVector Other) const
 {
    FourVector Out;
@@ -488,35 +492,41 @@ FourVector FourVector::SpatialCross(const FourVector Other) const
    Out.P[3] = P[1] * Other.P[2] - P[2] * Other.P[1];
    return Out;
 }
-
+//----------------------------------------------------------------------------
 FourVector FourVector::SpatialNormalize() const
 {
    FourVector Out;
    Out = (*this) / GetP();
    return Out;
 }
-
+//----------------------------------------------------------------------------
 double FourVector::SpatialDot(const FourVector &Other) const
 {
    return P[1] * Other.P[1] + P[2] * Other.P[2] + P[3] * Other.P[3];
 }
-
+//----------------------------------------------------------------------------
 double FourVector::MetricDot(const FourVector &Other) const
 {
    return P[0] * Other.P[0] - SpatialDot(Other);
 }
-
+//----------------------------------------------------------------------------
 ostream &operator <<(ostream &out, FourVector P)
 {
    out << "(" << P[0] << ", " << P[1] << ", " << P[2] << ", " << P[3] << ")";
    return out;
 }
-
+//----------------------------------------------------------------------------
+FourVector operator *(double Scale, FourVector P)
+{
+   return P * Scale;
+}
+//----------------------------------------------------------------------------
 double GetAngle(const FourVector P1, const FourVector P2)
 {
    return acos(P1.SpatialDot(P2) / P1.GetP() / P2.GetP());
 }
 
+//----------------------------------------------------------------------------
 double GetDR(const FourVector P1, const FourVector P2)
 {
    double DEta = P1.GetEta() - P2.GetEta();
@@ -524,7 +534,7 @@ double GetDR(const FourVector P1, const FourVector P2)
 
    return sqrt(DPhi * DPhi + DEta * DEta);
 }
-
+//----------------------------------------------------------------------------
 double GetDPhi(const FourVector P1, const FourVector P2)
 {
    double DPhi = P1.GetPhi() - P2.GetPhi();
@@ -536,7 +546,7 @@ double GetDPhi(const FourVector P1, const FourVector P2)
 
    return DPhi;
 }
-
+//----------------------------------------------------------------------------
 double GetMT(const FourVector P1, const FourVector P2)
 {
    double PT1 = P1.GetPT();
@@ -544,7 +554,7 @@ double GetMT(const FourVector P1, const FourVector P2)
 
    return sqrt(2 * (PT1 * PT2 - P1[1] * P2[1] - P1[2] * P2[2]));
 }
-
+//----------------------------------------------------------------------------
 double GetMinRadius(const FourVector P1, const FourVector P2, const FourVector P3)   // in eta-phi space
 {
    double Eta1 = P1.GetEta();
@@ -584,7 +594,7 @@ double GetMinRadius(const FourVector P1, const FourVector P2, const FourVector P
 
    return GetMinRadius(Eta1, Phi1 + Best1 * 2 * PI, Eta2, Phi2 + Best2 * 2 * PI, Eta3, Phi3 + Best3 * 2 * PI);
 }
-
+//----------------------------------------------------------------------------
 double GetMinRadius(const double X1, const double Y1, const double X2, const double Y2,
    const double X3, const double Y3)
 {
@@ -629,7 +639,7 @@ double GetMinRadius(const double X1, const double Y1, const double X2, const dou
    // minimum of the two
    return sqrt(min(MaxEdge2, Distance2));
 }
-
+//----------------------------------------------------------------------------
 double GetMR(const FourVector P1, const FourVector P2)
 {
    double Temp1 = P1[0] * P2[3] - P1[3] * P2[0];
@@ -637,7 +647,7 @@ double GetMR(const FourVector P1, const FourVector P2)
    double Temp3 = P1[0] - P2[0];
    return 2 * sqrt(Temp1 * Temp1 / (Temp2 * Temp2 - Temp3 * Temp3));
 }
-
+//----------------------------------------------------------------------------
 double GetMRStar(const FourVector P1, const FourVector P2)
 {
    double Temp1 = P1[0] + P2[0];
@@ -646,12 +656,12 @@ double GetMRStar(const FourVector P1, const FourVector P2)
    double Temp4 = (P1 + P2).GetPT();
    return sqrt((Temp1 * Temp1) - (Temp2 * Temp2) - (Temp3 * Temp3) / (Temp4 * Temp4));
 }
-
+//----------------------------------------------------------------------------
 double Get2011MR(const FourVector P1, const FourVector P2)
 {
    return GetMRStar(P1, P2) * GetGammaRStar(P1, P2);
 }
-
+//----------------------------------------------------------------------------
 double GetISRRemovedMR(const FourVector P1, const FourVector P2, const FourVector POther, double ME3Assumption)
 {
    FourVector ME = -(P1 + P2 + POther);
@@ -668,7 +678,7 @@ double GetISRRemovedMR(const FourVector P1, const FourVector P2, const FourVecto
 
    return GetMR(NewP1, NewP2);
 }
-
+//----------------------------------------------------------------------------
 double GetISRRemoved2011MR(const FourVector P1, const FourVector P2, const FourVector POther, double ME3Assumption)
 {
    FourVector ME = -(P1 + P2 + POther);
@@ -685,7 +695,7 @@ double GetISRRemoved2011MR(const FourVector P1, const FourVector P2, const FourV
 
    return Get2011MR(NewP1, NewP2);
 }
-
+//----------------------------------------------------------------------------
 double GetISR2011MR(const FourVector P1, const FourVector P2, const FourVector ME, const FourVector ISR, int Assumption)
 {
    if(Assumption == 1)
@@ -996,29 +1006,29 @@ double GetISR2011MR(const FourVector P1, const FourVector P2, const FourVector M
 
    return 0;
 }
-
+//----------------------------------------------------------------------------
 double GetMRT(const FourVector P1, const FourVector P2, const FourVector ME)
 {
    double Temp1 = ME.GetPT() * (P1.GetPT() + P2.GetPT());
    double Temp2 = ME[1] * (P1[1] + P2[1]) + ME[2] * (P1[2] + P2[2]);
    return sqrt((Temp1 - Temp2) / 2);
 }
-
+//----------------------------------------------------------------------------
 double GetR(const FourVector P1, const FourVector P2, const FourVector ME)
 {
    return GetMRT(P1, P2, ME) / GetMR(P1, P2);
 }
-
+//----------------------------------------------------------------------------
 double GetRStar(const FourVector P1, const FourVector P2, const FourVector ME)
 {
    return GetMRT(P1, P2, ME) / GetMRStar(P1, P2) / GetGammaRStar(P1, P2);
 }
-
+//----------------------------------------------------------------------------
 double Get2011R(const FourVector P1, const FourVector P2, const FourVector ME)
 {
    return GetMRT(P1, P2, ME) / GetMRStar(P1, P2) / GetGammaRStar(P1, P2);
 }
-
+//----------------------------------------------------------------------------
 double GetISRRemovedR(const FourVector P1, const FourVector P2, const FourVector POther, double ME3Assumption)
 {
    FourVector ME = -(P1 + P2 + POther);
@@ -1036,7 +1046,7 @@ double GetISRRemovedR(const FourVector P1, const FourVector P2, const FourVector
 
    return GetR(NewP1, NewP2, NewME);
 }
-
+//----------------------------------------------------------------------------
 double GetISRRemoved2011R(const FourVector P1, const FourVector P2, const FourVector POther, double ME3Assumption)
 {
    FourVector ME = -(P1 + P2 + POther);
@@ -1054,7 +1064,7 @@ double GetISRRemoved2011R(const FourVector P1, const FourVector P2, const FourVe
 
    return Get2011R(NewP1, NewP2, NewME);
 }
-
+//----------------------------------------------------------------------------
 double GetISR2011R(const FourVector P1, const FourVector P2, const FourVector ME, const FourVector ISR, int Assumption, char AdditionalVariant)
 {
    if(Assumption == 1)
@@ -1355,10 +1365,9 @@ double GetISR2011R(const FourVector P1, const FourVector P2, const FourVector ME
       return MRT11 / MR11;
    }
 
-
    return 0;
 }
-
+//----------------------------------------------------------------------------
 double GetGammaRStar(const FourVector P1, const FourVector P2)
 {
    double Temp1 = P1[0] + P2[0];
@@ -1376,17 +1385,17 @@ double GetGammaRStar(const FourVector P1, const FourVector P2)
    return Gamma;
    */
 }
-
+//----------------------------------------------------------------------------
 double BetaToGamma(double Beta)
 {
    return 1 / sqrt(1 - Beta * Beta);
 }
-
+//----------------------------------------------------------------------------
 double GammaToBeta(double Gamma)
 {
    return sqrt(1 - 1 / (Gamma * Gamma));
 }
-
+//----------------------------------------------------------------------------
 vector<FourVector> SplitIntoGroups(vector<FourVector> &Input, bool ZeroMass)
 {
    vector<FourVector> Result;
@@ -1463,7 +1472,7 @@ vector<FourVector> SplitIntoGroups(vector<FourVector> &Input, bool ZeroMass)
 
    return Result;
 }
-
+//----------------------------------------------------------------------------
 double GetDifference8(FourVector &P1, FourVector &P2, FourVector &ME, double BetaX)
 {
    double DeltaPx = P1[1] - P2[1];
@@ -1488,7 +1497,7 @@ double GetDifference8(FourVector &P1, FourVector &P2, FourVector &ME, double Bet
 
    return Left - Right;
 }
-
+//----------------------------------------------------------------------------
 double GetDifference9(FourVector &P1, FourVector &P2, FourVector &ME, double BetaZ)
 {
    double DeltaPx = P1[1] - P2[1];
@@ -1514,7 +1523,7 @@ double GetDifference9(FourVector &P1, FourVector &P2, FourVector &ME, double Bet
 
    return fabs(Left - Right);
 }
-
+//----------------------------------------------------------------------------
 double FindMR11MinimumPz(FourVector J1, FourVector J2, FourVector ME, FourVector ISR)
 {
    // do some basic caching to save time repeating search for MR and R
@@ -1612,7 +1621,7 @@ double FindMR11MinimumPz(FourVector J1, FourVector J2, FourVector ME, FourVector
 
    return BestPz;
 }
-
+//----------------------------------------------------------------------------
 double EstimateMass11(FourVector J1, FourVector J2, FourVector ME, FourVector ISR, bool Reversal)
 {
    Reversal = false;
@@ -1668,7 +1677,7 @@ double EstimateMass11(FourVector J1, FourVector J2, FourVector ME, FourVector IS
 
    return sqrt(M2) * 2;
 }
-
+//----------------------------------------------------------------------------
 double EstimateTransverseMass11(FourVector J1, FourVector J2, FourVector ME, FourVector ISR, char Variant, bool Reversal)
 {
    Reversal = false;
@@ -1784,7 +1793,7 @@ double EstimateTransverseMass11(FourVector J1, FourVector J2, FourVector ME, Fou
 
    return MT;
 }
-
+//----------------------------------------------------------------------------
 /*
 int FindCategory(GenParticleTree &Tree, int index)
 {
@@ -1853,7 +1862,7 @@ int FindCategory(GenParticleTree &Tree, int index)
    return 8;
 }
 */
-
+//----------------------------------------------------------------------------
 #endif
 
 

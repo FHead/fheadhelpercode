@@ -1,12 +1,12 @@
+//----------------------------------------------------------------------------
 #ifndef DrawRandom_H_AJGRKJVCGTZRHISCGGARHWGCA
 #define DrawRandom_H_AJGRKJVCGTZRHISCGGARHWGCA
-
+//----------------------------------------------------------------------------
 #include <cmath>
 #include <cstdlib>
-using namespace std;
-
+//----------------------------------------------------------------------------
 #define PI 3.14159265358979323846264338327950288479716939937510
-
+//----------------------------------------------------------------------------
 double DrawRandom();
 double DrawRandom(double max);
 double DrawRandom(double min, double max);
@@ -22,24 +22,24 @@ double DrawPoisson(double mean);
 double DrawPoissonDouble(double mean);
 double DrawDoubleSidedCBShape(double Mean, double Sigma, double AlphaL, double AlphaR, double NL, double NR);
 double DrawDoubleSidedCBShape(double AlphaL, double AlphaR, double NL, double NR);
-
+//----------------------------------------------------------------------------
 double DrawRandom()
 {
    double Value1 = double(rand() % 100000) / 100000;
    double Value2 = double(rand() % 100000) / 100000;
    return Value1 + Value2 / 100000;
 }
-
+//----------------------------------------------------------------------------
 double DrawRandom(double max)
 {
    return max * DrawRandom();
 }
-
+//----------------------------------------------------------------------------
 double DrawRandom(double min, double max)
 {
    return min + (max - min) * DrawRandom();
 }
-
+//----------------------------------------------------------------------------
 double DrawSine(double min, double max)
 {
    bool OK = false;
@@ -56,7 +56,7 @@ double DrawSine(double min, double max)
 
    return answer;
 }
-
+//----------------------------------------------------------------------------
 double DrawLorentzian(double center, double gamma)
 {
    if(gamma <= 0)
@@ -82,12 +82,12 @@ double DrawLorentzian(double center, double gamma)
 
    return center + displacement;
 }
-
+//----------------------------------------------------------------------------
 double DrawGaussian(double center, double sigma)
 {
    return center + DrawGaussian(sigma);
 }
-
+//----------------------------------------------------------------------------
 double DrawGaussian(double sigma)
 {
    if(sigma <= 0)
@@ -108,7 +108,7 @@ double DrawGaussian(double sigma)
 
    return value;
 }
-
+//----------------------------------------------------------------------------
 double DrawGaussianBoxMuller()
 {
    double x1 = DrawRandom();
@@ -116,7 +116,7 @@ double DrawGaussianBoxMuller()
 
    return sqrt(-2 * log(x1)) * cos(2 * PI * x2);
 }
-
+//----------------------------------------------------------------------------
 double DrawCruijff(double center, double sigmal, double sigmar, double alphal, double alphar)
 {
    if(sigmal <= 0 || sigmar <= 0 || alphal <= 0 || alphar <= 0)
@@ -142,7 +142,7 @@ double DrawCruijff(double center, double sigmal, double sigmar, double alphal, d
 
    return value + center;
 }
-
+//----------------------------------------------------------------------------
 double DrawCruijff(double center, double sigmal, double sigmar, double alphal, double alphar, double left, double right)
 {
    if(sigmal <= 0 || sigmar <= 0 || alphal <= 0 || alphar <= 0)
@@ -168,7 +168,7 @@ double DrawCruijff(double center, double sigmal, double sigmar, double alphal, d
 
    return value + center;
 }
-
+//----------------------------------------------------------------------------
 double DrawExponential(double exponent, double left, double right)
 {
    if(exponent > 0)
@@ -195,7 +195,7 @@ double DrawExponential(double exponent, double left, double right)
 
    return value + left;
 }
-
+//----------------------------------------------------------------------------
 double DrawExponential(double exponent, double side)
 {
    if(exponent == 0)
@@ -234,7 +234,7 @@ double DrawExponential(double exponent, double side)
 
    return Distance + side;
 }
-
+//----------------------------------------------------------------------------
 double DrawPoisson(double mean)
 {
    if(mean <= 0)
@@ -262,12 +262,12 @@ double DrawPoisson(double mean)
 
    return value;
 }
-
+//----------------------------------------------------------------------------
 double DrawDoubleSidedCBShape(double Mean, double Sigma, double AlphaL, double AlphaR, double NL, double NR)
 {
    return Mean + DrawDoubleSidedCBShape(AlphaL, AlphaR, NL, NR) * Sigma;
 }
-
+//----------------------------------------------------------------------------
 double DrawDoubleSidedCBShape(double AlphaL, double AlphaR, double NL, double NR)
 {
    double LeftTailIntegral = exp(-0.5 * AlphaL * AlphaL) * NL / AlphaL / (NL - 1);
@@ -297,10 +297,6 @@ double DrawDoubleSidedCBShape(double AlphaL, double AlphaR, double NL, double NR
 
    return 0;
 }
-
-
-
-
-
+//----------------------------------------------------------------------------
 #endif
 
