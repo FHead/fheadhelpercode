@@ -2,6 +2,9 @@
 #ifndef TauHelperFunctions_6624_AJSDKGIRIKANSVCGKISNCGIKNHKZSG
 #define TauHelperFunctions_6624_AJSDKGIRIKANSVCGKISNCGIKNHKZSG
 //----------------------------------------------------------------------------
+// FourVector class - with a lot of extra setters and getter
+// Author: Yi Chen (original version on 6624)
+//----------------------------------------------------------------------------
 #include <vector>
 #include <cmath>
 #include <ostream>
@@ -23,7 +26,7 @@
 #define PI 3.14159265358979323846264338327950288479716939937510
 //----------------------------------------------------------------------------
 class FourVector;
-ostream &operator <<(ostream &out, FourVector P);
+std::ostream &operator <<(std::ostream &out, FourVector P);
 FourVector operator *(double Scale, FourVector P);
 double GetAngle(const FourVector P1, const FourVector P2);
 double GetDR(const FourVector P1, const FourVector P2);
@@ -47,7 +50,7 @@ double GetISR2011R(const FourVector P1, const FourVector P2, const FourVector ME
 double GetGammaRStar(const FourVector P1, const FourVector P2);
 double BetaToGamma(double Beta);
 double GammaToBeta(double Gamma);
-vector<FourVector> SplitIntoGroups(vector<FourVector> &Input, bool ZeroMass = false);
+std::vector<FourVector> SplitIntoGroups(std::vector<FourVector> &Input, bool ZeroMass = true);
 double GetDifference8(FourVector &P1, FourVector &P2, FourVector &ME, double BetaX);
 double GetDifference9(FourVector &P1, FourVector &P2, FourVector &ME, double BetaZ);
 double FindMR11MinimumPz(FourVector J1, FourVector J2, FourVector ME, FourVector ISR);
@@ -510,7 +513,7 @@ double FourVector::MetricDot(const FourVector &Other) const
    return P[0] * Other.P[0] - SpatialDot(Other);
 }
 //----------------------------------------------------------------------------
-ostream &operator <<(ostream &out, FourVector P)
+std::ostream &operator <<(std::ostream &out, FourVector P)
 {
    out << "(" << P[0] << ", " << P[1] << ", " << P[2] << ", " << P[3] << ")";
    return out;
@@ -637,7 +640,7 @@ double GetMinRadius(const double X1, const double Y1, const double X2, const dou
    MaxEdge2 = MaxEdge2 / 4;
 
    // minimum of the two
-   return sqrt(min(MaxEdge2, Distance2));
+   return sqrt(std::min(MaxEdge2, Distance2));
 }
 //----------------------------------------------------------------------------
 double GetMR(const FourVector P1, const FourVector P2)
@@ -1396,9 +1399,9 @@ double GammaToBeta(double Gamma)
    return sqrt(1 - 1 / (Gamma * Gamma));
 }
 //----------------------------------------------------------------------------
-vector<FourVector> SplitIntoGroups(vector<FourVector> &Input, bool ZeroMass)
+std::vector<FourVector> SplitIntoGroups(std::vector<FourVector> &Input, bool ZeroMass)
 {
-   vector<FourVector> Result;
+   std::vector<FourVector> Result;
    
    if(Input.size() == 0)
    {
@@ -1420,7 +1423,7 @@ vector<FourVector> SplitIntoGroups(vector<FourVector> &Input, bool ZeroMass)
 
    int InputSize = Input.size();
 
-   vector<int> Groups(InputSize);
+   std::vector<int> Groups(InputSize);
    for(int i = 0; i < InputSize; i++)
       Groups[i] = 0;
    Groups[0] = 1;
@@ -1548,7 +1551,7 @@ double FindMR11MinimumPz(FourVector J1, FourVector J2, FourVector ME, FourVector
    int SearchStep = 10;
    double SearchStepSize = 1;
 
-   vector<double> Masses;
+   std::vector<double> Masses;
    for(int i = 0; i <= InitialStep; i++)
    {
       ME[3] = InitialCenter - InitialStep / 2 * InitialStepSize + i * InitialStepSize;
@@ -1558,7 +1561,7 @@ double FindMR11MinimumPz(FourVector J1, FourVector J2, FourVector ME, FourVector
       Masses.push_back(Mass);
    }
 
-   vector<double> LocalMinima;
+   std::vector<double> LocalMinima;
    for(int i = 1; i < InitialStep; i++)
       if(Masses[i] <= Masses[i-1] && Masses[i] <= Masses[i+1])
          LocalMinima.push_back(InitialCenter - InitialStep / 2 * InitialStepSize + i * InitialStepSize);
@@ -1569,7 +1572,7 @@ double FindMR11MinimumPz(FourVector J1, FourVector J2, FourVector ME, FourVector
 
    for(int i = 0; i <= 5; i++)
    {
-      vector<double> NewMinima;
+      std::vector<double> NewMinima;
       for(int j = 0; j < (int)LocalMinima.size(); j++)
       {
          double SearchCenter = LocalMinima[j];
@@ -1797,7 +1800,7 @@ double EstimateTransverseMass11(FourVector J1, FourVector J2, FourVector ME, Fou
 /*
 int FindCategory(GenParticleTree &Tree, int index)
 {
-   vector<int> Daughters = Tree[index].Daughters;
+   std::vector<int> Daughters = Tree[index].Daughters;
 
    int PiZeroCount = 0;
    int PiPlusCount = 0;
@@ -1823,7 +1826,7 @@ int FindCategory(GenParticleTree &Tree, int index)
       if(Tree[Daughters[i]].PDGID == 223 || Tree[Daughters[i]].PDGID == 213
          || Tree[Daughters[i]].PDGID == 113 || Tree[Daughters[i]].PDGID == -213)
       {
-         vector<int> DaughterList = Tree[Daughters[i]].Daughters;
+         std::vector<int> DaughterList = Tree[Daughters[i]].Daughters;
 
          for(int j = 0; j < (int)DaughterList.size(); j++)
          {
