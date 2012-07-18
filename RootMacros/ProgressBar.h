@@ -1,7 +1,10 @@
+// Progress bar class
+// Author: Yi Chen
+
 #include <iostream>
 #include <iomanip>
 #include <ostream>
-using namespace std;
+#include <cstdlib>
 
 class ProgressBar
 {
@@ -11,18 +14,18 @@ private:
    double Progress;
    int Column;
    int Style;
-   ostream *Out;
+   std::ostream *Out;
    void SanityCheck();
 public:
-   ProgressBar(ostream &out, double max = 100, double min = 0, int column = 80)
+   ProgressBar(std::ostream &out, double max = 100, double min = 0, int column = 80)
       : Out(&out), Max(max), Min(min), Column(column), Progress(0), Style(0) {srand(time(NULL));   SanityCheck();}
-   ProgressBar(ostream *out, double max = 100, double min = 0, int column = 80)
+   ProgressBar(std::ostream *out, double max = 100, double min = 0, int column = 80)
       : Out(out), Max(max), Min(min), Column(column), Progress(0), Style(0) {srand(time(NULL));   SanityCheck();}
    ~ProgressBar() {}
    void Print();
    void Print(double progress);
-   void ChangeLine() {*Out << endl;}
-   void PrintLine() {*Out << endl;}
+   void ChangeLine() {*Out << std::endl;}
+   void PrintLine() {*Out << std::endl;}
    void Update(double progress) {SetProgress(progress);}
    void Increment(double change = 1) {Progress = Progress + change;}
 public:
@@ -31,7 +34,7 @@ public:
    double GetProgress() {return Progress;}
    int GetColumn() {return Column;}
    int GetStyle() {return Style;}
-   ostream *GetStream() {return Out;}
+   std::ostream *GetStream() {return Out;}
    double GetPercentage() {return (Progress - Min) / (Max - Min);}
 public:
    void SetMin(double min) {Min = min;   SanityCheck();}
@@ -39,67 +42,67 @@ public:
    void SetProgress(double progress) {Progress = progress;   SanityCheck();}
    void SetColumn(int column) {Column = column;   SanityCheck();}
    void SetStyle(int style) {if(style == -1) Style = rand() % 6; else Style = style;   SanityCheck();}
-   void SetStream(ostream &out) {Out = &out;   SanityCheck();}
-   void SetStream(ostream *out) {Out = out;   SanityCheck();}
+   void SetStream(std::ostream &out) {Out = &out;   SanityCheck();}
+   void SetStream(std::ostream *out) {Out = out;   SanityCheck();}
 };
 
 void ProgressBar::SanityCheck()
 {
    if(Min == Max)
    {
-      cerr << "[ProgressBar] Sanity check on range failed.  Resetting to 0-100" << endl;
+      std::cerr << "[ProgressBar] Sanity check on range failed.  Resetting to 0-100" << std::endl;
       Min = 0;
       Max = 100;
       Progress = 0;
    }
    if(Max < Min)
    {
-      cerr << "[ProgressBar] Min > Max!  Reversing the role of the two" << endl;
-      swap(Min, Max);
+      std::cerr << "[ProgressBar] Min > Max!  Reversing the role of the two" << std::endl;
+      std::swap(Min, Max);
    }
 
    if(Progress < Min)
    {
-      cerr << "[ProgressBar] Negative progress.  Resetting to minimum value" << endl;
+      std::cerr << "[ProgressBar] Negative progress.  Resetting to minimum value" << std::endl;
       Progress = Min;
    }
    if(Progress > Max)
    {
-      cerr << "[ProgressBar] Past-complete progress.  Resetting to maximum value" << endl;
+      std::cerr << "[ProgressBar] Past-complete progress.  Resetting to maximum value" << std::endl;
       Progress = Max;
    }
 
    if(Column < 15)
    {
-      cerr << "[ProgressBar] Too few columns to display the progress bar.  Set to 20" << endl;
+      std::cerr << "[ProgressBar] Too few columns to display the progress bar.  Set to 20" << std::endl;
       Column = 20;
    }
    if(Column > 100)
    {
-      cerr << "[ProgressBar] Too many columns to display the progress bar.  Set to 100" << endl;
+      std::cerr << "[ProgressBar] Too many columns to display the progress bar.  Set to 100" << std::endl;
       Column = 100;
    }
 
    if(Style < 0 || Style > 5)
    {
-      cerr << "[ProgressBar] Style invalid.  Set to a random style." << endl;
-      cerr << endl;
-      cerr << "FYI: available styles look like these" << endl;
-      cerr << "0: [==============================>                 ]  55%" << endl;
-      cerr << "1: [                            ><>                 ]  55%" << endl;
-      cerr << "2: [ooooooooooooooooooooooooooooooo                 ]  55%" << endl;
-      cerr << "3: [~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|                 ]  55%" << endl;
-      cerr << "4: [                  <=============================]  55%" << endl;
-      cerr << "5: [                  <><                           ]  55%" << endl;
-      cerr << endl;
+      std::cerr << "[ProgressBar] Style invalid.  Set to a random style." << std::endl;
+      std::cerr << std::endl;
+      std::cerr << "FYI: available styles look like these" << std::endl;
+      std::cerr << "0: [==============================>                 ]  55%" << std::endl;
+      std::cerr << "1: [                            ><>                 ]  55%" << std::endl;
+      std::cerr << "2: [ooooooooooooooooooooooooooooooo                 ]  55%" << std::endl;
+      std::cerr << "3: [~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|                 ]  55%" << std::endl;
+      std::cerr << "4: [                  <=============================]  55%" << std::endl;
+      std::cerr << "5: [                  <><                           ]  55%" << std::endl;
+      std::cerr << std::endl;
 
-      Style = rand() % 6;
+      Style = std::rand() % 6;
    }
 
    if(Out == NULL)
    {
-      cerr << "[ProgressBar] Output stream is NULL.  Set to cout" << endl;
-      Out = &cout;
+      std::cerr << "[ProgressBar] Output stream is NULL.  Set to cout" << std::endl;
+      Out = &std::cout;
    }
 }
 
@@ -123,8 +126,8 @@ void ProgressBar::Print(double progress)
       for(int i = 0; i < AvailableColumn - FilledColumn; i++)
          *Out << " ";
       *Out << "] ";
-      *Out << setw(3) << setfill(' ') << (int)((progress - Min) / (Max - Min) * 100 + 0.5);
-      *Out << "\%" << flush;
+      *Out << std::setw(3) << std::setfill(' ') << (int)((progress - Min) / (Max - Min) * 100 + 0.5);
+      *Out << "\%" << std::flush;
    }
    if(Style == 1)
    {
@@ -143,8 +146,8 @@ void ProgressBar::Print(double progress)
       for(int i = 0; i < AvailableColumn - FilledColumn; i++)
          *Out << " ";
       *Out << "] ";
-      *Out << setw(3) << setfill(' ') << (int)((progress - Min) / (Max - Min) * 100 + 0.5);
-      *Out << "\%" << flush;
+      *Out << std::setw(3) << std::setfill(' ') << (int)((progress - Min) / (Max - Min) * 100 + 0.5);
+      *Out << "\%" << std::flush;
    }
    if(Style == 2)
    {
@@ -157,8 +160,8 @@ void ProgressBar::Print(double progress)
       for(int i = 0; i < AvailableColumn - FilledColumn; i++)
          *Out << " ";
       *Out << "] ";
-      *Out << setw(3) << setfill(' ') << (int)((progress - Min) / (Max - Min) * 100 + 0.5);
-      *Out << "\%" << flush;
+      *Out << std::setw(3) << std::setfill(' ') << (int)((progress - Min) / (Max - Min) * 100 + 0.5);
+      *Out << "\%" << std::flush;
    }
    if(Style == 3)
    {
@@ -173,8 +176,8 @@ void ProgressBar::Print(double progress)
       for(int i = 0; i < AvailableColumn - FilledColumn; i++)
          *Out << " ";
       *Out << "] ";
-      *Out << setw(3) << setfill(' ') << (int)((progress - Min) / (Max - Min) * 100 + 0.5);
-      *Out << "\%" << flush;
+      *Out << std::setw(3) << std::setfill(' ') << (int)((progress - Min) / (Max - Min) * 100 + 0.5);
+      *Out << "\%" << std::flush;
    }
    if(Style == 4)
    {
@@ -189,8 +192,8 @@ void ProgressBar::Print(double progress)
       for(int i = 0; i < FilledColumn - 1; i++)
          *Out << "=";
       *Out << "] ";
-      *Out << setw(3) << setfill(' ') << (int)((progress - Min) / (Max - Min) * 100 + 0.5);
-      *Out << "\%" << flush;
+      *Out << std::setw(3) << std::setfill(' ') << (int)((progress - Min) / (Max - Min) * 100 + 0.5);
+      *Out << "\%" << std::flush;
    }
    if(Style == 5)
    {
@@ -209,8 +212,8 @@ void ProgressBar::Print(double progress)
       for(int i = 0; i < FilledColumn - 3; i++)
          *Out << " ";
       *Out << "] ";
-      *Out << setw(3) << setfill(' ') << (int)((progress - Min) / (Max - Min) * 100 + 0.5);
-      *Out << "\%" << flush;
+      *Out << std::setw(3) << std::setfill(' ') << (int)((progress - Min) / (Max - Min) * 100 + 0.5);
+      *Out << "\%" << std::flush;
    }
 }
 

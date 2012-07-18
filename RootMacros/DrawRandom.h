@@ -2,6 +2,9 @@
 #ifndef DrawRandom_H_AJGRKJVCGTZRHISCGGARHWGCA
 #define DrawRandom_H_AJGRKJVCGTZRHISCGGARHWGCA
 //----------------------------------------------------------------------------
+// Custom sampling functions
+// Author: Yi Chen
+//----------------------------------------------------------------------------
 #include <cmath>
 #include <cstdlib>
 //----------------------------------------------------------------------------
@@ -179,7 +182,7 @@ double DrawExponential(double exponent, double left, double right)
    }
 
    if(right < left)
-      swap(left, right);
+      std::swap(left, right);
 
    double value = 0;
    bool OK = false;
