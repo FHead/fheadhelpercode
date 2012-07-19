@@ -9,7 +9,7 @@
 #include <cmath>
 #include <ostream>
 //----------------------------------------------------------------------------
-#include "DrawRandom.h"
+#include "DrawRandom2.h"
 // #include "GenparticleTree.h"
 //----------------------------------------------------------------------------
 // Categories:
@@ -472,16 +472,16 @@ FourVector FourVector::SmearAngle(double Angle) const
    FourVector Axis = SpatialCross(Reference);   // so that axis is perpendicular to input momentum
 
    FourVector RealAxis;   // pick a random rotation axis perpendicular to input momentum
-   double AxisRotation = DrawRandom(0, 2 * PI);
+   double AxisRotation = DefaultRandomBase.DrawRandom(0, 2 * PI);
    RealAxis = Axis.Rotate(*this, AxisRotation);
 
-   double SmearAngle = DrawGaussian(Angle);
+   double SmearAngle = DefaultRandomBase.DrawGaussian(Angle);
    return Rotate(RealAxis, SmearAngle);
 }
 //----------------------------------------------------------------------------
 FourVector FourVector::SmearMomentum(double Scale) const
 {
-   double Factor = 1 + DrawGaussian(Scale);
+   double Factor = 1 + DefaultRandomBase.DrawGaussian(Scale);
 
    return (*this) * Factor;
 }
