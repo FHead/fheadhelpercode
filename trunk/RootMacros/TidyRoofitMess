@@ -1,0 +1,24 @@
+#!/bin/sh
+
+Input=$1
+Output=$2
+
+if [ -z $1 ]; then
+   echo "Please provide at least a file to clean with"
+   exit -1
+fi
+
+if [ -z $2 ]; then
+   echo "Only input file is provided.  Output default to Temp_Output_RoofitMessCleaned.C"
+   Output=Temp_Output_RoofitMessCleaned.C
+fi
+
+cat $Input | sed "s#Int\[RSQ]#IntRSQ#g" \
+   | sed "s#_Norm\[MR,RSQ]#_NormMRRSQ#g" \
+   | sed "s#Comp\[#Comp#g" \
+   | sed "s#Model_\([0-9]*\),#Model\1#g" \
+   | sed "s#\([0-9]\)]\([0-9]\)#\1\2#g" \
+   | sed "s#Int\[R]#IntR#g" \
+   | sed "s#Norm\[MR,R]#NormMRR#g" \
+   | sed "s#1.147874#0#g" > $Output
+
