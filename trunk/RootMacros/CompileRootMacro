@@ -54,7 +54,8 @@ elif [ $HOSTNAME == "pccit28" ]; then
    echo g++ $input $libs $flags $include -o $output
    g++ $input $libs $flags $include -o $output
 
-elif [[ "$HOSTNAME" == pb-d-*.cern.ch ]]; then
+# elif [[ "$HOSTNAME" == pb-d-*.cern.ch ]]; then   # guess it's macbook - keeps changing
+elif [ $HOSTNAME == "FHeadMac" ]; then
    
    root_cflags=`sh $ROOTSYS/bin/root-config --cflags`
    root_libs=`sh $ROOTSYS/bin/root-config --glibs`
