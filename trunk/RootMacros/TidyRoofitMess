@@ -25,13 +25,15 @@ cat $Input | sed "s#Int\[RSQ]#IntRSQ#g" \
    | sed "s#Comp\[#Comp#g" \
    | sed "s#Model_\([0-9]*\),#Model\1#g" \
    | sed "s#\([0-9]\)]\([0-9]\)#\1\2#g" \
+   | sed "s#Model]\([0-9]\)#Model\1#g" \
    | sed "s#Int\[R]#IntR#g" \
    | sed "s#Norm\[MR,R]#NormMRR#g" \
+   | sed "s#Int\[RL]#IntR#g" \
+   | sed "s#Norm\[MRL,RL]#NormMRR#g" \
    | sed "s#1.147874#0#g" > $Output
 
 if [ -n "$CopyBack" ]; then
-   echo "Copying back?"
-   exit 0
+   echo "Copying back..."
    mv $Output $Input
 fi
 
