@@ -28,6 +28,7 @@ public:
    double DrawExponential(double exponent, double side);
    double DrawPoisson(double mean);
    double DrawPoissonDouble(double mean);
+   int DrawPoissonInt(double Lambda);
    double DrawDoubleSidedCBShape(double Mean, double Sigma, double AlphaL, double AlphaR, double NL, double NR);
    double DrawDoubleSidedCBShape(double AlphaL, double AlphaR, double NL, double NR);
 };
@@ -284,6 +285,22 @@ double RandomBase::DrawPoisson(double mean)
    }
 
    return value;
+}
+//----------------------------------------------------------------------------
+int RandomBase::DrawPoissonInt(double Lambda)
+{
+   double LL = -Lambda;
+   int K = 0;
+   double P = 0;
+
+   do
+   {
+      K = K + 1;
+      P = P + log(DrawRandom());
+   }
+   while(P > LL);
+
+   return K - 1;
 }
 //----------------------------------------------------------------------------
 double RandomBase::DrawDoubleSidedCBShape(double Mean, double Sigma, double AlphaL, double AlphaR, double NL, double NR)

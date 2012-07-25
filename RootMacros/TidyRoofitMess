@@ -2,6 +2,7 @@
 
 Input=$1
 Output=$2
+CopyBack=
 
 if [ -z $1 ]; then
    echo "Please provide at least a file to clean with"
@@ -13,6 +14,12 @@ if [ -z $2 ]; then
    Output=Temp_Output_RoofitMessCleaned.C
 fi
 
+if [ $1 == $2 ]; then
+   echo "Same output and input file.  Not recommended.  Temporary file set to Temp_Output_RoofitMessCleaned.C"
+   CopyBack=1
+   Output=Temp_Output_RoofitMessCleaned.C
+fi
+
 cat $Input | sed "s#Int\[RSQ]#IntRSQ#g" \
    | sed "s#_Norm\[MR,RSQ]#_NormMRRSQ#g" \
    | sed "s#Comp\[#Comp#g" \
@@ -21,4 +28,11 @@ cat $Input | sed "s#Int\[RSQ]#IntRSQ#g" \
    | sed "s#Int\[R]#IntR#g" \
    | sed "s#Norm\[MR,R]#NormMRR#g" \
    | sed "s#1.147874#0#g" > $Output
+
+if [ -n "$CopyBack" ]; then
+   echo "Copying back?"
+   exit 0
+   mv $Output $Input
+fi
+
 
