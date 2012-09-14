@@ -12,6 +12,9 @@ if [ -z $2 ]; then
    output=a.out
 fi
 
+shift
+shift
+
 root_cflags=`sh $ROOTSYS/bin/root-config --cflags`
 root_libs=`sh $ROOTSYS/bin/root-config --glibs`
 roofit_libs="-lRooFitCore -lRooFit -lMinuit -lFoam"
@@ -20,6 +23,7 @@ fastjet_libs=
 pythia_include="-I$PYTHIA8/include"
 pythia_libs="-L$PYTHIA8/lib/archive -lpythia8 -llhapdfdummy"
 extrainclude="-I/$HOME/RootMacros"
+extralibs=~/RootMacros/Code/library/*.o
 cxxflags="-g -fPIC -Wno-deprecated -O -ansi -D_GNU_SOURCE -g -O2"
 
 if [ -n "`command -v fastjet-config`" ]; then
@@ -32,9 +36,11 @@ all_include=""
 all_flags=""
 
 if [ $HOSTNAME == "t3-susy.ultralight.org" ]; then
+
+   roofit_base=/cms/sw/slc5_amd64_gcc462/lcg/roofit/5.32.00-cms5
    
-   all_libs="$root_libs $fastjet_libs $pythia_libs"
-   all_include="$extrainclude $pythia_include"
+   all_libs="$root_libs $fastjet_libs $pythia_libs -L$roofit_base/lib $roofit_libs $extralibs"
+   all_include="$extrainclude $pythia_include -I$roofit_base/include"
    all_flags="$root_cflags $cxxflags $fastjet_cflags -m64"
 
    # quick fix....
@@ -75,7 +81,7 @@ elif [[ "$HOSTNAME" == lxplus*.cern.ch ]]; then
 
 fi
 
-echo g++ $input $all_libs $all_include $all_flags -o $output
-g++ $input $all_libs $all_include $all_flags -o $output
+echo g++ $input $all_libs $all_include $all_flags "$@" -o $output
+g++ $input $all_libs $all_include $all_flags "$@" -o $output
 
 

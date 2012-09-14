@@ -1,70 +1,33 @@
 //----------------------------------------------------------------------------
-#ifndef DrawRandom2_H_AJGRKJVCGTZRHISCGGARHWGCA
-#define DrawRandom2_H_AJGRKJVCGTZRHISCGGARHWGCA
+// Custom sampling functions
+// Author: Yi Chen
 //----------------------------------------------------------------------------
 #include <cmath>
 #include <cstdlib>
+#include <algorithm>
 //----------------------------------------------------------------------------
 #define PI 3.14159265358979323846264338327950288479716939937510
 //----------------------------------------------------------------------------
-class RandomBase;
-class RandomMT;
+#include "Code/DrawRandom.h"
 //----------------------------------------------------------------------------
-class RandomBase
-{
-public:
-   double DrawRandom();
-   double DrawRandom(double max);
-   double DrawRandom(double min, double max);
-   double DrawSine(double min, double max);
-   double DrawLorentzian(double center, double gamma);
-   double DrawGaussian(double center, double sigma);
-   double DrawGaussian(double sigma);
-   double DrawGaussian();
-   double DrawGaussianBoxMuller();
-   double DrawCruijff(double center, double sigmal, double sigmar, double alphal, double alphar);
-   double DrawCruijff(double center, double sigmal, double sigmar, double alphal, double alphar, double left, double right);
-   double DrawExponential(double exponent, double left, double right);
-   double DrawExponential(double exponent, double side);
-   double DrawPoisson(double mean);
-   double DrawPoissonDouble(double mean);
-   int DrawPoissonInt(double Lambda);
-   double DrawDoubleSidedCBShape(double Mean, double Sigma, double AlphaL, double AlphaR, double NL, double NR);
-   double DrawDoubleSidedCBShape(double AlphaL, double AlphaR, double NL, double NR);
-};
-//----------------------------------------------------------------------------
-class RandomMT : public RandomBase
-{
-private:
-   long long MT[624];
-   int Index;
-public:
-   RandomMT(int Seed = 31426);
-private:
-   void GenerateNumbers();
-public:
-   long long DrawRandomInteger();
-   double DrawRandom();
-};
-//----------------------------------------------------------------------------
-double RandomBase::DrawRandom()
+double DrawRandom()
 {
    double Value1 = double(rand() % 100000) / 100000;
    double Value2 = double(rand() % 100000) / 100000;
    return Value1 + Value2 / 100000;
 }
 //----------------------------------------------------------------------------
-double RandomBase::DrawRandom(double max)
+double DrawRandom(double max)
 {
    return max * DrawRandom();
 }
 //----------------------------------------------------------------------------
-double RandomBase::DrawRandom(double min, double max)
+double DrawRandom(double min, double max)
 {
    return min + (max - min) * DrawRandom();
 }
 //----------------------------------------------------------------------------
-double RandomBase::DrawSine(double min, double max)
+double DrawSine(double min, double max)
 {
    bool OK = false;
    double answer = 0;
@@ -81,7 +44,7 @@ double RandomBase::DrawSine(double min, double max)
    return answer;
 }
 //----------------------------------------------------------------------------
-double RandomBase::DrawLorentzian(double center, double gamma)
+double DrawLorentzian(double center, double gamma)
 {
    if(gamma <= 0)
       return center;
@@ -107,12 +70,12 @@ double RandomBase::DrawLorentzian(double center, double gamma)
    return center + displacement;
 }
 //----------------------------------------------------------------------------
-double RandomBase::DrawGaussian(double center, double sigma)
+double DrawGaussian(double center, double sigma)
 {
    return center + DrawGaussian(sigma);
 }
 //----------------------------------------------------------------------------
-double RandomBase::DrawGaussian(double sigma)
+double DrawGaussian(double sigma)
 {
    if(sigma <= 0)
       return 0;
@@ -133,7 +96,7 @@ double RandomBase::DrawGaussian(double sigma)
    return value;
 }
 //----------------------------------------------------------------------------
-double RandomBase::DrawGaussianBoxMuller()
+double DrawGaussianBoxMuller()
 {
    double x1 = DrawRandom();
    double x2 = DrawRandom();
@@ -141,7 +104,7 @@ double RandomBase::DrawGaussianBoxMuller()
    return sqrt(-2 * log(x1)) * cos(2 * PI * x2);
 }
 //----------------------------------------------------------------------------
-double RandomBase::DrawCruijff(double center, double sigmal, double sigmar, double alphal, double alphar)
+double DrawCruijff(double center, double sigmal, double sigmar, double alphal, double alphar)
 {
    if(sigmal <= 0 || sigmar <= 0 || alphal <= 0 || alphar <= 0)
       return 0;
@@ -167,7 +130,7 @@ double RandomBase::DrawCruijff(double center, double sigmal, double sigmar, doub
    return value + center;
 }
 //----------------------------------------------------------------------------
-double RandomBase::DrawCruijff(double center, double sigmal, double sigmar, double alphal, double alphar, double left, double right)
+double DrawCruijff(double center, double sigmal, double sigmar, double alphal, double alphar, double left, double right)
 {
    if(sigmal <= 0 || sigmar <= 0 || alphal <= 0 || alphar <= 0)
       return 0;
@@ -193,7 +156,7 @@ double RandomBase::DrawCruijff(double center, double sigmal, double sigmar, doub
    return value + center;
 }
 //----------------------------------------------------------------------------
-double RandomBase::DrawExponential(double exponent, double left, double right)
+double DrawExponential(double exponent, double left, double right)
 {
    if(exponent > 0)
    {
@@ -220,7 +183,7 @@ double RandomBase::DrawExponential(double exponent, double left, double right)
    return value + left;
 }
 //----------------------------------------------------------------------------
-double RandomBase::DrawExponential(double exponent, double side)
+double DrawExponential(double exponent, double side)
 {
    if(exponent == 0)
       return side;
@@ -259,7 +222,7 @@ double RandomBase::DrawExponential(double exponent, double side)
    return Distance + side;
 }
 //----------------------------------------------------------------------------
-double RandomBase::DrawPoisson(double mean)
+double DrawPoisson(double mean)
 {
    if(mean <= 0)
       return 0;
@@ -287,28 +250,12 @@ double RandomBase::DrawPoisson(double mean)
    return value;
 }
 //----------------------------------------------------------------------------
-int RandomBase::DrawPoissonInt(double Lambda)
-{
-   double LL = -Lambda;
-   int K = 0;
-   double P = 0;
-
-   do
-   {
-      K = K + 1;
-      P = P + log(DrawRandom());
-   }
-   while(P > LL);
-
-   return K - 1;
-}
-//----------------------------------------------------------------------------
-double RandomBase::DrawDoubleSidedCBShape(double Mean, double Sigma, double AlphaL, double AlphaR, double NL, double NR)
+double DrawDoubleSidedCBShape(double Mean, double Sigma, double AlphaL, double AlphaR, double NL, double NR)
 {
    return Mean + DrawDoubleSidedCBShape(AlphaL, AlphaR, NL, NR) * Sigma;
 }
 //----------------------------------------------------------------------------
-double RandomBase::DrawDoubleSidedCBShape(double AlphaL, double AlphaR, double NL, double NR)
+double DrawDoubleSidedCBShape(double AlphaL, double AlphaR, double NL, double NR)
 {
    double LeftTailIntegral = exp(-0.5 * AlphaL * AlphaL) * NL / AlphaL / (NL - 1);
    double GaussianIntegral = sqrt(PI / 2) * (erf(AlphaR / sqrt(2)) + erf(AlphaL / sqrt(2)));
@@ -338,48 +285,4 @@ double RandomBase::DrawDoubleSidedCBShape(double AlphaL, double AlphaR, double N
    return 0;
 }
 //----------------------------------------------------------------------------
-RandomMT::RandomMT(int Seed)
-{
-   Index = 0;
-   MT[0] = Seed;
-   for(int i = 1; i < 624; i++)
-      MT[i] = (1812433253 * (MT[i-1] ^ (MT[i-1] >> 30)) + i) & 0xFFFFFFFF;
-}
-//----------------------------------------------------------------------------
-void RandomMT::GenerateNumbers()
-{
-   for(int i = 0; i < 624; i++)
-   {
-      long long Y = (MT[i] & 0x80000000) + (MT[(i+1)%624] & 0x7FFFFFFF);
-      MT[i] = MT[(i+397)%624] ^ (Y >> 1);
-      if(Y % 2 != 0)
-         MT[i] = MT[i] ^ 0x9908b0df;
-   }
-}
-//----------------------------------------------------------------------------
-long long RandomMT::DrawRandomInteger()
-{
-   if(Index == 0)
-      GenerateNumbers();
-
-   long long Y = MT[Index];
-   Y = Y ^ (Y >> 11);
-   Y = Y ^ ((Y << 7) & 0x9d2c5680);
-   Y = Y ^ ((Y << 15) & 0xefc60000);
-   Y = Y ^ (Y >> 18);
-
-   Index = (Index + 1) % 624;
-
-   return Y;
-}
-//----------------------------------------------------------------------------
-double RandomMT::DrawRandom()
-{
-   return DrawRandomInteger() / 4294967296.0;
-}
-//----------------------------------------------------------------------------
-RandomBase DefaultRandomBase;
-RandomMT DefaultRandomMT(10135);
-//----------------------------------------------------------------------------
-#endif
 
