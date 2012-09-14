@@ -48,7 +48,7 @@ if [ $HOSTNAME == "t3-susy.ultralight.org" ]; then
 
 elif [ $HOSTNAME == "pccit28" ]; then
 
-   all_libs="$root_libs $roofit_libs $fastjet_libs $pythia_libs -lMathMore -lHistPainter"
+   all_libs="$root_libs $roofit_libs $fastjet_libs $pythia_libs -lMathMore -lHistPainter $extralibs"
    all_flags="$cxxflags $fastjet_cflags $root_cflags"
    all_include="$extrainclude $pythia_include"
 
