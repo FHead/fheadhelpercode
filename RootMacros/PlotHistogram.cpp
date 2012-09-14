@@ -69,6 +69,13 @@ int main(int argc, char *argv[])
    C.SaveAs((FileBase + ".eps").c_str());
    C.SaveAs((FileBase + ".pdf").c_str());
 
+   C.SetLogy();
+   
+   C.SaveAs((FileBase + "_Log.C").c_str());
+   C.SaveAs((FileBase + "_Log.png").c_str());
+   C.SaveAs((FileBase + "_Log.eps").c_str());
+   C.SaveAs((FileBase + "_Log.pdf").c_str());
+
    return 0;
 }
 
