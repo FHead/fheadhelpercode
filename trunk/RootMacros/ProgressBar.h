@@ -83,7 +83,7 @@ void ProgressBar::SanityCheck()
       Column = 100;
    }
 
-   if(Style < 0 || Style > 5)
+   if(Style < 0 || Style > 7)
    {
       std::cerr << "[ProgressBar] Style invalid.  Set to a random style." << std::endl;
       std::cerr << std::endl;
@@ -94,9 +94,11 @@ void ProgressBar::SanityCheck()
       std::cerr << "3: [~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|                 ]  55%" << std::endl;
       std::cerr << "4: [                  <=============================]  55%" << std::endl;
       std::cerr << "5: [                  <><                           ]  55%" << std::endl;
+      std::cerr << "6: Current progress: 553/1000 (55%)" << std::endl;
+      std::cerr << "7: Current progress: 553" << std::endl;
       std::cerr << std::endl;
 
-      Style = std::rand() % 6;
+      Style = std::rand() % 8;
    }
 
    if(Out == NULL)
@@ -215,6 +217,14 @@ void ProgressBar::Print(double progress)
       *Out << std::setw(3) << std::setfill(' ') << (int)((progress - Min) / (Max - Min) * 100 + 0.5);
       *Out << "\%" << std::flush;
    }
+   if(Style == 6)
+   {
+      *Out << "Current progress: " << progress - Min << "/" << Max - Min << " ("
+         << std::setw(3) << std::setfill(' ') << (int)((progress - Min) / (Max - Min) * 100 + 0.5)
+         "\%)" << std::flush;
+   }
+   if(Style == 7)
+      *Out << "Current progress: " << progress - Min << std::flush;
 }
 
 
