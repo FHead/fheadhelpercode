@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 input=$1
 output=$2
@@ -81,7 +81,19 @@ elif [[ "$HOSTNAME" == lxplus*.cern.ch ]]; then
 
 fi
 
+TextRedColor=$(echo -e '\e[1;31m')
+TextYellowColor=$(echo -e '\e[1;34m')
+TextGreyColor=$(echo -e '\e[0;37m')
+TextNoColor=$(echo -e '\e[0m')
+
 echo g++ $input $all_libs $all_include $all_flags "$@" -o $output
-g++ $input $all_libs $all_include $all_flags "$@" -o $output
+g++ $input $all_libs $all_include $all_flags "$@" -o $output 2>&1 | \
+   sed -e "s#\(g++:[.A-Za-z0-9 /-]*: linker input file unused because linking not done\)#${TextGreyColor}\1${TextNoColor}#g" | \
+   sed -e "s/\([Ee][Rr][Rr][Oo][Rr]\)/${TextRedColor}\1${TextNoColor}/g" | \
+   sed -e "s/\(undefined reference\)/${TextRedColor}\1${TextNoColor}/g" | \
+   sed -e "s/\(multiple definition\)/${TextRedColor}\1${TextNoColor}/g" | \
+   sed -e "s/\([Ww][Aa][Rr][Nn][Ii][Nn][Gg]\)/${TextYellowColor}\1${TextNoColor}/g"
+   
+   # sed -e "s/^\(g++*unused because linking not done\)$/${TextGreyColor}\1${TextNoColor}/g" | \
 
 
