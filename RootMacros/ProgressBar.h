@@ -221,7 +221,7 @@ void ProgressBar::Print(double progress)
    {
       *Out << "Current progress: " << progress - Min << "/" << Max - Min << " ("
          << std::setw(3) << std::setfill(' ') << (int)((progress - Min) / (Max - Min) * 100 + 0.5)
-         "\%)" << std::flush;
+         << "\%)" << std::flush;
    }
    if(Style == 7)
       *Out << "Current progress: " << progress - Min << std::flush;
