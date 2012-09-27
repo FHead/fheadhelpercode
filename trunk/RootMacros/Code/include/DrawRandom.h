@@ -23,8 +23,11 @@ double DrawExponential(double exponent, double left, double right);
 double DrawExponential(double exponent, double side);
 double DrawPoisson(double mean);
 double DrawPoissonDouble(double mean);
-double DrawDoubleSidedCBShape(double Mean, double Sigma, double AlphaL, double AlphaR, double NL, double NR);
+double DrawDoubleSidedCBShape(double Mean, double Sigma, double AlphaL, double AlphaR, double NL, double NR, double NormalizationL = -1, double NormalizationM = -1, double NormalizationR = -1);
 double DrawDoubleSidedCBShape(double AlphaL, double AlphaR, double NL, double NR);
+double DrawDoubleSidedCBShapeWithNormalization(double AlphaL, double AlphaR, double NL, double NR, double NormalizationL = -1, double NormalizationM = -1, double NormalizationR = -1);
+double CachedExp(double X);
+double CachedErf(double X);
 //----------------------------------------------------------------------------
 #endif
 
