@@ -20,7 +20,9 @@ public:
    double DrawLorentzian(double center, double gamma);
    double DrawGaussian(double center, double sigma);
    double DrawGaussian(double sigma);
-   double DrawGaussian();
+   double DrawTruncatedGaussian(double center, double sigma, double min, double max);
+   double DrawTruncatedGaussian(double sigma, double min, double max);
+   double DrawTruncatedGaussian(double min, double max);
    double DrawGaussianBoxMuller();
    double DrawCruijff(double center, double sigmal, double sigmar, double alphal, double alphar);
    double DrawCruijff(double center, double sigmal, double sigmar, double alphal, double alphar, double left, double right);
