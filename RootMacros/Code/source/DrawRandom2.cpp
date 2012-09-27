@@ -1,6 +1,8 @@
 //----------------------------------------------------------------------------
+#include <map>
 #include <cmath>
 #include <cstdlib>
+#include <iostream>
 #include <algorithm>
 //----------------------------------------------------------------------------
 #define PI 3.14159265358979323846264338327950288479716939937510
@@ -263,9 +265,9 @@ int RandomBase::DrawPoissonInt(double Lambda)
    return K - 1;
 }
 //----------------------------------------------------------------------------
-double RandomBase::DrawDoubleSidedCBShape(double Mean, double Sigma, double AlphaL, double AlphaR, double NL, double NR)
+double RandomBase::DrawDoubleSidedCBShape(double Mean, double Sigma, double AlphaL, double AlphaR, double NL, double NR, double NormalizationL, double NormalizationM, double NormalizationR)
 {
-   return Mean + DrawDoubleSidedCBShape(AlphaL, AlphaR, NL, NR) * Sigma;
+   return Mean + DrawDoubleSidedCBShapeWithNormalization(AlphaL, AlphaR, NL, NR, NormalizationL, NormalizationM, NormalizationR) * Sigma;
 }
 //----------------------------------------------------------------------------
 double RandomBase::DrawDoubleSidedCBShape(double AlphaL, double AlphaR, double NL, double NR)
@@ -273,16 +275,25 @@ double RandomBase::DrawDoubleSidedCBShape(double AlphaL, double AlphaR, double N
    double LeftTailIntegral = exp(-0.5 * AlphaL * AlphaL) * NL / AlphaL / (NL - 1);
    double GaussianIntegral = sqrt(PI / 2) * (erf(AlphaR / sqrt(2)) + erf(AlphaL / sqrt(2)));
    double RightTailIntegral = exp(-0.5 * AlphaR * AlphaR) * NR / AlphaR / (NR - 1);
-   double TotalIntegral = LeftTailIntegral + GaussianIntegral + RightTailIntegral;
+
+   return DrawDoubleSidedCBShapeWithNormalization(AlphaL, AlphaR, NL, NR, LeftTailIntegral, GaussianIntegral, RightTailIntegral);
+}
+//----------------------------------------------------------------------------
+double RandomBase::DrawDoubleSidedCBShapeWithNormalization(double AlphaL, double AlphaR, double NL, double NR, double L, double M, double R)
+{
+   if(L + M + R < 0)
+      return DrawDoubleSidedCBShape(AlphaL, AlphaR, NL, NR);
+
+   double TotalIntegral = L + M + R;
 
    double RandomNumber = DrawRandom(TotalIntegral);
    
-   if(RandomNumber < LeftTailIntegral)
+   if(RandomNumber < L)
    {
       RandomNumber = DrawRandom();
       return -(NL / AlphaL * pow(1 - RandomNumber, 1.0 / (1 - NL)) - NL / AlphaL + AlphaL);
    }
-   else if(RandomNumber < LeftTailIntegral + GaussianIntegral)
+   else if(RandomNumber < L + M)
    {
       RandomNumber = DrawGaussianBoxMuller();
       while(RandomNumber < -AlphaL || RandomNumber > AlphaR)
@@ -296,6 +307,38 @@ double RandomBase::DrawDoubleSidedCBShape(double AlphaL, double AlphaR, double N
    }
 
    return 0;
+}
+//----------------------------------------------------------------------------
+double RandomBase::CachedExp(double X)
+{
+   static std::map<int, double> Evaluated;
+   if(Evaluated.size() > 100000)
+   {
+      std::cerr << "Clearing cache in CachedExp function.  Please use the non-cached version." << std::endl;
+      Evaluated.clear();
+   }
+
+   int Index = (int)(X * 1000000);
+   if(Evaluated.find(Index) == Evaluated.end())
+      Evaluated.insert(std::pair<int, double>(Index, exp(X)));
+
+   return Evaluated[Index];
+}
+//----------------------------------------------------------------------------
+double RandomBase::CachedErf(double X)
+{
+   static std::map<int, double> Evaluated;
+   if(Evaluated.size() > 100000)
+   {
+      std::cerr << "Clearing cache in CachedErf function.  Please use the non-cached version." << std::endl;
+      Evaluated.clear();
+   }
+
+   int Index = (int)(X * 1000000);
+   if(Evaluated.find(Index) == Evaluated.end())
+      Evaluated.insert(std::pair<int, double>(Index, erf(X)));
+
+   return Evaluated[Index];
 }
 //----------------------------------------------------------------------------
 RandomMT::RandomMT(int Seed)
