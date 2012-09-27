@@ -98,6 +98,37 @@ double DrawGaussian(double sigma)
    return value;
 }
 //----------------------------------------------------------------------------
+double DrawTruncatedGaussian(double center, double sigma, double min, double max)
+{
+   return center + DrawTruncatedGaussian((min - center) / sigma, (max - center) / sigma) * sigma;
+}
+//----------------------------------------------------------------------------
+double DrawTruncatedGaussian(double sigma, double min, double max)
+{
+   return DrawTruncatedGaussian(min / sigma, max / sigma) * sigma;
+}
+//----------------------------------------------------------------------------
+double DrawTruncatedGaussian(double min, double max)
+{
+   if(min > max)
+      std::swap(min, max);
+
+   bool OK = false;
+   double value = 0;
+
+   // form: exp(-x^2/(2 sigma^2)), sigma = 1
+   while(OK == false)
+   {
+      value = DrawRandom(min, max);
+      double check = DrawRandom();
+
+      if(check < exp(-value * value / 2))
+         OK = true;
+   }
+
+   return value;
+}
+//----------------------------------------------------------------------------
 double DrawGaussianBoxMuller()
 {
    double x1 = DrawRandom();
