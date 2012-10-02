@@ -64,12 +64,12 @@ int main(int argc, char *argv[])
 
    while(cin)
    {
-      double Number1 = -99999, Number2 = -99999;
-      cin >> Number1 >> Number2;
-      if(Number1 < -99998 || Number2 < -99998)
+      double Number1 = -99999, Number2 = -99999, Number3 = -99999;
+      cin >> Number1 >> Number2 >> Number3;
+      if(Number1 < -99998 || Number2 < -99998 || Number3 < -99998)
          continue;
 
-      HPlot.Fill(Number1, Number2);
+      HPlot.Fill(Number1, Number2, Number3);
    }
 
    TCanvas C("C", "C", 0, 0, 1024, 1024);
