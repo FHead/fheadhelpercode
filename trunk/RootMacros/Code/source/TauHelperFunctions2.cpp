@@ -377,6 +377,73 @@ FourVector FourVector::Boost(const FourVector Axis, double Beta) const
    return RotateZ(Psi).RotateX(Theta).BoostZ(Beta).RotateX(-Theta).RotateZ(-Psi);
 }
 //----------------------------------------------------------------------------
+FourVector FourVector::GammaBoostX(double Gamma) const
+{
+   double Beta = GammaToBeta(Gamma);
+   if(Gamma < 0)
+   {
+      Gamma = -Gamma;
+      Beta = -Beta;
+   }
+
+   FourVector Out;
+   Out.P[0] = Gamma * P[0] + Beta * Gamma * P[1];
+   Out.P[1] = Beta * Gamma * P[0] + Gamma * P[1];
+   Out.P[2] = P[2];
+   Out.P[3] = P[3];
+   return Out;
+}
+//----------------------------------------------------------------------------
+FourVector FourVector::GammaBoostY(double Gamma) const
+{
+   double Beta = GammaToBeta(Gamma);
+   if(Gamma < 0)
+   {
+      Gamma = -Gamma;
+      Beta = -Beta;
+   }
+
+   FourVector Out;
+   Out.P[0] = Gamma * P[0] + Beta * Gamma * P[2];
+   Out.P[1] = P[1];
+   Out.P[2] = Beta * Gamma * P[0] + Gamma * P[2];
+   Out.P[3] = P[3];
+   return Out;
+}
+//----------------------------------------------------------------------------
+FourVector FourVector::GammaBoostZ(double Gamma) const
+{
+   double Beta = GammaToBeta(Gamma);
+   if(Gamma < 0)
+   {
+      Gamma = -Gamma;
+      Beta = -Beta;
+   }
+
+   FourVector Out;
+   Out.P[0] = Gamma * P[0] + Beta * Gamma * P[3];
+   Out.P[1] = P[1];
+   Out.P[2] = P[2];
+   Out.P[3] = Beta * Gamma * P[0] + Gamma * P[3];
+   return Out;
+}
+//----------------------------------------------------------------------------
+FourVector FourVector::GammaBoost(const FourVector Axis, double Gamma) const
+{
+   if(Axis.GetPT() < 1e-8)   // axis along z direction
+   {
+      if(Axis[3] > 0)
+         return GammaBoostZ(Gamma);
+      else
+         return GammaBoostZ(-Gamma);
+   }
+
+   double Psi = PI / 2 - Axis.GetPhi();
+   double Theta = acos(Axis[3] / Axis.GetP());
+
+   return RotateZ(Psi).RotateX(Theta).GammaBoostZ(Gamma).RotateX(-Theta).RotateZ(-Psi);
+}
+//----------------------------------------------------------------------------
 FourVector FourVector::SmearAngle(double Angle) const
 {
    FourVector Reference(0, 1, 0, 0);

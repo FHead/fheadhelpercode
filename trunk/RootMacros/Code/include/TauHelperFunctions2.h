@@ -109,6 +109,10 @@ public:
    FourVector BoostY(double Beta) const;
    FourVector BoostZ(double Beta) const;
    FourVector Boost(const FourVector Axis, double Beta) const;
+   FourVector GammaBoostX(double Gamma) const;
+   FourVector GammaBoostY(double Gamma) const;
+   FourVector GammaBoostZ(double Gamma) const;
+   FourVector GammaBoost(const FourVector Axis, double Gamma) const;
    FourVector SmearAngle(double Angle) const;
    FourVector SmearMomentum(double Scale) const;
    FourVector SpatialCross(const FourVector Other) const;
