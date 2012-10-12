@@ -13,9 +13,9 @@ class RandomMT;
 class RandomBase
 {
 public:
-   double DrawRandom();
-   double DrawRandom(double max);
-   double DrawRandom(double min, double max);
+   virtual double DrawRandom();
+   virtual double DrawRandom(double max);
+   virtual double DrawRandom(double min, double max);
    double DrawSine(double min, double max);
    double DrawLorentzian(double center, double gamma);
    double DrawGaussian(double center, double sigma);
