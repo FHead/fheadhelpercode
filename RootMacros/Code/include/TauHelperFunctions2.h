@@ -31,6 +31,7 @@ FourVector operator *(double Scale, FourVector P);
 double GetAngle(const FourVector P1, const FourVector P2);
 double GetDR(const FourVector P1, const FourVector P2);
 double GetDPhi(const FourVector P1, const FourVector P2);
+double EPS(const FourVector A, const FourVector B, const FourVector C, const FourVector D);
 double GetMT(const FourVector P1, const FourVector P2);
 double GetMinRadius(const FourVector P1, const FourVector P2, const FourVector P3);   // in eta-phi space
 double GetMinRadius(const double X1, const double Y1, const double X2, const double Y2, const double X3, const double Y3);
@@ -82,6 +83,7 @@ public:
    FourVector operator +(const FourVector &Other) const;
    FourVector operator -() const;
    FourVector operator -(const FourVector &Other) const;
+   double operator *(const FourVector &other) const;
    FourVector operator *(double Scale) const;
    FourVector operator /(double Scale) const;
 public:

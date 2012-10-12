@@ -167,6 +167,11 @@ FourVector FourVector::operator -(const FourVector &Other) const
    return Out;
 }
 //----------------------------------------------------------------------------
+double FourVector::operator *(const FourVector &other) const
+{
+   return MetricDot(other);
+}
+//----------------------------------------------------------------------------
 FourVector FourVector::operator *(double Scale) const
 {
    FourVector Out;
@@ -460,6 +465,72 @@ double GetDPhi(const FourVector P1, const FourVector P2)
       DPhi = DPhi + 2 * PI;
 
    return DPhi;
+}
+//----------------------------------------------------------------------------
+double EPS(const FourVector A, const FourVector B, const FourVector C, const FourVector D)
+{
+   double Result = 0;
+
+   Result = Result + A[1] * B[3] * C[2] * D[0];
+   Result = Result - A[1] * B[2] * C[3] * D[0];
+   Result = Result - A[0] * B[3] * C[2] * D[1];
+   Result = Result + A[0] * B[2] * C[3] * D[1];
+   Result = Result - A[1] * B[3] * C[0] * D[2];
+   Result = Result + A[0] * B[3] * C[1] * D[2];
+   Result = Result + A[1] * B[0] * C[3] * D[2];
+   Result = Result - A[0] * B[1] * C[3] * D[2];
+   
+   Result = Result + A[3] * B[2] * C[1] * D[0];
+   Result = Result - A[3] * B[1] * C[2] * D[0];
+   Result = Result - A[3] * B[2] * C[0] * D[1];
+   Result = Result + A[3] * B[0] * C[2] * D[1];
+   Result = Result + A[3] * B[1] * C[0] * D[2];
+   Result = Result - A[3] * B[0] * C[1] * D[2];
+  
+   Result = Result + A[1] * B[2] * C[0] * D[3];
+   Result = Result - A[0] * B[2] * C[1] * D[3];
+   Result = Result - A[1] * B[0] * C[2] * D[3];
+   Result = Result + A[0] * B[1] * C[2] * D[3];
+
+   Result = Result - A[2] * B[3] * C[1] * D[0];
+   Result = Result + A[2] * B[1] * C[3] * D[0];
+   Result = Result + A[2] * B[3] * C[0] * D[1];
+   Result = Result - A[2] * B[0] * C[3] * D[1];
+   Result = Result - A[2] * B[1] * C[0] * D[3];
+   Result = Result + A[2] * B[0] * C[1] * D[3];
+
+   /*
+   // Reordered 
+   Result = Result + A[0] * B[1] * C[2] * D[3];
+   Result = Result - A[0] * B[1] * C[3] * D[2];
+   Result = Result - A[0] * B[2] * C[1] * D[3];
+   Result = Result + A[0] * B[2] * C[3] * D[1];
+   Result = Result + A[0] * B[3] * C[1] * D[2];
+   Result = Result - A[0] * B[3] * C[2] * D[1];
+
+   Result = Result - A[1] * B[0] * C[2] * D[3];
+   Result = Result + A[1] * B[0] * C[3] * D[2];
+   Result = Result + A[1] * B[2] * C[0] * D[3];
+   Result = Result - A[1] * B[2] * C[3] * D[0];
+   Result = Result - A[1] * B[3] * C[0] * D[2];
+   Result = Result + A[1] * B[3] * C[2] * D[0];
+   
+   Result = Result + A[2] * B[0] * C[1] * D[3];
+   Result = Result - A[2] * B[0] * C[3] * D[1];
+   Result = Result - A[2] * B[1] * C[0] * D[3];
+   Result = Result + A[2] * B[1] * C[3] * D[0];
+   Result = Result + A[2] * B[3] * C[0] * D[1];
+   Result = Result - A[2] * B[3] * C[1] * D[0];
+   
+   Result = Result - A[3] * B[0] * C[1] * D[2];
+   Result = Result + A[3] * B[0] * C[2] * D[1];
+   Result = Result + A[3] * B[1] * C[0] * D[2];
+   Result = Result - A[3] * B[1] * C[2] * D[0];
+   Result = Result - A[3] * B[2] * C[0] * D[1];
+   Result = Result + A[3] * B[2] * C[1] * D[0];
+   */
+
+   return Result;
 }
 //----------------------------------------------------------------------------
 double GetMT(const FourVector P1, const FourVector P2)

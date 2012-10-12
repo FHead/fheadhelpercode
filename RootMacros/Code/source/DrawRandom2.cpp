@@ -326,9 +326,15 @@ double RandomBase::DrawDoubleSidedCBShapeWithNormalization(double AlphaL, double
    }
    else if(RandomNumber < L + M)
    {
-      RandomNumber = DrawGaussianBoxMuller();
-      while(RandomNumber < -AlphaL || RandomNumber > AlphaR)
+      if(AlphaL + AlphaR < 4)
+         RandomNumber = DrawTruncatedGaussian(-AlphaL, AlphaR);
+      else
+      {
          RandomNumber = DrawGaussianBoxMuller();
+         while(RandomNumber < -AlphaL || RandomNumber > AlphaR)
+            RandomNumber = DrawGaussianBoxMuller();
+      }
+      
       return RandomNumber;
    }
    else
