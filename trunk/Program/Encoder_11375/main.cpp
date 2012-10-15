@@ -21,6 +21,7 @@ int main(int argc, char *argv[])
 
    if(argc <= 2)
    {
+      cerr << "LSC Encoder by FHead, version 11375" << endl;
       cerr << UsageString << endl;
       return -1;
    }
