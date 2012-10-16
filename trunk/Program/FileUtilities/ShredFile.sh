@@ -1,10 +1,10 @@
-/home/fhead/Program/bin/CleanFile $1
-/home/fhead/Program/bin/CleanFile $1 A
-/home/fhead/Program/bin/CleanFile $1 ' '
-/home/fhead/Program/bin/CleanFile $1 C
-/home/fhead/Program/bin/CleanFile $1 ' '
-/home/fhead/Program/bin/CleanFile $1 E
-/home/fhead/Program/bin/CleanFile $1
+$HOME/Program/bin/CleanFile $1
+$HOME/Program/bin/CleanFile $1 A
+$HOME/Program/bin/CleanFile $1 ' '
+$HOME/Program/bin/CleanFile $1 C
+$HOME/Program/bin/CleanFile $1 ' '
+$HOME/Program/bin/CleanFile $1 E
+$HOME/Program/bin/CleanFile $1
 rm $1
 
 
