@@ -1,6 +1,7 @@
 //----------------------------------------------------------------------------
 #include <iostream>
 #include <vector>
+#include <cmath>
 //----------------------------------------------------------------------------
 #include "LargeInteger.h"
 //----------------------------------------------------------------------------
@@ -13,7 +14,7 @@ LargeInteger::LargeInteger()
 LargeInteger::LargeInteger(int value)
 {
    Value.clear();
-   Value.push_back(abs(value));
+   Value.push_back(std::abs(value));
 
    if(value >= 0)
       Sign = true;
@@ -48,7 +49,7 @@ void LargeInteger::SortOutDigits()
    {
       if(Value[i] < 0)
       {
-         int N = abs(Value[i]) / LargeIntegerDigitLimit;
+         int N = std::abs(Value[i]) / LargeIntegerDigitLimit;
          Value[i] = Value[i] + LargeIntegerDigitLimit * (N + 1);
          Value[i+1] = Value[i+1] - (N + 1);
       }
@@ -69,7 +70,7 @@ void LargeInteger::SortOutDigits()
       {
          if(Value[i] < 0)
          {
-            int N = abs(Value[i]) / LargeIntegerDigitLimit;
+            int N = std::abs(Value[i]) / LargeIntegerDigitLimit;
             Value[i] = Value[i] + LargeIntegerDigitLimit * (N + 1);
             Value[i+1] = Value[i+1] - (N + 1);
          }
