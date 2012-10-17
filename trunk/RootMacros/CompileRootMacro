@@ -59,7 +59,7 @@ elif [ $HOSTNAME == "pccit28" ]; then
 elif [ $HOSTNAME == "FHeadMac" ]; then
    
    all_libs="$root_libs $roofit_libs $fastjet_libs $pythia_libs -lHistPainter"
-   all_flags="$cxxflags $fastjet_cflags $root_cflags"
+   all_flags="$cxxflags $fastjet_cflags $root_cflags -m32"
    all_include="$extrainclude $pythia_include"
 
    # quick fix....
