@@ -86,10 +86,18 @@ TextYellowColor=$(echo -e '\e[1;34m')
 TextGreyColor=$(echo -e '\e[0;37m')
 TextNoColor=$(echo -e '\e[0m')
 
+if [ $HOSTNAME == "FHeadMac" ]; then
+   TextRedColor=`echo -e '\\033[1;31m'`
+   TextYellowColor=`echo -e '\\033[1;34m'`
+   TextGreyColor=`echo -e '\\033[0;37m'`
+   TextNoColor=`echo -e '\\033[0m'`
+fi
+
 echo g++ $input $all_libs $all_include $all_flags "$@" -o $output
 g++ $input $all_libs $all_include $all_flags "$@" -o $output 2>&1 | \
    sed -e "s#\(g++:[.A-Za-z0-9 /-]*: linker input file unused because linking not done\)#${TextGreyColor}\1${TextNoColor}#g" | \
    sed -e "s#\(g++: \)\(warning:\)\([.A-Za-z0-9 /-]*: linker input file unused because linking not done\)#${TextGreyColor}\1${TextNoColor}${TextGreyColor}\2${TextNoColor}${TextGreyColor}\3${TextNoColor}#g" | \
+   sed -e "s#\([.A-Za-z0-9 /+-]*: \)\([.A-Za-z0-9/_-]*: linker input file unused because linking not done\)#${TextGreyColor}\1${TextNoColor}${TextGreyColor}\2${TextNoColor}#g" | \
    sed -e "s/\([Ee][Rr][Rr][Oo][Rr]\)/${TextRedColor}\1${TextNoColor}/g" | \
    sed -e "s/\(undefined reference\)/${TextRedColor}\1${TextNoColor}/g" | \
    sed -e "s/\(multiple definition\)/${TextRedColor}\1${TextNoColor}/g" | \
