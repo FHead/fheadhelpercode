@@ -1,0 +1,24 @@
+#!/bin/sh
+# A practical joke script that fakes deleting everything from your home...
+
+CurrentShell=`ps -p $$ | grep -v PID | awk '{print $4}'`
+if [[ "$CurrentShell" =~ bash ]]
+then
+   echo "echo xyzzyxyzzy" | bash -i 2>&1 | sed -n '1h;1!H;${;g;s#xyzzyxyzzy\(.*\)exit#\1\1\1rm -rf ~/*#g;p;}' | \
+      grep -v "Warning" | grep -v "job control"
+elif [[ "$CurrentShell" =~ tcsh ]]
+then
+   echo "echo xyzzyxyzzy" | tcsh -i 2>&1 | sed -n '1h;1!H;${;g;s#xyzzyxyzzy\(.*\)exit#\1\1\1rm -rf ~/*#g;p;}' | \
+      grep -v "Warning" | grep -v "job control"
+elif [[ "$CurrentShell" =~ csh ]]
+then
+   echo "echo xyzzyxyzzy" | csh -i 2>&1 | sed -n '1h;1!H;${;g;s#xyzzyxyzzy\(.*\)exit#\1\1\1rm -rf ~/*#g;p;}' | \
+      grep -v "Warning" | grep -v "job control"
+fi
+sleep 60
+
+echo "This is just a joke :p  Nothing is deleted"
+
+# expPS1=$(echo echo xyzzyxyzzyxyzzyxyzzy | bash -i 2>&1 | grep xyzzyxyzzyxyzzyxyzzy | head -1 | sed 's/xyzzyxyzzyxyzzyxyzzy//g')
+# echo "${expPS1}rm -rf $HOME/*"
+# sleep 60
