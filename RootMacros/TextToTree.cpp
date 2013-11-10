@@ -84,7 +84,7 @@ vector<string> Split(string All)
    {
       int index2 = All.find(':', index);
       if(index2 - index > 0)
-         Result.push_back(All.substr(index, index2 - index));
+         Result.push_back(All.substr(index, index2 - index) + "/D");
       index = index2 + 1;
    }
 
