@@ -333,6 +333,11 @@ double DrawDoubleSidedCBShapeWithNormalization(double AlphaL, double AlphaR, dou
    return 0;
 }
 //----------------------------------------------------------------------------
+double DrawLogNormal(double Mu, double Sigma)
+{
+   return exp(DrawGaussian(Mu, Sigma));
+}
+//----------------------------------------------------------------------------
 double CachedExp(double X)
 {
    static std::map<int, double> Evaluated;
