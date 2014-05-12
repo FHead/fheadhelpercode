@@ -46,6 +46,18 @@ if [ $HOSTNAME == "t3-susy.ultralight.org" ]; then
    # quick fix....
    libs=`echo $libs | sed "s/-lz//g"`
 
+elif [ $HOSTNAME == "t3-higgs.ultralight.org" ] || [ $HOSTNAME == "t3-higgs" ]; then
+
+   # roofit_base=/cms/sw/slc5_amd64_gcc462/lcg/roofit/5.32.00-cms5
+   roofit_base=/cvmfs/cms.cern.ch/slc5_amd64_gcc462/lcg/roofit/5.34.02-cms/
+   
+   all_libs="$root_libs $fastjet_libs -L$roofit_base/lib $roofit_libs $extralibs"
+   all_include="$extrainclude -I$roofit_base/include"
+   all_flags="$root_cflags $cxxflags $fastjet_cflags -m64"
+
+   # quick fix....
+   libs=`echo $libs | sed "s/-lz//g"`
+
 elif [ $HOSTNAME == "pccit28" ]; then
 
    all_libs="$root_libs $roofit_libs $fastjet_libs $pythia_libs -lMathMore -lHistPainter $extralibs"
