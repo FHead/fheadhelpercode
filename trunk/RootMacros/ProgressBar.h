@@ -9,18 +9,18 @@
 class ProgressBar
 {
 private:
-   double Min;
-   double Max;
-   double Progress;
-   int Column;
-   int Style;
    std::ostream *Out;
+   double Max;
+   double Min;
+   int Column;
+   double Progress;
+   int Style;
    void SanityCheck();
 public:
    ProgressBar(std::ostream &out, double max = 100, double min = 0, int column = 80)
-      : Out(&out), Max(max), Min(min), Column(column), Progress(0), Style(0) {srand(time(NULL));   SanityCheck();}
+      : Out(&out), Max(max), Min(min), Column(column), Progress(0), Style(0) {SanityCheck();}
    ProgressBar(std::ostream *out, double max = 100, double min = 0, int column = 80)
-      : Out(out), Max(max), Min(min), Column(column), Progress(0), Style(0) {srand(time(NULL));   SanityCheck();}
+      : Out(out), Max(max), Min(min), Column(column), Progress(0), Style(0) {SanityCheck();}
    ~ProgressBar() {}
    void Print();
    void Print(double progress);
@@ -129,7 +129,7 @@ void ProgressBar::Print(double progress)
          *Out << " ";
       *Out << "] ";
       *Out << std::setw(3) << std::setfill(' ') << (int)((progress - Min) / (Max - Min) * 100 + 0.5);
-      *Out << "\%" << std::flush;
+      *Out << "%" << std::flush;
    }
    if(Style == 1)
    {
@@ -149,7 +149,7 @@ void ProgressBar::Print(double progress)
          *Out << " ";
       *Out << "] ";
       *Out << std::setw(3) << std::setfill(' ') << (int)((progress - Min) / (Max - Min) * 100 + 0.5);
-      *Out << "\%" << std::flush;
+      *Out << "%" << std::flush;
    }
    if(Style == 2)
    {
@@ -163,7 +163,7 @@ void ProgressBar::Print(double progress)
          *Out << " ";
       *Out << "] ";
       *Out << std::setw(3) << std::setfill(' ') << (int)((progress - Min) / (Max - Min) * 100 + 0.5);
-      *Out << "\%" << std::flush;
+      *Out << "%" << std::flush;
    }
    if(Style == 3)
    {
@@ -179,7 +179,7 @@ void ProgressBar::Print(double progress)
          *Out << " ";
       *Out << "] ";
       *Out << std::setw(3) << std::setfill(' ') << (int)((progress - Min) / (Max - Min) * 100 + 0.5);
-      *Out << "\%" << std::flush;
+      *Out << "%" << std::flush;
    }
    if(Style == 4)
    {
@@ -195,7 +195,7 @@ void ProgressBar::Print(double progress)
          *Out << "=";
       *Out << "] ";
       *Out << std::setw(3) << std::setfill(' ') << (int)((progress - Min) / (Max - Min) * 100 + 0.5);
-      *Out << "\%" << std::flush;
+      *Out << "%" << std::flush;
    }
    if(Style == 5)
    {
@@ -215,13 +215,13 @@ void ProgressBar::Print(double progress)
          *Out << " ";
       *Out << "] ";
       *Out << std::setw(3) << std::setfill(' ') << (int)((progress - Min) / (Max - Min) * 100 + 0.5);
-      *Out << "\%" << std::flush;
+      *Out << "%" << std::flush;
    }
    if(Style == 6)
    {
       *Out << "\033[1GCurrent progress: " << progress - Min << "/" << Max - Min << " ("
          << std::setw(3) << std::setfill(' ') << (int)((progress - Min) / (Max - Min) * 100 + 0.5)
-         << "\%)" << std::flush;
+         << "%)" << std::flush;
    }
    if(Style == 7)
       *Out << "\033[1GCurrent progress: " << progress - Min << std::flush;
