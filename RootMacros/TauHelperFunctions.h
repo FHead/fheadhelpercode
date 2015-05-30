@@ -36,8 +36,10 @@ double GetDPhi(const double P1[4], const double P2[4]);
 double GetMT(const double P1[4], const double P2[4]);
 double GetMinRadius(const double P1[4], const double P2[4], const double P3[4]);   // in eta-phi space
 double GetMinRadius(const double X1, const double Y1, const double X2, const double Y2, const double X3, const double Y3);
+double Get2011MR(const double P1[4], const double P2[4]);
 double GetMR(const double P1[4], const double P2[4]);
 double GetMRT(const double P1[4], const double P2[4], const double ME[4]);
+double Get2011R(const double P1[4], const double P2[4], const double ME[4]);
 double GetR(const double P1[4], const double P2[4], const double ME[4]);
 double GetBeta(const double P[4]);
 double GetGamma(const double P[4]);
@@ -293,6 +295,25 @@ double GetMinRadius(const double X1, const double Y1, const double X2, const dou
    return sqrt(min(MaxEdge2, Distance2));
 }
 
+double Get2011MR(const double P1[4], const double P2[4])
+{
+   double Temp1, Temp2, Temp3, Temp4;
+
+   Temp1 = P1[0] * P2[3] - P1[3] * P2[0];
+   Temp2 = P1[3] - P2[3];
+   Temp3 = P1[0] - P2[0];
+   double MRStar = 2 * sqrt(Temp1 * Temp1 / (Temp2 * Temp2 - Temp3 * Temp3));
+
+   Temp1 = P1[0] + P2[0];
+   Temp2 = P1[3] + P2[3];
+   Temp3 = GetPT(P1) * GetPT(P1) - GetPT(P2) * GetPT(P2);
+   Temp4 = sqrt((P1[1] + P2[1]) * (P1[1] + P2[1]) + (P1[2] + P2[2]) * (P1[2] + P2[2]));
+
+   double Upper = Temp1 * Temp1 - Temp2 * Temp2;
+   double Lower = Temp1 * Temp1 - Temp2 * Temp2 - Temp3 * Temp3 / Temp4 / Temp4;
+   return sqrt(Upper / Lower) * MRStar;
+}
+
 double GetMR(const double P1[4], const double P2[4])
 {
    double Temp1 = P1[0] * P2[3] - P1[3] * P2[0];
@@ -306,6 +327,11 @@ double GetMRT(const double P1[4], const double P2[4], const double ME[4])
    double Temp1 = GetPT(ME) * (GetPT(P1) + GetPT(P2));
    double Temp2 = ME[1] * (P1[1] + P2[1]) + ME[2] * (P1[2] + P2[2]);
    return sqrt((Temp1 - Temp2) / 2);
+}
+
+double Get2011R(const double P1[4], const double P2[4], const double ME[4])
+{
+   return GetMRT(P1, P2, ME) / Get2011MR(P1, P2);
 }
 
 double GetR(const double P1[4], const double P2[4], const double ME[4])

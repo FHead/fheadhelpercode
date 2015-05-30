@@ -44,7 +44,10 @@ int main(int argc, char *argv[])
    for(int i = 0; i < ColumnCount; i++)
    {
       if(i < (int)BranchNames.size())
+      {
+         cout << BranchNames[i] << endl;
          Tree.Branch(BranchNames[i].c_str(), &Variables[i], (BranchNames[i] + "/D").c_str());
+      }
       else
          Tree.Branch(Form("B%d", i + 1), &Variables[i], Form("B%d/D", i + 1));
    }
@@ -85,7 +88,6 @@ vector<string> Split(string All)
       int index2 = All.find(':', index);
       if(index2 - index > 0)
          Result.push_back(All.substr(index, index2 - index));
-      cout << All.substr(index, index2 - index) << endl;
       index = index2 + 1;
    }
 
