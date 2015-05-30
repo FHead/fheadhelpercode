@@ -10,7 +10,7 @@
    // courtesy of Segev, http://ultrahigh.org/2007/08/20/making-pretty-root-color-palettes/
 
    const Int_t NRGBs = 5;
-   const Int_t NCont = 255;
+   const Int_t NCont = 99;
 
    Double_t stops[NRGBs] = { 0.00, 0.34, 0.61, 0.84, 1.00 };
    Double_t red[NRGBs]   = { 0.00, 0.00, 0.87, 1.00, 0.51 };

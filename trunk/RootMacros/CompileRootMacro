@@ -15,7 +15,7 @@ fi
 shift
 shift
 
-root_cflags=`sh $ROOTSYS/bin/root-config --cflags`
+root_cflags="`sh $ROOTSYS/bin/root-config --cflags` -D__ROOFIT_NOBANNER"
 root_libs=`sh $ROOTSYS/bin/root-config --glibs`
 roofit_libs="-lRooFitCore -lRooFit -lMinuit -lFoam -lRooStats"
 fastjet_cflags=
