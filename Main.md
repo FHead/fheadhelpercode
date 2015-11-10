@@ -1,0 +1,3 @@
+# Introduction #
+
+The project area contains a lot of (and increasing) helper files that hopefully makes analysis life easier
