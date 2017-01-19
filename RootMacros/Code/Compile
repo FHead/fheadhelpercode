@@ -3,5 +3,5 @@ for i in `ls source`
 do
    j=`basename $i`
    j=${j%.*}
-   ~/RootMacros/CompileRootMacro source/$i library/$j.o -c
+   $PWD/../CompileRootMacro source/$i library/$j.o -c
 done
