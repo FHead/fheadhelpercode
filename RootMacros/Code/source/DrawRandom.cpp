@@ -338,6 +338,21 @@ double DrawLogNormal(double Mu, double Sigma)
    return exp(DrawGaussian(Mu, Sigma));
 }
 //----------------------------------------------------------------------------
+double DrawInverse(double min, double max)
+{
+   if(min < 0 || max < 0)
+      return 0;
+   if(min == max)
+      return min;
+   if(max > min)
+      std::swap(min, max);
+
+   double u = DrawRandom(0, 1);
+   double x = min * exp(log(max / min) * u);   // inverse sampling
+
+   return x;
+}
+//----------------------------------------------------------------------------
 double CachedExp(double X)
 {
    static std::map<int, double> Evaluated;

@@ -34,6 +34,7 @@ public:
    double DrawDoubleSidedCBShape(double Mean, double Sigma, double AlphaL, double AlphaR, double NL, double NR, double NormalizationL = -1, double NormalizationM = -1, double NormalizationR = -1);
    double DrawDoubleSidedCBShape(double AlphaL, double AlphaR, double NL, double NR);
    double DrawDoubleSidedCBShapeWithNormalization(double AlphaL, double AlphaR, double NL, double NR, double NormalizationL = -1, double NormalizationM = -1, double NormalizationR = -1);
+   double DrawInverse(double min, double max);
    double CachedExp(double X);
    double CachedErf(double X);
 };
