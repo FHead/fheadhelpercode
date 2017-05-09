@@ -51,6 +51,8 @@ private:
 public:
    long long DrawRandomInteger();
    double DrawRandom();
+   double DrawRandom(double max);
+   double DrawRandom(double min, double max);
 };
 //----------------------------------------------------------------------------
 #endif
