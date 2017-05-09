@@ -70,6 +70,8 @@ void FourVector::SetPtEtaPhiMass(double pt, double eta, double phi, double mass)
    P[3] = pt * sinh(eta);
 
    P[0] = sqrt(mass * mass + SpatialDot(*this));
+
+   CalculateInnerQuantities();
 }
 //----------------------------------------------------------------------------
 void FourVector::SetPtYPhi(double pt, double y, double phi)
@@ -83,6 +85,8 @@ void FourVector::SetPtYPhiMass(double pt, double y, double phi, double mass)
    P[2] = pt * sin(phi);
    P[0] = sqrt(pt * pt +  mass * mass) * cosh(y);
    P[3] = P[0] * tanh(y);
+
+   CalculateInnerQuantities();
 }
 //----------------------------------------------------------------------------
 void FourVector::SetSizeEtaPhi(double size, double eta, double phi)
@@ -96,6 +100,8 @@ void FourVector::SetSizeEtaPhiMass(double size, double eta, double phi, double m
    P[1] = size / cosh(eta) * cos(phi);
    P[2] = size / cosh(eta) * sin(phi);
    P[3] = size * tanh(eta);
+
+   CalculateInnerQuantities();
 }
 //----------------------------------------------------------------------------
 void FourVector::SetSizeEtaPhiEnergy(double size, double eta, double phi, double energy)
@@ -104,6 +110,8 @@ void FourVector::SetSizeEtaPhiEnergy(double size, double eta, double phi, double
    P[1] = size / cosh(eta) * cos(phi);
    P[2] = size / cosh(eta) * sin(phi);
    P[3] = size * tanh(eta);
+
+   CalculateInnerQuantities();
 }
 //----------------------------------------------------------------------------
 void FourVector::SetSizeThetaPhi(double size, double theta, double phi)
@@ -117,6 +125,8 @@ void FourVector::SetSizeThetaPhiMass(double size, double theta, double phi, doub
    P[1] = size * sin(theta) * cos(phi);
    P[2] = size * sin(theta) * sin(phi);
    P[3] = size * cos(theta);
+
+   CalculateInnerQuantities();
 }
 //----------------------------------------------------------------------------
 double &FourVector::operator [](int index)
@@ -139,6 +149,8 @@ FourVector &FourVector::operator =(const FourVector &Other)
    P[1] = Other.P[1];
    P[2] = Other.P[2];
    P[3] = Other.P[3];
+
+   CalculateInnerQuantities();
 
    return *this;
 }
