@@ -433,6 +433,18 @@ double RandomMT::DrawRandom()
    return DrawRandomInteger() / 4294967296.0;
 }
 //----------------------------------------------------------------------------
+double RandomMT::DrawRandom(double Max)
+{
+   return DrawRandom() * Max;
+}
+//----------------------------------------------------------------------------
+double RandomMT::DrawRandom(double Min, double Max)
+{
+   if(Min >= Max)
+      std::swap(Min, Max);
+   return DrawRandom() * (Max - Min) + Min;
+}
+//----------------------------------------------------------------------------
 RandomBase DefaultRandomBase;
 RandomMT DefaultRandomMT(10135);
 //----------------------------------------------------------------------------
