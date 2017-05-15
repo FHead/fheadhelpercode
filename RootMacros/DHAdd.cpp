@@ -13,10 +13,14 @@ int main(int argc, char *argv[])
       return -1;
    }
 
+   cout << "Target file: " << argv[1] << endl;
+
    DataHelper DHFileTarget(argv[1]);
 
    for(int iF = 2; iF < argc; iF++)
    {
+      cout << "Source file " << iF - 1 << ": " << argv[iF] << endl;
+      
       DataHelper DHFile(argv[iF]);
 
       vector<string> States = DHFile.GetListOfKeys();
