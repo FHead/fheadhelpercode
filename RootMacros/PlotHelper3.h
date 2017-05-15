@@ -23,6 +23,9 @@ using namespace std;
 #include "TROOT.h"
 #include "TFile.h"
 #include "TH1.h"
+#include "TH2.h"
+#include "TProfile.h"
+#include "TProfile2D.h"
 #include "TGraph.h"
 #include "TVirtualPad.h"
 #include "TVirtualPS.h"
@@ -77,6 +80,20 @@ public:
       string PlotOption = "", bool LogY = false, bool LogZ = false, bool Grid = false, bool LogX = false);
    void AddGraphFromFile(TFile &File, string GraphName,
       string PlotOption = "", bool LogY = false, bool LogZ = false, bool Grid = false, bool LogX = false);
+   void AddPlot(TTree *Tree, string ToPlot, string Selection, string PlotOption = "", string Titles = ";;",
+      int Bin = 100, double Min = 0, double Max = 100,
+      bool LogY = false, bool LogZ = false, bool Grid = false, bool LogX = false);
+   void AddPlotProfile(TTree *Tree, string ToPlot, string Selection, string PlotOption = "prof", string Titles = ";;",
+      int Bin = 100, double Min = 0, double Max = 100,
+      bool LogY = false, bool LogZ = false, bool Grid = false, bool LogX = false);
+   void AddPlot2D(TTree *Tree, string ToPlot, string Selection, string PlotOption = "", string Titles = ";;",
+      int BinX = 100, double MinX = 0, double MaxX = 100,
+      int BinY = 100, double MinY = 0, double MaxY = 100,
+      bool LogY = false, bool LogZ = false, bool Grid = false, bool LogX = false);
+   void AddPlotProfile2D(TTree *Tree, string ToPlot, string Selection, string PlotOption = "colz", string Titles = ";;",
+      int BinX = 100, double MinX = 0, double MaxX = 100,
+      int BinY = 100, double MinY = 0, double MaxY = 100,
+      bool LogY = false, bool LogZ = false, bool Grid = false, bool LogX = false);
    void AddCanvas(TCanvas *Canvas);
    void AddCanvas(TCanvas &Canvas);
    void AddCanvasWithText(TCanvas *Canvas, string Text, double X = 0.1, double Y = 0.9, double TextSize = 0.03);
@@ -345,6 +362,68 @@ void PdfFileHelper::AddGraphFromFile(TFile &File, string GraphName, string PlotO
       return;
 
    AddPlot(Graph, PlotOption, LogY, LogZ, Grid, LogX);
+}
+   
+void PdfFileHelper::AddPlot(TTree *Tree, string ToPlot, string Selection, string PlotOption, string Titles,
+   int Bin, double Min, double Max,
+   bool LogY, bool LogZ, bool Grid, bool LogX)
+{
+   if(Tree == NULL)
+      return;
+
+   TH1D H("TempHistogramForPdfFileHelper", Titles.c_str(), Bin, Min, Max);
+   H.SetStats(0);
+
+   Tree->Draw(Form("%s>>TempHistogramForPdfFileHelper", ToPlot.c_str()), Selection.c_str(), PlotOption.c_str());
+
+   AddPlot(H, PlotOption, LogY, LogZ, Grid, LogX);
+}
+
+void PdfFileHelper::AddPlotProfile(TTree *Tree, string ToPlot, string Selection, string PlotOption, string Titles,
+   int Bin, double Min, double Max,
+   bool LogY, bool LogZ, bool Grid, bool LogX)
+{
+   if(Tree == NULL)
+      return;
+
+   TProfile H("TempHistogramForPdfFileHelper", Titles.c_str(), Bin, Min, Max);
+   H.SetStats(0);
+
+   Tree->Draw(Form("%s>>TempHistogramForPdfFileHelper", ToPlot.c_str()), Selection.c_str(), PlotOption.c_str());
+
+   AddPlot(H, PlotOption, LogY, LogZ, Grid, LogX);
+}
+
+void PdfFileHelper::AddPlot2D(TTree *Tree, string ToPlot, string Selection, string PlotOption, string Titles,
+   int BinX, double MinX, double MaxX,
+   int BinY, double MinY, double MaxY,
+   bool LogY, bool LogZ, bool Grid, bool LogX)
+{
+   if(Tree == NULL)
+      return;
+
+   TH2D H("TempHistogramForPdfFileHelper", Titles.c_str(), BinX, MinX, MaxX, BinY, MinY, MaxY);
+   H.SetStats(0);
+
+   Tree->Draw(Form("%s>>TempHistogramForPdfFileHelper", ToPlot.c_str()), Selection.c_str(), PlotOption.c_str());
+
+   AddPlot(H, PlotOption, LogY, LogZ, Grid, LogX);
+}
+
+void PdfFileHelper::AddPlotProfile2D(TTree *Tree, string ToPlot, string Selection, string PlotOption, string Titles,
+   int BinX, double MinX, double MaxX,
+   int BinY, double MinY, double MaxY,
+   bool LogY, bool LogZ, bool Grid, bool LogX)
+{
+   if(Tree == NULL)
+      return;
+
+   TProfile2D H("TempHistogramForPdfFileHelper", Titles.c_str(), BinX, MinX, MaxX, BinY, MinY, MaxY);
+   H.SetStats(0);
+
+   Tree->Draw(Form("%s>>TempHistogramForPdfFileHelper", ToPlot.c_str()), Selection.c_str(), PlotOption.c_str());
+
+   AddPlot(H, PlotOption, LogY, LogZ, Grid, LogX);
 }
 
 void PdfFileHelper::AddCanvas(TCanvas *Canvas)
