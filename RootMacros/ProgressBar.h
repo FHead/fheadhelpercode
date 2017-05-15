@@ -23,6 +23,7 @@ public:
       : Out(out), Max(max), Min(min), Column(column), Progress(0), Style(0) {SanityCheck();}
    ~ProgressBar() {}
    void Print();
+   void PrintWithMod(int Mod);
    void Print(double progress);
    void ChangeLine() {*Out << std::endl;}
    void PrintLine() {*Out << std::endl;}
@@ -111,6 +112,12 @@ void ProgressBar::SanityCheck()
 void ProgressBar::Print()
 {
    Print(Progress);
+}
+
+void ProgressBar::PrintWithMod(int Mod)
+{
+   if((int)Progress % Mod == 0)
+      Print(Progress);
 }
 
 void ProgressBar::Print(double progress)
