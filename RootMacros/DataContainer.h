@@ -34,6 +34,8 @@ public:
    DataContainer(string value);
    DataContainer(double value);
    DataContainer(long long value);
+   // DataContainer(DataContainer &other);
+   // DataContainer(const DataContainer &other);
    ~DataContainer();
    long long GetInteger();
    double GetDouble();
@@ -44,7 +46,7 @@ public:
    DataContainer &operator =(double value);
    DataContainer &operator =(int value);
    DataContainer &operator =(long long value);
-   DataContainer &operator =(DataContainer &other);
+   // DataContainer &operator =(DataContainer &other);
    bool operator <(string value) const { return *this < DataContainer(value); }
    bool operator <(double value) const { return *this < DataContainer(value); }
    bool operator <(long long value) const { return *this < DataContainer(value); }
@@ -117,6 +119,26 @@ DataContainer::DataContainer(long long value)
    DoubleValue = 0;
    Type = DataTypeInteger;
 }
+//---------------------------------------------------------------------------
+/*
+DataContainer::DataContainer(DataContainer &other)
+{
+   Type = other.Type;
+   StringValue = other.StringValue;
+   DoubleValue = other.DoubleValue;
+   IntegerValue = other.IntegerValue;
+}
+*/
+//---------------------------------------------------------------------------
+/*
+DataContainer::DataContainer(const DataContainer &other)
+{
+   Type = other.Type;
+   StringValue = other.StringValue;
+   DoubleValue = other.DoubleValue;
+   IntegerValue = other.IntegerValue;
+}
+*/
 //---------------------------------------------------------------------------
 DataContainer::~DataContainer()
 {
@@ -196,6 +218,7 @@ DataContainer &DataContainer::operator =(long long value)
    return *this;
 }
 //---------------------------------------------------------------------------
+/*
 DataContainer &DataContainer::operator =(DataContainer &other)
 {
    Type = other.Type;
@@ -204,6 +227,7 @@ DataContainer &DataContainer::operator =(DataContainer &other)
    IntegerValue = other.IntegerValue;
    return *this;
 }
+*/
 //---------------------------------------------------------------------------
 bool DataContainer::operator <(const DataContainer &other) const
 {

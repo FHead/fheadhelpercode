@@ -22,6 +22,7 @@ using namespace std;
 #include "TLatex.h"
 #include "TROOT.h"
 #include "TFile.h"
+#include "TTree.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TProfile.h"
@@ -98,7 +99,8 @@ public:
    void AddCanvas(TCanvas &Canvas);
    void AddCanvasWithText(TCanvas *Canvas, string Text, double X = 0.1, double Y = 0.9, double TextSize = 0.03);
    void AddCanvasWithText(TCanvas &Canvas, string Text, double X = 0.1, double Y = 0.9, double TextSize = 0.03);
-   void AddTextPage(string Text, double X = 0.15, double Y = 0.5, double TextSize = 0.05);
+   void AddTextPage(string Text, double TextSize = 0.05);
+   void AddTextPage(string Text, double X, double Y, double TextSize = 0.05);
    void AddTextPage(vector<string> Text, double X = 0.1, double Y = 0.9, double TextSize = 0.04);
    void AddTimeStampPage();
    void AddTableOfContentPage(vector<string> Items, vector<string> Destinations,
@@ -467,6 +469,25 @@ void PdfFileHelper::AddCanvasWithText(TCanvas &Canvas, string Text, double X, do
    AddCanvasWithText(&Canvas, Text, X, Y, TextSize);
 }
 
+void PdfFileHelper::AddTextPage(string Text, double TextSize)
+{
+   TCanvas canvas;
+
+   TLatex text(0.5, 0.5, Text.c_str());
+   text.SetTextAlign(22);
+   text.SetTextFont(42);
+   text.SetTextSize(TextSize);
+   text.Draw();
+
+   if(PrintPageNumber == true)
+      InsertPageNumber(canvas, NextPageNumber);
+   canvas.Print(FileName.c_str(), Option.c_str());
+   NextPageNumber = NextPageNumber + 1;
+
+   if(AutomaticHomeButton == true)
+      InsertHomeButtonAbsolute(HomeButtonX, HomeButtonY, HomeButtonSize, HomeButtonDestination);
+}
+
 void PdfFileHelper::AddTextPage(string Text, double X, double Y, double TextSize)
 {
    TCanvas canvas;
@@ -522,7 +543,7 @@ void PdfFileHelper::AddTimeStampPage()
    string str = "Generated at ";
    str = str + ctime(&CurrentTime);
 
-   AddTextPage(str, 0.03);
+   AddTextPage(str);
 }
 
 void PdfFileHelper::AddTableOfContentPage(vector<string> Items, vector<string> Destinations, double X, double Y,
@@ -732,8 +753,9 @@ void PdfFileHelper::InsertPageNumber(TCanvas &Canvas, int PageNumber)
    TLatex Latex;
    Latex.SetTextFont(42);
    Latex.SetTextSize(0.02);
+   Latex.SetTextAlign(31);
    Latex.SetNDC(true);
-   Latex.DrawLatex(0.98, 0.01, Form("%d", PageNumber));
+   Latex.DrawLatex(0.99, 0.01, Form("%d", PageNumber));
 }
 
 #endif

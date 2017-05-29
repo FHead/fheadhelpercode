@@ -21,6 +21,8 @@ private:
    map<string, DataContainer> Data;
 public:
    StateContainer();
+   StateContainer(StateContainer &other);
+   StateContainer(const StateContainer &other);
    ~StateContainer();
 private:
    void Initialize();
@@ -36,11 +38,21 @@ public:
    string GetRepresentation();   // get representation of whole object
    void SaveToStream(ostream &out);
    void LoadFromStream(istream &in);
-   StateContainer &operator =(StateContainer &other);
+   StateContainer &operator =(const StateContainer &other);
 };
 //---------------------------------------------------------------------------
 StateContainer::StateContainer()
 {
+}
+//---------------------------------------------------------------------------
+StateContainer::StateContainer(StateContainer &other)
+{
+   Data = other.Data;
+}
+//---------------------------------------------------------------------------
+StateContainer::StateContainer(const StateContainer &other)
+{
+   Data = other.Data;
 }
 //---------------------------------------------------------------------------
 StateContainer::~StateContainer()
@@ -178,7 +190,7 @@ void StateContainer::LoadFromStream(istream &in)
    }
 }
 //---------------------------------------------------------------------------
-StateContainer &StateContainer::operator =(StateContainer &other)
+StateContainer &StateContainer::operator =(const StateContainer &other)
 {
    Data = other.Data;
    
