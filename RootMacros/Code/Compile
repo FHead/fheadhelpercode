@@ -1,3 +1,6 @@
+#!/bin/sh
+
+mkdir -p library include source
 ln -s include/* .
 for i in `ls source`
 do
@@ -5,3 +8,5 @@ do
    j=${j%.*}
    $PWD/../CompileRootMacro source/$i library/$j.o -c
 done
+
+rm library/TauHelperFunctions2.o

@@ -35,6 +35,8 @@ all_libs=""
 all_include=""
 all_flags=""
 
+echo HOSTNAME = $HOSTNAME
+
 if [ $HOSTNAME == "t3-susy.ultralight.org" ]; then
 
    roofit_base=/cms/sw/slc5_amd64_gcc462/lcg/roofit/5.32.00-cms5
@@ -74,6 +76,25 @@ elif [ $HOSTNAME == "FHeadMac" ]; then
    all_flags="$cxxflags $fastjet_cflags $root_cflags"
    all_include="$extrainclude $pythia_include"
 
+   # quick fix....
+   libs=`echo $libs | sed "s/-lz//g"`
+
+elif [[ $HOSTNAME == "Yis-MacBook-Pro.local" ]] || [[ $HOSTNAME == fheadmacbookpro* ]] || [[ $HOSTNAME == "yis-macbook-pro.home" ]] || [[ $HOSTNAME == "FHeadMacBookPro" ]]; then
+
+   extrainclude="-I/$HOME/FHeadHelperCode/RootMacros"
+   extralibs=~/FHeadHelperCode/RootMacros/Code/library/*.o
+
+   pythia_libs="-L$PYTHIA8/lib -lpythia8"
+   
+   all_libs="$root_libs $fastjet_libs $pythia_libs -lHistPainter $extralibs"
+   all_flags="$cxxflags $fastjet_cflags $root_cflags"
+   all_include="$extrainclude $pythia_include"
+
+   if [ -n "$ROOFITSYS" ]; then
+      all_libs="$all_libs $roofit_libs -L$ROOFITSYS/lib"
+      all_include="$all_include -I$ROOFITSYS/include"
+   fi
+   
    # quick fix....
    libs=`echo $libs | sed "s/-lz//g"`
 
