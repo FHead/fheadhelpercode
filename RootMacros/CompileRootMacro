@@ -16,7 +16,7 @@ shift
 shift
 
 root_cflags="`sh $ROOTSYS/bin/root-config --cflags` -D__ROOFIT_NOBANNER"
-root_libs=`sh $ROOTSYS/bin/root-config --glibs`
+root_libs=`sh $ROOTSYS/bin/root-config --libs`
 roofit_libs="-lRooFitCore -lRooFit -lMinuit -lFoam -lRooStats"
 fastjet_cflags=
 fastjet_libs=
@@ -98,10 +98,10 @@ elif [[ $HOSTNAME == "Yis-MacBook-Pro.local" ]] || [[ $HOSTNAME == fheadmacbookp
    # quick fix....
    libs=`echo $libs | sed "s/-lz//g"`
 
-elif [[ "$HOSTNAME" == lxplus*.cern.ch ]]; then
+elif [[ "$HOSTNAME" == lxplus*.cern.ch ]] || [[ "$HOSTNAME" == lxplus* ]]; then
 
-   all_libs="$root_libs -lMathMore $pythia_libs"
-   all_flags="$root_cflags $cxxflags"
+   all_libs="$root_libs -lMathMore $pythia_libs $extralibs"
+   all_flags="$root_cflags $cxxflags -std=c++11"
    all_include="$extrainclude $pythia_include"
 
    if [ -n "$ROOFITSYS" ]; then
