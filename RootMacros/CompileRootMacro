@@ -22,8 +22,8 @@ fastjet_cflags=
 fastjet_libs=
 pythia_include="-I$PYTHIA8/include"
 pythia_libs="-L$PYTHIA8/lib/archive -lpythia8 -llhapdfdummy"
-extrainclude="-I/$HOME/RootMacros"
-extralibs=~/RootMacros/Code/library/*.o
+extrainclude="-I/$RootMacrosBase"
+extralibs=$RootMacrosBase/Code/library/*.o
 cxxflags="-g -fPIC -Wno-deprecated -O -ansi -D_GNU_SOURCE -g -O2"
 
 if [ -n "`command -v fastjet-config`" ]; then
