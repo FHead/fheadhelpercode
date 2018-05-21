@@ -14,6 +14,11 @@ public:
    void Initialize(int argc, char *argv[]);
    std::string operator [](int Index);
    std::string operator [](std::string Key);
+   std::string Get(int Index);
+   std::string Get(std::string Key);
+   std::string Get(int Index, std::string Default);
+   std::string Get(std::string Key, std::string Default);
+   std::string GetSelf();
 };
 
 CommandLine::CommandLine(int argc, char *argv[])
@@ -50,7 +55,7 @@ void CommandLine::Initialize(int argc, char *argv[])
             Arguments.insert(std::pair<std::string, std::string>(Key, "1"));
          else
          {
-            Arguments.insert(std::pair<std::string, std::string>(argv[i], Value));
+            Arguments.insert(std::pair<std::string, std::string>(Key, argv[i+1]));
             i = i + 1;
          }
       }
@@ -59,18 +64,55 @@ void CommandLine::Initialize(int argc, char *argv[])
 
 std::string CommandLine::operator [](int Index)
 {
+   return Get(Index);
+}
+
+std::string CommandLine::operator [](std::string Key)
+{
+   return Get(Key);
+}
+
+std::string CommandLine::Get(int Index)
+{
    if(Index < 0 || Index >= ExtraArguments.size())
-      throw("Exception: arguemnt index out of range");
+   {
+      std::cerr << "Exception: argument index out of range" << std::endl;
+      throw;
+   }
    
    return ExtraArguments[Index];
 }
    
-std::string CommandLine::operator [](std::string Key)
+std::string CommandLine::Get(std::string Key)
 {
    if(Arguments.find(Key) == Arguments.end())
-      throw("Exception: Key \"" + Key + "\" not found in arguments");
+   {
+      std::cerr << "Exception: Key \"" << Key << "\" not found in arguments" << std::endl;
+      throw;
+   }
 
    return Arguments[Key];
+}
+
+std::string CommandLine::Get(int Index, std::string Default)
+{
+   if(Index < 0 || Index >= ExtraArguments.size())
+      return Default;
+   
+   return ExtraArguments[Index];
+}
+   
+std::string CommandLine::Get(std::string Key, std::string Default)
+{
+   if(Arguments.find(Key) == Arguments.end())
+      return Default;
+
+   return Arguments[Key];
+}
+
+std::string CommandLine::GetSelf()
+{
+   return Self;
 }
 
 
