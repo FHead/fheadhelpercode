@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
    {
       if(i < (int)BranchNames.size())
       {
-         cout << BranchNames[i] << endl;
+         // cout << BranchNames[i] << endl;
          Tree.Branch(BranchNames[i].c_str(), &Variables[i], (BranchNames[i] + "/D").c_str());
       }
       else

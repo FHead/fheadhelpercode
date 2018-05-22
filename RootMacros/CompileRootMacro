@@ -69,6 +69,18 @@ elif [ $HOSTNAME == "pccit28" ]; then
    # quick fix....
    libs=`echo $libs | sed "s/-lz//g"`
 
+elif [ $HOSTNAME == "palencia.cern.ch" ]; then
+
+   pythia_include="-I$PYTHIA8/include"
+   pythia_libs="-L$PYTHIA8/lib -lpythia8"
+   
+   all_libs="$root_libs $roofit_libs $fastjet_libs $pythia_libs -lMathMore -lHistPainter $extralibs"
+   all_flags="$cxxflags $fastjet_cflags $root_cflags"
+   all_include="$extrainclude $pythia_include"
+
+   # quick fix....
+   libs=`echo $libs | sed "s/-lz//g"`
+
 # elif [[ "$HOSTNAME" == pb-d-*.cern.ch ]]; then   # guess it's macbook - keeps changing
 elif [ $HOSTNAME == "FHeadMac" ]; then
    
@@ -100,8 +112,10 @@ elif [[ $HOSTNAME == "Yis-MacBook-Pro.local" ]] || [[ $HOSTNAME == fheadmacbookp
 
 elif [[ "$HOSTNAME" == lxplus*.cern.ch ]] || [[ "$HOSTNAME" == lxplus* ]]; then
 
+   pythia_libs="-L$PYTHIA8/lib/ -lpythia8"
+   
    all_libs="$root_libs -lMathMore $pythia_libs $extralibs"
-   all_flags="$root_cflags $cxxflags -std=c++11"
+   all_flags="$root_cflags $cxxflags -std=c++1y"
    all_include="$extrainclude $pythia_include"
 
    if [ -n "$ROOFITSYS" ]; then
