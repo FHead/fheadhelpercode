@@ -98,13 +98,13 @@ public:
    void CalculateInnerQuantities();
    bool IsModified();
    void CheckModified();
-   double InnerGetEta();
-   double InnerGetPhi();
-   double InnerGetP();
-   double InnerGetPT();
-   double InnerGetMass2();
-   double InnerGetY();
-   double InnerGetTheta();
+   double InnerGetEta() const;
+   double InnerGetPhi() const;
+   double InnerGetP() const;
+   double InnerGetPT() const;
+   double InnerGetMass2() const;
+   double InnerGetY() const;
+   double InnerGetTheta() const;
 public:
    double GetMass();
    double GetMass2();

@@ -242,13 +242,13 @@ void FourVector::CheckModified()
       CalculateInnerQuantities();
 }
 //----------------------------------------------------------------------------
-double FourVector::InnerGetEta()
+double FourVector::InnerGetEta() const
 {
    double Momentum = InnerGetP();
    return 0.5 * log((Momentum + InnerP[3]) / (Momentum - InnerP[3]));
 }
 //----------------------------------------------------------------------------
-double FourVector::InnerGetPhi()
+double FourVector::InnerGetPhi() const
 {
    double PT = InnerGetPT();
 
@@ -259,27 +259,27 @@ double FourVector::InnerGetPhi()
    return Angle;
 }
 //----------------------------------------------------------------------------
-double FourVector::InnerGetP()
+double FourVector::InnerGetP() const
 {
    return sqrt(InnerP[1] * InnerP[1] + InnerP[2] * InnerP[2] + InnerP[3] * InnerP[3]);
 }
 //----------------------------------------------------------------------------
-double FourVector::InnerGetPT()
+double FourVector::InnerGetPT() const
 {
    return sqrt(InnerP[1] * InnerP[1] + InnerP[2] * InnerP[2]);
 }
 //----------------------------------------------------------------------------
-double FourVector::InnerGetMass2()
+double FourVector::InnerGetMass2() const
 {
    return InnerP[0] * InnerP[0] - InnerP[1] * InnerP[1] - InnerP[2] * InnerP[2] - InnerP[3] * InnerP[3];
 }
 //----------------------------------------------------------------------------
-double FourVector::InnerGetY()
+double FourVector::InnerGetY() const
 {
    return 0.5 * log((InnerP[0] + InnerP[3]) / (InnerP[0] - InnerP[3]));
 }
 //----------------------------------------------------------------------------
-double FourVector::InnerGetTheta()
+double FourVector::InnerGetTheta() const
 {
    return acos(InnerP[3] / InnerGetP());
 }
