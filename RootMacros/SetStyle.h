@@ -950,14 +950,19 @@ void AddHeader(string AdditionalComment, bool Colored)
 
 std::vector<int> GetPrimaryColors()
 {
-   std::vector<int> Colors;
+   static std::vector<int> Colors;
+   if(Colors.size() > 0)
+      return Colors;
 
-   Colors.push_back(TColor::GetColor("#E74C3C"));
-   Colors.push_back(TColor::GetColor("#3498DB"));
-   Colors.push_back(TColor::GetColor("#F1C40F"));
-   Colors.push_back(TColor::GetColor("#2ECC71"));
-   Colors.push_back(TColor::GetColor("#7F7F7F"));
-   Colors.push_back(TColor::GetColor("#8E44AD"));
+   Colors.push_back(TColor::GetColor("#E74C3C"));   // Alizarin
+   Colors.push_back(TColor::GetColor("#3498DB"));   // Peter River
+   Colors.push_back(TColor::GetColor("#F1C40F"));   // Sum Flower
+   Colors.push_back(TColor::GetColor("#2ECC71"));   // Emerald
+   Colors.push_back(TColor::GetColor("#7F8C8D"));   // Asbestos
+   Colors.push_back(TColor::GetColor("#8E44AD"));   // Wisteria
+   Colors.push_back(TColor::GetColor("#2C3E50"));   // Green Sea (dark)
+   Colors.push_back(TColor::GetColor("#16A085"));   // Green Sea
+   Colors.push_back(TColor::GetColor("#E67E22"));   // Carrot
 
    return Colors;
 }
