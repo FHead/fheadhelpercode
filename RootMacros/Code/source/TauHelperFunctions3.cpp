@@ -210,6 +210,20 @@ FourVector FourVector::operator /(double Scale) const
    return Out;
 }
 //----------------------------------------------------------------------------
+bool FourVector::operator <(const FourVector &Other) const
+{
+   if(P[0] < Other.P[0])   return true;
+   if(P[0] > Other.P[0])   return false;
+   if(P[1] < Other.P[1])   return true;
+   if(P[1] > Other.P[1])   return false;
+   if(P[2] < Other.P[2])   return true;
+   if(P[2] > Other.P[2])   return false;
+   if(P[3] < Other.P[3])   return true;
+   if(P[3] > Other.P[3])   return false;
+
+   return false;
+}
+//----------------------------------------------------------------------------
 void FourVector::CalculateInnerQuantities()
 {
    InnerP[0] = P[0];

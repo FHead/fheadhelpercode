@@ -50,11 +50,18 @@ public:
    bool GetBool(std::string Key);
    bool GetBool(int Index, bool Default);
    bool GetBool(std::string Key, bool Default);
+   std::vector<bool> GetBoolVector(int Index, char Delimiter = ',');
+   std::vector<bool> GetBoolVector(std::string Key, char Delimiter = ',');
+   std::vector<bool> GetBoolVector(int Index, std::string Default, char Delimiter = ',');
+   std::vector<bool> GetBoolVector(std::string Key, std::string Default, char Delimiter = ',');
+   std::vector<bool> GetBoolVector(int Index, std::vector<bool> Default, char Delimiter = ',');
+   std::vector<bool> GetBoolVector(std::string Key, std::vector<bool> Default, char Delimiter = ',');
    bool StringToBool(string String);
    std::string GetSelf();
    static std::vector<std::string> Parse(std::string Input, char Delimiter = ',');
    static std::vector<int> ParseInt(std::string Input, char Delimiter = ',');
    static std::vector<double> ParseDouble(std::string Input, char Delimiter = ',');
+   std::vector<bool> ParseBool(std::string Input, char Delimiter = ',');
 };
 
 CommandLine::CommandLine(int argc, char *argv[])
@@ -352,6 +359,48 @@ bool CommandLine::GetBool(std::string Key, bool Default)
    return StringToBool(String);
 }
 
+std::vector<bool> CommandLine::GetBoolVector(int Index, char Delimiter)
+{
+   return ParseBool(Get(Index), Delimiter);
+}
+
+std::vector<bool> CommandLine::GetBoolVector(std::string Key, char Delimiter)
+{
+   return ParseBool(Get(Key), Delimiter);
+}
+
+std::vector<bool> CommandLine::GetBoolVector(int Index, std::string Default, char Delimiter)
+{
+   std::string Result = Get(Index, DEFAULTSTRING);
+   if(Result == DEFAULTSTRING)
+      return ParseBool(Default, Delimiter);
+   return ParseBool(Result, Delimiter);
+}
+
+std::vector<bool> CommandLine::GetBoolVector(std::string Key, std::string Default, char Delimiter)
+{
+   std::string Result = Get(Key, DEFAULTSTRING);
+   if(Result == DEFAULTSTRING)
+      return ParseBool(Default, Delimiter);
+   return ParseBool(Result, Delimiter);
+}
+
+std::vector<bool> CommandLine::GetBoolVector(int Index, std::vector<bool> Default, char Delimiter)
+{
+   std::string Result = Get(Index, DEFAULTSTRING);
+   if(Result == DEFAULTSTRING)
+      return Default;
+   return ParseBool(Result, Delimiter);
+}
+
+std::vector<bool> CommandLine::GetBoolVector(std::string Key, std::vector<bool> Default, char Delimiter)
+{
+   std::string Result = Get(Key, DEFAULTSTRING);
+   if(Result == DEFAULTSTRING)
+      return Default;
+   return ParseBool(Result, Delimiter);
+}
+
 bool CommandLine::StringToBool(string String)
 {
    if(String == "1")   return true;
@@ -416,6 +465,18 @@ std::vector<double> CommandLine::ParseDouble(std::string Input, char Delimiter)
 
    for(std::string Item : ResultString)
       Result.push_back(atof(Item.c_str()));
+
+   return Result;
+}
+
+std::vector<bool> CommandLine::ParseBool(std::string Input, char Delimiter)
+{
+   std::vector<std::string> ResultString = Parse(Input, Delimiter);
+
+   std::vector<bool> Result;
+
+   for(std::string Item : ResultString)
+      Result.push_back(StringToBool(Item));
 
    return Result;
 }
