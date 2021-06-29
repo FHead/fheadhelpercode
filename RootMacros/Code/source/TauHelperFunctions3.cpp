@@ -625,7 +625,12 @@ FourVector operator *(double Scale, FourVector P)
 //----------------------------------------------------------------------------
 double GetAngle(FourVector P1, FourVector P2)
 {
-   return acos(P1.SpatialDot(P2) / P1.GetP() / P2.GetP());
+   double V = P1.SpatialDot(P2) / P1.GetP() / P2.GetP();
+   if(V > 1 && V - 1 < 1e-5)
+      V = 0.999999;
+   if(V < -1 && (-1) - V > -1e-5)
+      V = -0.999999;
+   return acos(V);
 }
 //----------------------------------------------------------------------------
 double GetDR(FourVector P1, FourVector P2)
