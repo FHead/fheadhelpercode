@@ -31,6 +31,11 @@ if [ -n "`command -v fastjet-config`" ]; then
    fastjet_libs=`fastjet-config --libs`
 fi
 
+if [ -n "`command -v pythia8-config`" ]; then
+   pythia_include=`pythia8-config --cxxflags`
+   pythia_libs=`pythia8-config --libs`
+fi
+
 all_libs=""
 all_include=""
 all_flags=""
@@ -90,6 +95,28 @@ elif [ $HOSTNAME == "FHeadMac" ]; then
 
    # quick fix....
    libs=`echo $libs | sed "s/-lz//g"`
+
+elif [[ $HOSTNAME == macbook-pro-de-yi* ]] || [[ $HOSTNAME == MacBook-Pro-de-Yi.local ]]; then
+
+   roounfold_cflags='-I/Users/yichen/Programs/RooUnfold/RooUnfold/build'
+   roounfold_libs='-L/Users/yichen/Programs/RooUnfold/RooUnfold/build -lRooUnfold'
+
+   extrainclude="-I/$HOME/RootMacros"
+   extralibs=~/RootMacros/Code/library/*.o
+
+   all_libs="$root_libs $fastjet_libs $pythia_libs -lHistPainter $extralibs $roounfold_libs"
+   all_flags="$cxxflags $fastjet_cflags $root_cflags $roounfold_cflags"
+   all_include="$extrainclude $pythia_include"
+
+   if [ -n "$ROOFITSYS" ]; then
+      all_libs="$all_libs $roofit_libs -L$ROOFITSYS/lib"
+      all_include="$all_include -I$ROOFITSYS/include"
+   fi
+   
+   # quick fix....
+   libs=`echo $libs | sed "s/-lz//g"`
+
+   echo $pythia_libs
 
 elif [[ $HOSTNAME == "Yis-MacBook-Pro.local" ]] || [[ $HOSTNAME == fheadmacbookpro* ]] || [[ $HOSTNAME == "yis-macbook-pro.home" ]] || [[ $HOSTNAME == "FHeadMacBookPro" ]]; then
 
