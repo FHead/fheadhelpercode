@@ -65,6 +65,25 @@ elif [ $HOSTNAME == "t3-higgs.ultralight.org" ] || [ $HOSTNAME == "t3-higgs" ]; 
    # quick fix....
    libs=`echo $libs | sed "s/-lz//g"`
 
+elif [ $HOSTNAME == "FHeadSpectre" ]; then
+
+   echo "Ubuntu on spectre"
+
+   PYTHIA8=`pythia8-config --prefix`
+
+   pythia_include="-I$PYTHIA8/include"
+   pythia_libs="-L$PYTHIA8/lib -lpythia8"
+
+   roounfold_cflags="-I$RooUnfoldBase"
+   roounfold_libs="-L$RooUnfoldBase -lRooUnfold"
+
+   all_libs="$root_libs $roofit_libs $fastjet_libs $pythia_libs -lHistPainter $extralibs $roounfold_libs"
+   all_flags="$cxxflags $fastjet_cflags $root_cflags $roounfold_cflags"
+   all_include="$extrainclude $pythia_include"
+
+   # quick fix....
+   libs=`echo $libs | sed "s/-lz//g"`
+
 elif [ $HOSTNAME == "pccit28" ]; then
 
    all_libs="$root_libs $roofit_libs $fastjet_libs $pythia_libs -lMathMore -lHistPainter $extralibs"
