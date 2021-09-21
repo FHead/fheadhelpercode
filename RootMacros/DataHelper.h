@@ -22,6 +22,7 @@ class DataHelper
 private:
    map<string, StateContainer> States;
    char ConstantHeader[32];
+   string CurrentFileName;
 public:
    DataHelper();
    DataHelper(string FileName);
@@ -40,7 +41,9 @@ public:
    string GetRepresentation(string Key);
    DataHelper &operator =(DataHelper &other);
    void LoadFromFile(string FileName);
+   void LoadFromFile();
    void SaveToFile(string FileName);
+   void SaveToFile();
    void LoadFromStream(istream &in);
    void SaveToStream(ostream &out);
 };
@@ -65,6 +68,7 @@ void DataHelper::Initialize()
 {
    memset(ConstantHeader, '\0', 32);
    strcpy(ConstantHeader, "DataHelperFHead6427");
+   CurrentFileName = "";
 }
 //---------------------------------------------------------------------------
 void DataHelper::CleanUp()
@@ -158,14 +162,26 @@ DataHelper &DataHelper::operator =(DataHelper &other)
 //---------------------------------------------------------------------------
 void DataHelper::LoadFromFile(string FileName)
 {
-   ifstream in(FileName.c_str());
+   CurrentFileName = FileName;
+   LoadFromFile();
+}
+//---------------------------------------------------------------------------
+void DataHelper::LoadFromFile()
+{
+   ifstream in(CurrentFileName.c_str());
    LoadFromStream(in);
    in.close();
 }
 //---------------------------------------------------------------------------
 void DataHelper::SaveToFile(string FileName)
 {
-   ofstream out(FileName.c_str());
+   CurrentFileName = FileName;
+   SaveToFile();
+}
+//---------------------------------------------------------------------------
+void DataHelper::SaveToFile()
+{
+   ofstream out(CurrentFileName.c_str());
    SaveToStream(out);
    out.close();
 }

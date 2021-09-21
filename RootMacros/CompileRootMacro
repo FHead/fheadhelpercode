@@ -115,7 +115,7 @@ elif [ $HOSTNAME == "FHeadMac" ]; then
    # quick fix....
    libs=`echo $libs | sed "s/-lz//g"`
 
-elif [[ $HOSTNAME == macbook-pro-de-yi* ]] || [[ $HOSTNAME == MacBook-Pro-de-Yi.local ]]; then
+elif [[ $HOSTNAME == "Yis-MacBook-Pro.local" ]] || [[ $HOSTNAME == fheadmacbookpro* ]] || [[ $HOSTNAME == "yis-macbook-pro.home" ]] || [[ $HOSTNAME == "FHeadMacBookPro" ]] || [[ $HOSTNAME == macbook-pro-de-yi* ]] || [[ $HOSTNAME == MacBook-Pro-de-Yi.local ]]; then
 
    roounfold_cflags='-I/Users/yichen/Programs/RooUnfold/RooUnfold/build'
    roounfold_libs='-L/Users/yichen/Programs/RooUnfold/RooUnfold/build -lRooUnfold'
@@ -161,7 +161,23 @@ elif [[ "$HOSTNAME" == lxplus*.cern.ch ]] || [[ "$HOSTNAME" == lxplus* ]]; then
    pythia_libs="-L$PYTHIA8/lib/ -lpythia8"
    
    all_libs="$root_libs -lMathMore $pythia_libs $extralibs"
-   all_flags="$root_cflags $cxxflags -std=c++1y"
+   all_flags="$root_cflags $cxxflags -std=c++17"
+   all_include="$extrainclude $pythia_include"
+
+   if [ -n "$ROOFITSYS" ]; then
+      all_libs="$all_libs $roofit_libs -L$ROOFITSYS/lib"
+      all_include="$all_include -I$ROOFITSYS/include"
+   fi
+
+   # quick fix....
+   libs=`echo $libs | sed "s/-lz//g"`
+
+elif [[ "$HOSTNAME" == svmithi* ]] ; then
+
+   pythia_libs="-L$PYTHIA8/lib/ -lpythia8"
+   
+   all_libs="$root_libs -lMathMore $pythia_libs $extralibs"
+   all_flags="$root_cflags $cxxflags -std=c++17"
    all_include="$extrainclude $pythia_include"
 
    if [ -n "$ROOFITSYS" ]; then
