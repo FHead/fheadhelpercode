@@ -221,6 +221,7 @@ void FourVector::CalculateInnerQuantities()
    InnerPhi = InnerGetPhi();
    InnerMomentum = InnerGetP();
    InnerPT = InnerGetPT();
+   InnerET = InnerGetET();
    InnerMass2 = InnerGetMass2();
    InnerY = InnerGetY();
    InnerTheta = InnerGetTheta();
@@ -267,6 +268,11 @@ double FourVector::InnerGetP() const
 double FourVector::InnerGetPT() const
 {
    return sqrt(InnerP[1] * InnerP[1] + InnerP[2] * InnerP[2]);
+}
+//----------------------------------------------------------------------------
+double FourVector::InnerGetET() const
+{
+   return InnerGetPT() / InnerGetP() * InnerP[0];
 }
 //----------------------------------------------------------------------------
 double FourVector::InnerGetMass2() const
@@ -326,6 +332,20 @@ double FourVector::GetPT2()
    CheckModified();
 
    return InnerPT * InnerPT;
+}
+//----------------------------------------------------------------------------
+double FourVector::GetET()
+{
+   CheckModified();
+
+   return InnerET;
+}
+//----------------------------------------------------------------------------
+double FourVector::GetET2()
+{
+   CheckModified();
+
+   return InnerET * InnerET;
 }
 //----------------------------------------------------------------------------
 double FourVector::GetEta()

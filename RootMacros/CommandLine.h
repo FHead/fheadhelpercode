@@ -50,7 +50,7 @@ public:
    bool GetBool(std::string Key);
    bool GetBool(int Index, bool Default);
    bool GetBool(std::string Key, bool Default);
-   bool StringToBool(string String);
+   bool StringToBool(std::string String);
    std::string GetSelf();
    static std::vector<std::string> Parse(std::string Input, char Delimiter = ',');
    static std::vector<int> ParseInt(std::string Input, char Delimiter = ',');
@@ -330,13 +330,13 @@ std::vector<double> CommandLine::GetDoubleVector(std::string Key, std::vector<do
 
 bool CommandLine::GetBool(int Index)
 {
-   string String = Get(Index);
+   std::string String = Get(Index);
    return StringToBool(String);
 }
 
 bool CommandLine::GetBool(std::string Key)
 {
-   string String = Get(Key);
+   std::string String = Get(Key);
    return StringToBool(String);
 }
 
@@ -352,7 +352,7 @@ bool CommandLine::GetBool(std::string Key, bool Default)
    return StringToBool(String);
 }
 
-bool CommandLine::StringToBool(string String)
+bool CommandLine::StringToBool(std::string String)
 {
    if(String == "1")   return true;
    if(String == "0")   return false;

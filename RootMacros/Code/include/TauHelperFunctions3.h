@@ -92,6 +92,7 @@ public:
    double InnerPhi;
    double InnerMomentum;
    double InnerPT;
+   double InnerET;
    double InnerMass2;
    double InnerY;
    double InnerTheta;
@@ -102,6 +103,7 @@ public:
    double InnerGetPhi() const;
    double InnerGetP() const;
    double InnerGetPT() const;
+   double InnerGetET() const;
    double InnerGetMass2() const;
    double InnerGetY() const;
    double InnerGetTheta() const;
@@ -112,6 +114,8 @@ public:
    double GetP2();
    double GetPT();
    double GetPT2();
+   double GetET();
+   double GetET2();
    double GetEta();
    double GetAbsEta();
    double GetRapidity();
