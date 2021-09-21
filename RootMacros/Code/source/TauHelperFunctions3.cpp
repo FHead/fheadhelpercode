@@ -210,6 +210,20 @@ FourVector FourVector::operator /(double Scale) const
    return Out;
 }
 //----------------------------------------------------------------------------
+bool FourVector::operator <(const FourVector &Other) const
+{
+   if(P[0] < Other.P[0])   return true;
+   if(P[0] > Other.P[0])   return false;
+   if(P[1] < Other.P[1])   return true;
+   if(P[1] > Other.P[1])   return false;
+   if(P[2] < Other.P[2])   return true;
+   if(P[2] > Other.P[2])   return false;
+   if(P[3] < Other.P[3])   return true;
+   if(P[3] > Other.P[3])   return false;
+
+   return false;
+}
+//----------------------------------------------------------------------------
 void FourVector::CalculateInnerQuantities()
 {
    InnerP[0] = P[0];
@@ -631,7 +645,12 @@ FourVector operator *(double Scale, FourVector P)
 //----------------------------------------------------------------------------
 double GetAngle(FourVector P1, FourVector P2)
 {
-   return acos(P1.SpatialDot(P2) / P1.GetP() / P2.GetP());
+   double V = P1.SpatialDot(P2) / P1.GetP() / P2.GetP();
+   if(V > 1 && V - 1 < 1e-5)
+      V = 0.999999;
+   if(V < -1 && (-1) - V > -1e-5)
+      V = -0.999999;
+   return acos(V);
 }
 //----------------------------------------------------------------------------
 double GetDR(FourVector P1, FourVector P2)

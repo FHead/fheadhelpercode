@@ -1,13 +1,17 @@
 #!/bin/sh
 
+touch library/x.o
+
 mkdir -p library include source
-ln -s include/* .
+ln -sf include/* .
 for i in `ls source`
 do
    j=`basename $i`
    j=${j%.*}
-   rm library/$j.o
+   rm -f library/$j.o
    $PWD/../CompileRootMacro source/$i library/$j.o -c
 done
 
-rm library/TauHelperFunctions2.o
+rm -f library/TauHelperFunctions2.o
+
+rm library/x.o

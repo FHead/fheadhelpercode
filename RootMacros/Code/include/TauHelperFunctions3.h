@@ -86,6 +86,7 @@ public:
    double operator *(FourVector other);
    FourVector operator *(double Scale) const;
    FourVector operator /(double Scale) const;
+   bool operator <(const FourVector &other) const;
 public:
    double InnerP[4];
    double InnerEta;
