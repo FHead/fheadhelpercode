@@ -5,9 +5,9 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-   if(argc != 4)
+   if(argc != 3 && argc != 4)
    {
-      cerr << "Usage: " << argv[0] << " DHFile State Key" << endl;
+      cerr << "Usage: " << argv[0] << " DHFile State [Key]" << endl;
       return -1;
    }
 
@@ -19,13 +19,24 @@ int main(int argc, char *argv[])
       return -1;
    }
 
-   if(DHFile[argv[2]].Exist(argv[3]) == false)
+   if(argc == 4)
    {
-      cerr << "Key \"" << argv[3] << "\" does not exist" << endl;
-      return -1;
-   }
+      if(DHFile[argv[2]].Exist(argv[3]) == false)
+      {
+         cerr << "Key \"" << argv[3] << "\" does not exist" << endl;
+         return -1;
+      }
 
-   cout << DHFile[argv[2]][argv[3]].GetRepresentation() << endl;
+      cout << DHFile[argv[2]][argv[3]].GetRepresentation() << endl;
+   }
+   if(argc == 3)
+   {
+      cout << "State: " << argv[2] << endl;
+      vector<string> ListOfData = DHFile[argv[2]].GetListOfKeys();
+      for(int j = 0; j < (int)ListOfData.size(); j++)
+         cout << "   " << ListOfData[j] << " = " << DHFile[argv[2]][ListOfData[j]] << endl;
+      cout << endl;
+   }
 
    return 0;
 }
