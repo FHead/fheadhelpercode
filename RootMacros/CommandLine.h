@@ -30,12 +30,28 @@ public:
    int GetInt(std::string Key);
    int GetInt(int Index, int Default);
    int GetInt(std::string Key, int Default);
+   int GetInteger(int Index)                    { return GetInt(Index);          }
+   int GetInteger(std::string Key)              { return GetInt(Key);            }
+   int GetInteger(int Index, int Default)       { return GetInt(Index, Default); }
+   int GetInteger(std::string Key, int Default) { return GetInt(Key, Default);   }
    std::vector<int> GetIntVector(int Index, char Delimiter = ',');
    std::vector<int> GetIntVector(std::string Key, char Delimiter = ',');
    std::vector<int> GetIntVector(int Index, std::string Default, char Delimiter = ',');
    std::vector<int> GetIntVector(std::string Key, std::string Default, char Delimiter = ',');
    std::vector<int> GetIntVector(int Index, std::vector<int> Default, char Delimiter = ',');
    std::vector<int> GetIntVector(std::string Key, std::vector<int> Default, char Delimiter = ',');
+   std::vector<int> GetIntegerVector(int Index, char Delimiter = ',')
+      { return GetIntVector(Index, Delimiter); }
+   std::vector<int> GetIntegerVector(std::string Key, char Delimiter = ',')
+      { return GetIntVector(Key, Delimiter); }
+   std::vector<int> GetIntegerVector(int Index, std::string Default, char Delimiter = ',')
+      { return GetIntVector(Index, Default, Delimiter); }
+   std::vector<int> GetIntegerVector(std::string Key, std::string Default, char Delimiter = ',')
+      { return GetIntVector(Key, Default, Delimiter); }
+   std::vector<int> GetIntegerVector(int Index, std::vector<int> Default, char Delimiter = ',')
+      { return GetIntVector(Index, Default, Delimiter); }
+   std::vector<int> GetIntegerVector(std::string Key, std::vector<int> Default, char Delimiter = ',')
+      { return GetIntVector(Key, Default, Delimiter); }
    double GetDouble(int Index);
    double GetDouble(std::string Key);
    double GetDouble(int Index, double Default);
