@@ -5,13 +5,21 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-   if(argc != 3 && argc != 4)
+   if(argc != 2 && argc != 3 && argc != 4)
    {
-      cerr << "Usage: " << argv[0] << " DHFile State [Key]" << endl;
+      cerr << "Usage: " << argv[0] << " DHFile [State [Key]]" << endl;
       return -1;
    }
 
    DataHelper DHFile(argv[1]);
+
+   if(argc == 2)   // list available states
+   {
+      cout << "Available states:" << endl;
+      for(string S : DHFile.GetListOfKeys())
+         cout << "   " << S << endl;
+      return 0;
+   }
 
    if(DHFile.Exist(argv[2]) == false)
    {

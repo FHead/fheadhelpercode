@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
    string ValueType = string(argv[4]);
 
    if(ValueType == "int" || ValueType == "integer")
-      DHFile[argv[2]][argv[3]] = atoi(argv[5]);
+      DHFile[argv[2]][argv[3]] = atoll(argv[5]);
    else if(ValueType == "int" || ValueType == "float")
       DHFile[argv[2]][argv[3]] = atof(argv[5]);
    else
