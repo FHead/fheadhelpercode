@@ -419,6 +419,11 @@ std::vector<bool> CommandLine::GetBoolVector(std::string Key, std::vector<bool> 
 
 bool CommandLine::StringToBool(std::string String)
 {
+   if(String[0] == '"')
+      String.erase(String.begin());
+   if(String[String.size()-1] == '"')
+      String.erase(String.begin() + (String.size() - 1));
+   
    if(String == "1")   return true;
    if(String == "0")   return false;
 
@@ -468,7 +473,13 @@ std::vector<int> CommandLine::ParseInt(std::string Input, char Delimiter)
    std::vector<int> Result;
 
    for(std::string Item : ResultString)
+   {
+      if(Item[0] == '"')
+         Item.erase(Item.begin());
+      if(Item[Item.size()-1] == '"')
+         Item.erase(Item.begin() + (Item.size() - 1));
       Result.push_back(atoi(Item.c_str()));
+   }
 
    return Result;
 }
@@ -480,7 +491,13 @@ std::vector<double> CommandLine::ParseDouble(std::string Input, char Delimiter)
    std::vector<double> Result;
 
    for(std::string Item : ResultString)
+   {
+      if(Item[0] == '"')
+         Item.erase(Item.begin());
+      if(Item[Item.size()-1] == '"')
+         Item.erase(Item.begin() + (Item.size() - 1));
       Result.push_back(atof(Item.c_str()));
+   }
 
    return Result;
 }
@@ -492,7 +509,13 @@ std::vector<bool> CommandLine::ParseBool(std::string Input, char Delimiter)
    std::vector<bool> Result;
 
    for(std::string Item : ResultString)
+   {
+      if(Item[0] == '"')
+         Item.erase(Item.begin());
+      if(Item[Item.size()-1] == '"')
+         Item.erase(Item.begin() + (Item.size() - 1));
       Result.push_back(StringToBool(Item));
+   }
 
    return Result;
 }

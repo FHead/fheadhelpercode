@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
          return -1;
       }
 
-      cout << DHFile[argv[2]][argv[3]].GetRepresentation() << endl;
+      cout << DHFile[argv[2]][argv[3]].GetRawRepresentation() << endl;
    }
    if(argc == 3)
    {

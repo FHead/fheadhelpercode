@@ -41,6 +41,7 @@ public:
    double GetDouble();
    string GetString();
    string GetRepresentation();
+   string GetRawRepresentation();
    int GetType();
    DataContainer &operator =(string value);
    DataContainer &operator =(double value);
@@ -165,6 +166,28 @@ string DataContainer::GetRepresentation()
       return "NONE";
    else if(Type == DataTypeString)
       return "\"" + StringValue + "\"";
+   else if(Type == DataTypeDouble)
+   {
+      stringstream str;
+      str << DoubleValue;
+      return str.str();
+   }
+   else if(Type == DataTypeInteger)
+   {
+      stringstream str;
+      str << IntegerValue;
+      return str.str();
+   }
+   
+   return "";
+}
+//---------------------------------------------------------------------------
+string DataContainer::GetRawRepresentation()
+{
+   if(Type == DataTypeNone)
+      return "NONE";
+   else if(Type == DataTypeString)
+      return StringValue;
    else if(Type == DataTypeDouble)
    {
       stringstream str;

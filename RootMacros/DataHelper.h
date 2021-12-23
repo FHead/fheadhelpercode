@@ -39,6 +39,10 @@ public:
    void Erase(string Key);
    string GetRepresentation();
    string GetRepresentation(string Key);
+   string GetRepresentation(string Key, string Item);
+   string GetRawRepresentation();
+   string GetRawRepresentation(string Key);
+   string GetRawRepresentation(string Key, string Item);
    DataHelper &operator =(DataHelper &other);
    void LoadFromFile(string FileName);
    void LoadFromFile();
@@ -151,6 +155,51 @@ string DataHelper::GetRepresentation(string Key)
       return "STATENOTFOUND";
    
    return States[Key].GetRepresentation();
+}
+//---------------------------------------------------------------------------
+string DataHelper::GetRepresentation(string Key, string Item)
+{
+   if(States.find(Key) == States.end())
+      return "STATENOTFOUND";
+   
+   return States[Key].GetRepresentation(Item);
+}
+//---------------------------------------------------------------------------
+string DataHelper::GetRawRepresentation()
+{
+   string Representation = "[";
+
+   bool FirstItem = true;
+   
+   for(map<string, StateContainer>::iterator iter = States.begin(); iter != States.end(); iter++)
+   {
+      if(FirstItem == true)
+         FirstItem = false;
+      else
+         Representation = Representation + ", ";
+      
+      Representation = Representation + "\"" + iter->first + "\" -- " + iter->second.GetRawRepresentation();
+   }
+
+   Representation = Representation + "]";
+
+   return Representation;
+}
+//---------------------------------------------------------------------------
+string DataHelper::GetRawRepresentation(string Key)
+{
+   if(States.find(Key) == States.end())
+      return "STATENOTFOUND";
+   
+   return States[Key].GetRawRepresentation();
+}
+//---------------------------------------------------------------------------
+string DataHelper::GetRawRepresentation(string Key, string Item)
+{
+   if(States.find(Key) == States.end())
+      return "STATENOTFOUND";
+   
+   return States[Key].GetRawRepresentation(Item);
 }
 //---------------------------------------------------------------------------
 DataHelper &DataHelper::operator =(DataHelper &other)

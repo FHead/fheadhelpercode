@@ -36,6 +36,8 @@ public:
    void Delete(string Key);
    string GetRepresentation(string Key);   // get representation of single value
    string GetRepresentation();   // get representation of whole object
+   string GetRawRepresentation(string Key);   // get representation of single value
+   string GetRawRepresentation();   // get representation of whole object
    void SaveToStream(ostream &out);
    void LoadFromStream(istream &in);
    StateContainer &operator =(const StateContainer &other);
@@ -135,6 +137,35 @@ string StateContainer::GetRepresentation()
          Representation = Representation + ", ";
          
       Representation = Representation + "\"" + iter->first + "\": " + iter->second.GetRepresentation();
+   }
+
+   Representation = Representation + "}";
+
+   return Representation;
+}
+//---------------------------------------------------------------------------
+string StateContainer::GetRawRepresentation(string Key)
+{
+   if(Data.find(Key) == Data.end())
+      return "DATANOTFOUND";
+      
+   return Data[Key].GetRawRepresentation();
+}
+//---------------------------------------------------------------------------
+string StateContainer::GetRawRepresentation()
+{
+   bool FirstEntry = true;
+
+   string Representation = "{";
+   
+   for(map<string, DataContainer>::iterator iter = Data.begin(); iter != Data.end(); iter++)
+   {
+      if(FirstEntry == true)
+         FirstEntry = false;
+      else
+         Representation = Representation + ", ";
+         
+      Representation = Representation + "\"" + iter->first + "\": " + iter->second.GetRawRepresentation();
    }
 
    Representation = Representation + "}";
