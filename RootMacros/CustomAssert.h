@@ -1,3 +1,6 @@
+#ifndef CUSTOMASSERT_H
+#define CUSTOMASSERT_H
+
 // Taken from Eugene Magdalits
 // https://stackoverflow.com/questions/3692954/add-custom-messages-in-assert
 
@@ -16,4 +19,5 @@ void __M_Assert(const char* expr_str, bool expr, const char* file, int line, con
     }
 }
 
+#endif
 
