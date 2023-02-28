@@ -35,6 +35,9 @@ void AddCMS(double X = 0.15, double Y = 0.875, double Luminosity = -1, double Fo
 void AddCMSSimulation(double X = 0.15, double Y = 0.875, double Luminosity = -1, double FontSize = 0.03);
 void AddHeader(string AdditionalComment = "", bool Colored = false);
 std::vector<int> GetPrimaryColors();
+std::vector<int> GetPrimaryColors6();
+std::vector<int> GetPrimaryColors8();
+std::vector<int> GetPrimaryColors10();
 
 void SetThesisStyle()
 {
@@ -966,6 +969,46 @@ std::vector<int> GetPrimaryColors()
 
    return Colors;
 }
+
+std::vector<int> GetPrimaryColors6()
+{
+   static std::vector<int> Colors;
+   if(Colors.size() > 0)
+      return Colors;
+
+   std::string ColorStrings[] = ["#5790fc", "#f89c20", "#e42536", "#964a8b", "#9c9ca1", "#7a21dd"];
+   for(int i = 0; i < 6; i++)
+      Colors.push_back(TColor::GetColor(ColorStrings[i]));
+
+   return Colors;
+}
+
+std::vector<int> GetPrimaryColors8()
+{
+   static std::vector<int> Colors;
+   if(Colors.size() > 0)
+      return Colors;
+
+   std::string ColorStrings[] = ["#1845fb", "#ff5e02", "#c91f16", "#c849a9", "#adad7d", "#86c8dd", "#578dff", "#656364"];
+   for(int i = 0; i < 8; i++)
+      Colors.push_back(TColor::GetColor(ColorStrings[i]));
+
+   return Colors;
+}
+
+std::vector<int> GetPrimaryColors10()
+{
+   static std::vector<int> Colors;
+   if(Colors.size() > 0)
+      return Colors;
+
+   std::string ColorStrings[] = ["#3f90da", "#ffa90e", "#bd1f01", "#94a4a2", "#832db6", "#a96b59", "#e76300", "#b9ac70", "#717581", "#92dadd"];
+   for(int i = 0; i < 10; i++)
+      Colors.push_back(TColor::GetColor(ColorStrings[i]));
+
+   return Colors;
+}
+
 
 
 #endif
