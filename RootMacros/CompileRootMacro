@@ -15,8 +15,10 @@ fi
 shift
 shift
 
-root_cflags="`sh $ROOTSYS/bin/root-config --cflags` -D__ROOFIT_NOBANNER"
-root_libs=`sh $ROOTSYS/bin/root-config --libs`
+# root_cflags="`sh $ROOTSYS/bin/root-config --cflags` -D__ROOFIT_NOBANNER"
+# root_libs=`sh $ROOTSYS/bin/root-config --libs`
+root_cflags="`root-config --cflags` -D__ROOFIT_NOBANNER"
+root_libs=`root-config --libs`
 roofit_libs="-lRooFitCore -lRooFit -lMinuit -lFoam -lRooStats"
 fastjet_cflags=
 fastjet_libs=
@@ -64,6 +66,26 @@ elif [ $HOSTNAME == "t3-higgs.ultralight.org" ] || [ $HOSTNAME == "t3-higgs" ]; 
 
    # quick fix....
    libs=`echo $libs | sed "s/-lz//g"`
+
+elif [ "$HOSTNAME" == "LunaVandyMacbook" ]; then
+
+   # roounfold_cflags='-I/Users/yichen/Programs/RooUnfold/RooUnfold/build'
+   # roounfold_libs='-L/Users/yichen/Programs/RooUnfold/RooUnfold/build -lRooUnfold'
+
+   pythia_include=
+   pythia_libs=
+
+   extrainclude="-I/$HOME/RootMacros"
+   extralibs=~/RootMacros/Code/library/*.o
+
+   all_libs="$root_libs $fastjet_libs $pythia_libs -lHistPainter $extralibs $roounfold_libs"
+   all_flags="$cxxflags $fastjet_cflags $root_cflags $roounfold_cflags"
+   all_include="$extrainclude $pythia_include"
+
+   if [ -n "$ROOFITSYS" ]; then
+      all_libs="$all_libs $roofit_libs -L$ROOFITSYS/lib"
+      all_include="$all_include -I$ROOFITSYS/include"
+   fi
 
 elif [ $HOSTNAME == "FHeadSpectre" ]; then
 
@@ -207,6 +229,15 @@ elif [[ "$HOSTNAME" == PersonalPhysicsProject ]]; then
    all_libs="$root_libs $roofit_libs $fastjet_libs $pythia_libs -lHistPainter $extralibs"
    all_flags="$cxxflags $fastjet_cflags $root_cflags"
    all_include="$extrainclude $pythia_include"
+
+   # quick fix....
+   libs=`echo $libs | sed "s/-lz//g"`
+
+else
+
+   all_libs="$root_libs $fastjet_libs -lHistPainter $extralibs"
+   all_flags="$cxxflags $fastjet_cflags $root_cflags"
+   all_include="$extrainclude"
 
    # quick fix....
    libs=`echo $libs | sed "s/-lz//g"`
