@@ -5,6 +5,9 @@ using namespace std;
 
 #include "Board.h"
 
+int main(int argc, char *argv[]);
+void DoShapeTest(vector<Shape> &Shapes);
+
 int main(int argc, char *argv[])
 {
    string DateString = "20241124";
@@ -35,16 +38,16 @@ int main(int argc, char *argv[])
 
    vector<Shape> Shapes;
 
-   Shapes.push_back(Shape(0, {0, 0, 0, 1, 2}, {0, 1, 2, 0, 0}, 4));
-   Shapes.push_back(Shape(1, {0, 0, 0, 0, 1}, {0, 1, 2, 3, 0}, 4));
-   Shapes.push_back(Shape(2, {0, 0, 1, 2, 2}, {0, 1, 1, 1, 2}, 2));
-   Shapes.push_back(Shape(3, {0, 0, 0, 0, 0}, {0, 1, 2, 3, 4}, 2));
-   Shapes.push_back(Shape(4, {0, 0, 0, 1, 2}, {0, 1, 2, 1, 1}, 4));
-   Shapes.push_back(Shape(5, {0, 1, 2, 2, 3}, {0, 0, 0, 1, 0}, 4));
-   Shapes.push_back(Shape(6, {0, 1, 1, 2, 3}, {0, 0, 1, 1, 1}, 4));
-   Shapes.push_back(Shape(7, {0, 1, 1, 1, 2}, {0, 0, 1, 2, 1}, 4));
-   Shapes.push_back(Shape(8, {0, 0, 1, 2, 2}, {0, 1, 0, 0, 1}, 4));
-   Shapes.push_back(Shape(9, {0, 1, 1, 2, 2}, {0, 0, 1, 0, 1}, 4));
+   Shapes.push_back(Shape(0, {0, 0, 0, 1, 2}, {0, 1, 2, 0, 0}, 4, false));
+   Shapes.push_back(Shape(1, {0, 0, 0, 0, 1}, {0, 1, 2, 3, 0}, 4, false));
+   Shapes.push_back(Shape(2, {0, 0, 1, 2, 2}, {0, 1, 1, 1, 2}, 2, false));
+   Shapes.push_back(Shape(3, {0, 0, 0, 0, 0}, {0, 1, 2, 3, 4}, 2, false));
+   Shapes.push_back(Shape(4, {0, 0, 0, 1, 2}, {0, 1, 2, 1, 1}, 4, false));
+   Shapes.push_back(Shape(5, {0, 1, 2, 2, 3}, {0, 0, 0, 1, 0}, 4, false));
+   Shapes.push_back(Shape(6, {0, 1, 1, 2, 3}, {0, 0, 1, 1, 1}, 4, false));
+   Shapes.push_back(Shape(7, {0, 1, 1, 1, 2}, {0, 0, 1, 2, 1}, 4, true));
+   Shapes.push_back(Shape(8, {0, 0, 1, 2, 2}, {0, 1, 0, 0, 1}, 4, false));
+   Shapes.push_back(Shape(9, {0, 1, 1, 2, 2}, {0, 0, 1, 0, 1}, 4, false));
 
    vector<int> WDayX{8, 7, 8, 7, 7, 7, 8};
    vector<int> WDayY{1, 5, 5, 4, 3, 2, 2};
@@ -67,7 +70,17 @@ int main(int argc, char *argv[])
    Initial.State[MonthX[Month-1]][MonthY[Month-1]] = STATE_FORBIDDEN;
    Initial.State[WDayX[WDay]][WDayY[WDay]] = STATE_FORBIDDEN;
 
-   /*
+   // DoShapeTest(Shapes);
+
+   Board Final = Solve(Initial, Shapes);
+
+   cout << Final << endl;
+
+   return 0;
+}
+
+void DoShapeTest(vector<Shape> &Shapes)
+{
    cout << "Shape test" << endl;
    cout << endl;
    for(int i = 0; i < (int)Shapes.size(); i++)
@@ -85,16 +98,4 @@ int main(int argc, char *argv[])
 
       cout << endl;
    }
-   */
-
-   cout << "Initial setup" << endl;
-   cout << Initial << endl;
-
-   Board Final = Solve(Initial, Shapes);
-
-   cout << "Final setup" << endl;
-   cout << Final << endl;
-
-   return 0;
 }
-

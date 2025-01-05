@@ -21,6 +21,7 @@ public:
    vector<int> X;
    vector<int> Y;
    int RotatePeriod;
+   bool CanFlip;
 public:
    Shape()
    {
@@ -33,8 +34,9 @@ public:
          Y[i] = 0;
       }
       RotatePeriod = 4;
+      CanFlip = false;
    }
-   Shape(int id, std::vector<int> x, std::vector<int> y, int p)
+   Shape(int id, std::vector<int> x, std::vector<int> y, int p, bool canflip)
    {
       ID = id;
 
@@ -52,6 +54,7 @@ public:
          Y[i] = y[i];
 
       RotatePeriod = p;
+      CanFlip = canflip;
    }
    Shape Rotate()
    {
@@ -64,6 +67,39 @@ public:
       {
          NewShape.X[i] = -Y[i];
          NewShape.Y[i] = X[i];
+      }
+
+      int XShift = 0, YShift = 0;
+      for(int i = 0; i < SHAPESIZE; i++)
+      {
+         if(NewShape.Y[i] < YShift)
+            YShift = NewShape.Y[i];
+      }
+      for(int i = 0; i < SHAPESIZE; i++)
+      {
+         if(NewShape.Y[i] == YShift && NewShape.X[i] < XShift)
+            XShift = NewShape.X[i];
+      }
+
+      for(int i = 0; i < SHAPESIZE; i++)
+      {
+         NewShape.X[i] = NewShape.X[i] - XShift;
+         NewShape.Y[i] = NewShape.Y[i] - YShift;
+      }
+
+      return NewShape;
+   }
+   Shape Flip()
+   {
+      // Flip horizontally 
+      // The left-most one in the bottom row is always (0, 0)
+
+      Shape NewShape(*this);
+
+      for(int i = 0; i < SHAPESIZE; i++)
+      {
+         NewShape.X[i] = -X[i];
+         NewShape.Y[i] = Y[i];
       }
 
       int XShift = 0, YShift = 0;
@@ -121,11 +157,6 @@ public:
       if(ForbiddenCount != 4)
          return false;
 
-      return true;
-   }
-   bool Good()   // check if the board is still possible
-   {
-      // TODO
       return true;
    }
    bool IsSolution()
@@ -237,12 +268,12 @@ std::ostream &operator <<(std::ostream &out, Board &B)
 {
    out << "o";
    for(int i = 0; i < WIDTH; i++)
-      out << "ooo";
+      out << "---";
    out << "o" << endl;
 
    for(int j = HEIGHT - 1; j >= 0; j--)
    {
-      out << "o";
+      out << "|";
       for(int i = 0; i < WIDTH; i++)
       {
          if(B.State[i][j] == STATE_FORBIDDEN)
@@ -252,12 +283,12 @@ std::ostream &operator <<(std::ostream &out, Board &B)
          else
             out << " " << (char)('A' + B.State[i][j]) << " ";
       }
-      out << "o" << endl;
+      out << "|" << endl;
    }
 
    out << "o";
    for(int i = 0; i < WIDTH; i++)
-      out << "ooo";
+      out << "---";
    out << "o" << endl;
 
    return out;
@@ -269,25 +300,31 @@ Board Solve(Board Current, std::vector<Shape> Shapes)
    {
       Shape S = Shapes[i];
       int R = S.RotatePeriod;
+      int F = (S.CanFlip == true) ? 2 : 1;
 
-      for(int r = 0; r < R; r++)
+      for(int f = 0; f < F; f++)
       {
-         if(Current.CanPlace(S) == true)
+         for(int r = 0; r < R; r++)
          {
-            Board NewBoard = Current.PlaceNext(S);
+            if(Current.CanPlace(S) == true)
+            {
+               Board NewBoard = Current.PlaceNext(S);
 
-            std::vector<Shape> NewShapes = Shapes;
-            NewShapes.erase(NewShapes.begin() + i);
+               std::vector<Shape> NewShapes = Shapes;
+               NewShapes.erase(NewShapes.begin() + i);
 
-            // cout << NewBoard << endl;
+               // cout << NewBoard << endl;
 
-            NewBoard = Solve(NewBoard, NewShapes);
+               NewBoard = Solve(NewBoard, NewShapes);
 
-            if(NewBoard.IsSolution() == true)
-               return NewBoard;
+               if(NewBoard.IsSolution() == true)
+                  return NewBoard;
+            }
+
+            S = S.Rotate();
          }
 
-         S = S.Rotate();
+         S = S.Flip();
       }
    }
 
